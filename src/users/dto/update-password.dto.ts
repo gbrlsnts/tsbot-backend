@@ -1,3 +1,3 @@
 export class UpdatePasswordDto {
-    password: string;
+  password: string;
 }

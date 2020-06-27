@@ -1,15 +1,15 @@
 import { User } from './user.entity';
 
 export interface UsersListResponse {
-    users: User[];
+  users: User[];
 }
 
 export interface UserResponse {
-    user: User;
+  user: User;
 }
 
 export interface UserIdResponse {
-    user: {
-        id: number;
-    }
-};
+  user: {
+    id: number;
+  };
+}
