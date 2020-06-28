@@ -7,9 +7,3 @@ export interface UsersListResponse {
 export interface UserResponse {
   user: User;
 }
-
-export interface UserIdResponse {
-  user: {
-    id: number;
-  };
-}

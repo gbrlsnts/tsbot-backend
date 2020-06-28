@@ -28,10 +28,25 @@ export class UsersService {
    * Get an user by id
    * @param id user id
    */
-  async getUserById(id: number): Promise<User> {
+  async getUserById(id: number, allColumns = false): Promise<User> {
     const user = await this.usersRepository.findOne({
-      select: safeColumns,
+      select: !allColumns ? safeColumns: undefined,
       where: { id },
+    });
+
+    if (!user) throw new NotFoundException();
+
+    return user;
+  }
+
+  /**
+   * Get an user by id
+   * @param id user id
+   */
+  async getUserByEmail(email: string, allColumns = false): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      select: !allColumns ? safeColumns: undefined,
+      where: { email },
     });
 
     if (!user) throw new NotFoundException();

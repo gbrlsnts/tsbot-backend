@@ -28,22 +28,4 @@ export class UserRepository extends Repository<User> {
       throw error;
     }
   }
-
-  /**
-   * Validate an user password by the credentials
-   * @param credentials user credentials
-   */
-  async validateUserPassword(credentials: UserCredentialsDto): Promise<string> {
-    const { email, password } = credentials;
-
-    const user = await this.findOne({ email });
-
-    if (!user) return null;
-
-    const valid = await user.validatePassword(password);
-
-    if (!valid) return null;
-
-    return user.email;
-  }
 }

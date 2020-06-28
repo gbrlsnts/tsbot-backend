@@ -4,14 +4,12 @@ import {
   Param,
   ParseIntPipe,
   Body,
-  Post,
   Patch,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UserCredentialsDto } from './dto/user-credentials.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { UsersListResponse, UserResponse, UserIdResponse } from './users.types';
+import { UsersListResponse, UserResponse } from './users.types';
 
 @Controller('users')
 export class UsersController {
@@ -47,16 +45,5 @@ export class UsersController {
     @Body() updatePasswordDto: UpdatePasswordDto,
   ): Promise<void> {
     return this.usersService.updatePassword(id, updatePasswordDto);
-  }
-
-  @Post()
-  async createUser(
-    @Body() createUserDto: UserCredentialsDto,
-  ): Promise<UserIdResponse> {
-    const id = await this.usersService.createUser(createUserDto);
-
-    return {
-      user: { id },
-    };
   }
 }
