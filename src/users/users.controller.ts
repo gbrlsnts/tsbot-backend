@@ -5,6 +5,7 @@ import {
   ParseIntPipe,
   Body,
   Patch,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateEmailDto } from './dto/update-email.dto';
@@ -34,7 +35,7 @@ export class UsersController {
   @Patch('/:id/email')
   updateUserEmail(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateEmailDto: UpdateEmailDto,
+    @Body(ValidationPipe) updateEmailDto: UpdateEmailDto,
   ): Promise<void> {
     return this.usersService.updateEmail(id, updateEmailDto);
   }
