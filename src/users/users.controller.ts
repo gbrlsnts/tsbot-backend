@@ -11,6 +11,7 @@ import { UsersService } from './users.service';
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UsersListResponse, UserResponse } from './users.types';
+import { User } from './user.entity';
 
 @Controller('users')
 export class UsersController {
@@ -36,7 +37,7 @@ export class UsersController {
   updateUserEmail(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) updateEmailDto: UpdateEmailDto,
-  ): Promise<void> {
+  ): Promise<User> {
     return this.usersService.updateEmail(id, updateEmailDto);
   }
 

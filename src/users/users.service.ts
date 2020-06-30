@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from './user.repository';
 import { User } from './user.entity';
 import { UserCredentialsDto } from './dto/user-credentials.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import * as messages from "../messages/user.messages";
 
 const safeColumns: (keyof User)[] = ['id', 'email'];
 
@@ -54,17 +55,34 @@ export class UsersService {
     return user;
   }
 
+  /**
+   * Check if an email already exists
+   * @param email email to check
+   */
+  async checkEmailExists(email: string): Promise<boolean> {
+    const count = await this.usersRepository.count({
+      where: { email },
+    });
+
+    return count > 0;
+  }
+
   /**a
    * Update an user email
    * @param id user id
    * @param dto data to update email
    */
-  async updateEmail(id: number, dto: UpdateEmailDto): Promise<void> {
+  async updateEmail(id: number, dto: UpdateEmailDto): Promise<User> {
     const user = await this.getUserById(id);
+
+    const emailExists = await this.checkEmailExists(dto.email);
+    
+    if(emailExists)
+      throw new ConflictException(messages.emailExists);
 
     user.email = dto.email;
 
-    await this.usersRepository.save(user);
+    return this.usersRepository.save(user);
   }
 
   /**

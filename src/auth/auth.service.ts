@@ -3,6 +3,7 @@ import { JwtService } from "@nestjs/jwt";
 import { UsersService } from '../users/users.service';
 import { UserCredentialsDto } from '../users/dto/user-credentials.dto';
 import { AccessToken, JwtPayload } from './auth.types';
+import { invalidCredentials } from '../messages/auth.messages';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +29,7 @@ export class AuthService {
       payload = { email: user.email };
     } catch(e) {
       if(typeof e === NotFoundException.name || typeof e === UnauthorizedException.name)
-        throw new UnauthorizedException('Invalid credentials');
+        throw new UnauthorizedException(invalidCredentials);
 
       throw e;
     }
