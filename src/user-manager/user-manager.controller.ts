@@ -6,15 +6,18 @@ import {
   Body,
   Patch,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UpdateEmailDto } from './dto/update-email.dto';
-import { UpdatePasswordDto } from './dto/update-password.dto';
-import { UsersListResponse, UserResponse } from './users.types';
-import { User } from './user.entity';
+import { UsersService } from '../users/users.service';
+import { UpdateEmailDto } from '../users/dto/update-email.dto';
+import { UpdatePasswordDto } from '../users/dto/update-password.dto';
+import { UsersListResponse, UserResponse } from '../users/users.types';
+import { User } from '../users/user.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('users')
-export class UsersController {
+@UseGuards(JwtAuthGuard)
+export class UserManagerController {
   constructor(private usersService: UsersService) {}
 
   @Get()
