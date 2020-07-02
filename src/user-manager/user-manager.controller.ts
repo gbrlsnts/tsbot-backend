@@ -12,7 +12,6 @@ import { UsersService } from '../users/users.service';
 import { UpdateEmailDto } from '../users/dto/update-email.dto';
 import { UpdatePasswordDto } from '../users/dto/update-password.dto';
 import { UsersListResponse, UserResponse } from '../users/users.types';
-import { User } from '../users/user.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('users')
