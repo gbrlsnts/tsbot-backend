@@ -37,11 +37,13 @@ export class UserManagerController {
   }
 
   @Patch('/:id/email')
-  updateUserEmail(
+  async updateUserEmail(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) updateEmailDto: UpdateEmailDto,
-  ): Promise<User> {
-    return this.usersService.updateEmail(id, updateEmailDto);
+  ): Promise<UserResponse> {
+    const user = await this.usersService.updateEmail(id, updateEmailDto);
+
+    return { user };
   }
 
   @Patch('/:id/password')
