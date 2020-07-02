@@ -12,7 +12,8 @@ import { UsersService } from '../users/users.service';
 import { UpdateEmailDto } from '../users/dto/update-email.dto';
 import { UpdatePasswordDto } from '../users/dto/update-password.dto';
 import { UsersListResponse, UserResponse } from '../users/users.types';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { LoggedUserGuard } from '../auth/guards/self-user.guard';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -27,6 +28,7 @@ export class UserManagerController {
   }
 
   @Get('/:id')
+  @UseGuards(LoggedUserGuard)
   async getUserById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UserResponse> {
@@ -36,6 +38,7 @@ export class UserManagerController {
   }
 
   @Patch('/:id/email')
+  @UseGuards(LoggedUserGuard)
   async updateUserEmail(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) updateEmailDto: UpdateEmailDto,
@@ -46,6 +49,7 @@ export class UserManagerController {
   }
 
   @Patch('/:id/password')
+  @UseGuards(LoggedUserGuard)
   updateUserPassword(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePasswordDto: UpdatePasswordDto,
