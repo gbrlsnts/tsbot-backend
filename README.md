@@ -60,16 +60,23 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
+## Environment variables
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+App:
 
-## Stay in touch
+* APP_PORT: number - the port the app should listen to
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Database:
 
-## License
+* DB_TYPE: string - database type
+* DB_HOST: string - database host
+* DB_PORT: string - database port
+* DB_USER: string - database username
+* DB_PASSWORD: string - database password
+* DB_DATABASE: string - database name
+* DB_SYNC: boolean - if typeorm should sync entities
 
-  Nest is [MIT licensed](LICENSE).
+Auth:
+
+* JWT_EXPIRES: number - number of seconds a JWT token is valid
+* JWT_SECRET: string - secret to use in jwt token encoding

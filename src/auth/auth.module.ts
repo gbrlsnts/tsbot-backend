@@ -5,6 +5,9 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
 import { JwtStrategy } from './jwt.strategy';
+import * as config from "config";
+
+const jwtConfig = config.get('jwt');
 
 @Module({
   imports: [
@@ -12,9 +15,9 @@ import { JwtStrategy } from './jwt.strategy';
       defaultStrategy: 'jwt',
     }),
     JwtModule.register({
-      secret: 'test',
+      secret: process.env.JWT_SECRET || jwtConfig.secret,
       signOptions: {
-        expiresIn: 3600,
+        expiresIn: process.env.JWT_EXPIRES || jwtConfig.expires,
       }
     }),
     UsersModule,
