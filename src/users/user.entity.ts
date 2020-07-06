@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, Unique } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Server } from '../servers/server.entity';
 
 @Entity()
 @Unique(['email'])
@@ -12,6 +13,9 @@ export class User {
 
   @Column()
   password: string;
+
+  @OneToMany(() => Server, server => server.owner)
+  servers: Server[];
 
   /**
    * Set a new hashed password
