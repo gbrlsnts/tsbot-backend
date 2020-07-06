@@ -4,6 +4,9 @@ import { ServerConfigInterface } from './server.types';
 
 @Entity()
 export class ServerConfig {
+    @PrimaryColumn()
+    id: number;
+
     @OneToOne(() => Server, server => server.config, {
         primary: true
     })
