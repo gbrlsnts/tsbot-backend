@@ -6,12 +6,12 @@ import { UserManagerController } from './user-manager.controller';
 import { UsersModule } from 'src/users/users.module';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([UserRepository]),
-        UsersModule,
-        AuthModule
-    ],
-    providers: [],
-    controllers: [UserManagerController]
+  imports: [
+    TypeOrmModule.forFeature([UserRepository]),
+    UsersModule,
+    AuthModule,
+  ],
+  providers: [],
+  controllers: [UserManagerController],
 })
 export class UserManagerModule {}

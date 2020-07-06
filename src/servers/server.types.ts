@@ -1,24 +1,24 @@
-import { Server } from "./server.entity";
+import { Server } from './server.entity';
 
 export interface ServerConfigInterface {
-    host: string;
-    serverPort: number;
-    queryPort: number;
-    botName: string;
-    protocol: TeamspeakConnectionProtocol;
-    username: string;
-    password: string;
+  host: string;
+  serverPort: number;
+  queryPort: number;
+  botName: string;
+  protocol: TeamspeakConnectionProtocol;
+  username: string;
+  password: string;
 }
 
 export enum TeamspeakConnectionProtocol {
-    RAW = 'RAW',
-    SSH = 'SSH',
+  RAW = 'RAW',
+  SSH = 'SSH',
 }
 
 export interface ServersListResponse {
-    servers: Server[];
-};
+  servers: Server[];
+}
 
 export interface ServerResponse {
-    server: Server;
-};
+  server: Server;
+}

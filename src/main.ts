@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as config from "config";
+import * as config from 'config';
 
 const port = process.env.APP_PORT || config.get('server.port');
 

@@ -12,7 +12,7 @@ import { ServersModule } from './servers/servers.module';
     UsersModule,
     AuthModule,
     UserManagerModule,
-    ServersModule
+    ServersModule,
   ],
   controllers: [],
   providers: [],

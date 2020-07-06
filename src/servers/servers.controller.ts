@@ -1,4 +1,14 @@
-import { Controller, UseGuards, Get, Patch, Delete, Post, ParseIntPipe, Param, Body } from '@nestjs/common';
+import {
+  Controller,
+  UseGuards,
+  Get,
+  Patch,
+  Delete,
+  Post,
+  ParseIntPipe,
+  Param,
+  Body,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/get-user-decorator';
 import { ServersService } from './servers.service';
@@ -9,49 +19,41 @@ import { User } from '../users/user.entity';
 @Controller('servers')
 @UseGuards(JwtAuthGuard)
 export class ServersController {
+  constructor(private serverService: ServersService) {}
 
-    constructor(private serverService: ServersService) {}
+  @Get()
+  async getServers(): Promise<ServersListResponse> {
+    const servers = await this.serverService.getServers();
 
-    @Get()
-    async getServers(): Promise<ServersListResponse>
-    {
-        const servers = await this.serverService.getServers();
+    return { servers };
+  }
 
-        return { servers };
-    }
+  @Get('/:id')
+  async getServerById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ServerResponse> {
+    const server = await this.serverService.getServerById(id);
 
-    @Get('/:id')
-    async getServerById(
-        @Param('id', ParseIntPipe) id: number
-    ): Promise<ServerResponse>
-    {
-        const server = await this.serverService.getServerById(id);
+    return { server };
+  }
 
-        return { server };
-    }
+  @Post()
+  async createServer(
+    @GetUser() user: User,
+    @Body() dto: CreateServerDto,
+  ): Promise<ServerResponse> {
+    const server = await this.serverService.createServer(user, dto);
 
-    @Post()
-    async createServer(
-        @GetUser() user: User,
-        @Body() dto: CreateServerDto
-    ): Promise<ServerResponse>
-    {
-        const server = await this.serverService.createServer(user, dto);
+    return { server };
+  }
 
-        return { server };
-    }
+  @Patch('/:id')
+  updateServer(): void {
+    return;
+  }
 
-    @Patch('/:id')
-    updateServer(): void
-    {
-        return;
-    }
-
-    @Delete('/:id')
-    deleteServer(
-        @Param('id', ParseIntPipe) id: number
-    ): Promise<void>
-    {
-        return this.serverService.deleteServer(id);
-    }
+  @Delete('/:id')
+  deleteServer(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.serverService.deleteServer(id);
+  }
 }

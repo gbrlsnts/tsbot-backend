@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Unique,
+  OneToMany,
+} from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Server } from '../servers/server.entity';
 
@@ -14,7 +20,10 @@ export class User {
   @Column()
   password: string;
 
-  @OneToMany(() => Server, server => server.owner)
+  @OneToMany(
+    () => Server,
+    server => server.owner,
+  )
   servers: Server[];
 
   /**

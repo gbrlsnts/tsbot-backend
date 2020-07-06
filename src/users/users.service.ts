@@ -1,11 +1,15 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from './user.repository';
 import { User } from './user.entity';
 import { UserCredentialsDto } from './dto/user-credentials.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import * as messages from "../messages/user.messages";
+import * as messages from '../messages/user.messages';
 
 const safeColumns: (keyof User)[] = ['id', 'email'];
 
@@ -31,7 +35,7 @@ export class UsersService {
    */
   async getUserById(id: number, allColumns = false): Promise<User> {
     const user = await this.usersRepository.findOne({
-      select: !allColumns ? safeColumns: undefined,
+      select: !allColumns ? safeColumns : undefined,
       where: { id },
     });
 
@@ -46,7 +50,7 @@ export class UsersService {
    */
   async getUserByEmail(email: string, allColumns = false): Promise<User> {
     const user = await this.usersRepository.findOne({
-      select: !allColumns ? safeColumns: undefined,
+      select: !allColumns ? safeColumns : undefined,
       where: { email },
     });
 
@@ -76,9 +80,8 @@ export class UsersService {
     const user = await this.getUserById(id);
 
     const emailExists = await this.checkEmailExists(dto.email);
-    
-    if(emailExists)
-      throw new ConflictException(messages.emailExists);
+
+    if (emailExists) throw new ConflictException(messages.emailExists);
 
     user.email = dto.email;
 

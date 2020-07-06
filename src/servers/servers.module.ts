@@ -6,11 +6,10 @@ import { ServerRepository } from './server.repository';
 import { ServerConfigRepository } from './server-config.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([
-    ServerRepository,
-    ServerConfigRepository,
-  ])],
+  imports: [
+    TypeOrmModule.forFeature([ServerRepository, ServerConfigRepository]),
+  ],
   providers: [ServersService],
-  controllers: [ServersController]
+  controllers: [ServersController],
 })
 export class ServersModule {}

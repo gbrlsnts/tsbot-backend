@@ -1,17 +1,21 @@
-import { Entity, OneToOne, Column, PrimaryColumn } from "typeorm";
+import { Entity, OneToOne, Column, PrimaryColumn } from 'typeorm';
 import { Server } from './server.entity';
 import { ServerConfigInterface } from './server.types';
 
 @Entity()
 export class ServerConfig {
-    @PrimaryColumn()
-    id: number;
+  @PrimaryColumn()
+  id: number;
 
-    @OneToOne(() => Server, server => server.config, {
-        primary: true
-    })
-    server: Server;
+  @OneToOne(
+    () => Server,
+    server => server.config,
+    {
+      primary: true,
+    },
+  )
+  server: Server;
 
-    @Column('json')
-    config: ServerConfigInterface;
+  @Column('json')
+  config: ServerConfigInterface;
 }
