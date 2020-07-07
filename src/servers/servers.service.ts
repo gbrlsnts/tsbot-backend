@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ServerRepository } from './server.repository';
 import { Server } from './server.entity';
 import { User } from '../users/user.entity';
 import { CreateServerDto } from './dto/create-server.dto';
 import { ServerConfigRepository } from './server-config.repository';
+import { serverNameExists } from '../messages/server.messages';
+import { ServerConfig } from './server-config.entity';
 
 @Injectable()
 export class ServersService {
@@ -37,35 +39,47 @@ export class ServersService {
     return server;
   }
 
+  async getServerConfigById(id: number): Promise<ServerConfig> {
+    const config = await this.configRepository.findOne({
+      where: { id }
+    });
+
+    if (!config) throw new NotFoundException();
+
+    return config;
+  }
+
   /**
    * Create a server and its configuration
    * @param user user that will own the server
    * @param dto data to persist
    */
   async createServer(user: User, dto: CreateServerDto): Promise<Server> {
-    let server = this.serverRepository.create();
+    const exists = await this.checkServerExistsByUser(user.id, dto.serverName);
 
-    server.name = dto.name;
-    server.owner = user;
+    if (exists) throw new ConflictException(serverNameExists);
+
+    let server = this.serverRepository.create({
+      name: dto.serverName,
+      ownerId: user.id,
+    });
+
     server = await this.serverRepository.save(server);
 
-    let serverConfig = this.configRepository.create();
+    const serverConfig = this.configRepository.create({
+      id: server.id,
+      config: {
+        host: dto.host,
+        serverPort: dto.serverPort,
+        queryPort: dto.queryPort,
+        botName: dto.botName,
+        protocol: dto.protocol,
+        username: dto.username,
+        password: dto.password,
+      },
+    });
 
-    serverConfig.server = server;
-    serverConfig.config = {
-      host: dto.host,
-      serverPort: dto.serverPort,
-      queryPort: dto.queryPort,
-      botName: dto.botName,
-      protocol: dto.protocol,
-      username: dto.username,
-      password: dto.password,
-    };
-
-    serverConfig = await this.configRepository.save(serverConfig);
-
-    delete serverConfig.config.password;
-    server.config = serverConfig;
+    await this.configRepository.save(serverConfig);
 
     return server;
   }
@@ -86,5 +100,22 @@ export class ServersService {
     const result = await this.serverRepository.softDelete(id);
 
     if (result.affected == 0) throw new NotFoundException();
+  }
+
+  /**
+   * Checks if a user already has a server with a given name
+   * @param userId the user id to check
+   * @param serverName the server name to check
+   */
+  async checkServerExistsByUser(userId: number, serverName: string): Promise<boolean>
+  {
+    const count = await this.serverRepository.count({
+      where: {
+        name: serverName,
+        ownerId: userId,
+      }
+    });
+
+    return count > 0;
   }
 }

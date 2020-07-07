@@ -22,3 +22,7 @@ export interface ServersListResponse {
 export interface ServerResponse {
   server: Server;
 }
+
+export interface ServerConfigResponse {
+  config: Partial<ServerConfigInterface>;
+}

@@ -19,11 +19,8 @@ export class Server {
   @Column()
   name: string;
 
-  @ManyToOne(
-    () => User,
-    user => user.servers,
-  )
-  owner: User;
+  @Column()
+  ownerId: number;
 
   @OneToOne(
     () => ServerConfig,
@@ -39,4 +36,10 @@ export class Server {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @ManyToOne(
+    () => User,
+    user => user.servers,
+  )
+  owner: User;
 }

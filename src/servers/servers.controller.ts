@@ -12,7 +12,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/get-user-decorator';
 import { ServersService } from './servers.service';
-import { ServersListResponse, ServerResponse } from './server.types';
+import { ServersListResponse, ServerResponse, ServerConfigResponse } from './server.types';
 import { CreateServerDto } from './dto/create-server.dto';
 import { User } from '../users/user.entity';
 
@@ -37,6 +37,15 @@ export class ServersController {
     return { server };
   }
 
+  @Get('/:id/config')
+  async getServerConfigById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ServerConfigResponse> {
+    const serverConfig = await this.serverService.getServerConfigById(id);
+
+    return { config: serverConfig.config };
+  }
+
   @Post()
   async createServer(
     @GetUser() user: User,
@@ -53,7 +62,10 @@ export class ServersController {
   }
 
   @Delete('/:id')
-  deleteServer(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  deleteServer(
+    @Param('id', ParseIntPipe) 
+    id: number
+  ): Promise<void> {
     return this.serverService.deleteServer(id);
   }
 }
