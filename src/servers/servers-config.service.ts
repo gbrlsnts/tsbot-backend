@@ -16,7 +16,7 @@ export class ServersConfigService {
    */
   async getServerConfigById(id: number): Promise<ServerConfig> {
     const config = await this.configRepository.findOne({
-      where: { id }
+      where: { id },
     });
 
     if (!config) throw new NotFoundException();

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ServerRepository } from './server.repository';
 import { Server } from './server.entity';
@@ -32,7 +36,7 @@ export class ServersService {
    */
   async getServerById(id: number): Promise<Server> {
     const server = await this.serverRepository.findOne({
-      where: { id }
+      where: { id },
     });
 
     if (!server) throw new NotFoundException();
@@ -40,7 +44,7 @@ export class ServersService {
     return server;
   }
 
-    /**
+  /**
    * Get a server by the id
    * @param id the server id
    * @param withConfig if config should be included
@@ -88,7 +92,10 @@ export class ServersService {
       },
     });
 
-    const created = await this.serverRepository.saveTransactionServerAndConfig(server, serverConfig);
+    const created = await this.serverRepository.saveTransactionServerAndConfig(
+      server,
+      serverConfig,
+    );
 
     delete created.config;
 
@@ -104,9 +111,12 @@ export class ServersService {
   async updateServer(user: User, id: number, dto: ServerDto): Promise<Server> {
     const server = await this.getServerWithConfigById(id);
 
-    if(server.name !== dto.serverName) {
-      const exists = await this.checkServerExistsByUser(user.id, dto.serverName);
-      if(exists) throw new ConflictException(serverNameExists);
+    if (server.name !== dto.serverName) {
+      const exists = await this.checkServerExistsByUser(
+        user.id,
+        dto.serverName,
+      );
+      if (exists) throw new ConflictException(serverNameExists);
 
       server.name = dto.serverName;
     }
@@ -114,7 +124,10 @@ export class ServersService {
     const updatedConfigDto = new ServerConfigDto(dto);
     server.config.config = server.config.config.merge(updatedConfigDto);
 
-    const updated = await this.serverRepository.saveTransactionServerAndConfig(server, server.config);
+    const updated = await this.serverRepository.saveTransactionServerAndConfig(
+      server,
+      server.config,
+    );
 
     delete updated.config;
 
@@ -137,13 +150,15 @@ export class ServersService {
    * @param userId the user id to check
    * @param serverName the server name to check
    */
-  async checkServerExistsByUser(userId: number, serverName: string): Promise<boolean>
-  {
+  async checkServerExistsByUser(
+    userId: number,
+    serverName: string,
+  ): Promise<boolean> {
     const count = await this.serverRepository.count({
       where: {
         name: serverName,
         ownerId: userId,
-      }
+      },
     });
 
     return count > 0;

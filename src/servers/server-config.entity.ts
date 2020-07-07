@@ -1,4 +1,11 @@
-import { Entity, OneToOne, Column, PrimaryColumn, JoinColumn, AfterLoad } from 'typeorm';
+import {
+  Entity,
+  OneToOne,
+  Column,
+  PrimaryColumn,
+  JoinColumn,
+  AfterLoad,
+} from 'typeorm';
 import { Server } from './server.entity';
 import { ServerConfigDto } from './dto/config.dto';
 import * as config from 'config';

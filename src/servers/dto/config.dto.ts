@@ -31,7 +31,10 @@ export class ServerConfigDto {
     newDto.botName = otherDto.botName || this.botName;
     newDto.protocol = otherDto.protocol || this.protocol;
     newDto.username = otherDto.username || this.username;
-    newDto.password = otherDto.password && otherDto.password.length > 0 ? otherDto.password : this.password;
+    newDto.password =
+      otherDto.password && otherDto.password.length > 0
+        ? otherDto.password
+        : this.password;
 
     return newDto;
   }
