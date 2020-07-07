@@ -1,6 +1,7 @@
-import { Entity, OneToOne, Column, PrimaryColumn } from 'typeorm';
+import { Entity, OneToOne, Column, PrimaryColumn, JoinColumn, AfterLoad } from 'typeorm';
 import { Server } from './server.entity';
-import { ServerConfigInterface } from './server.types';
+import { ServerConfigDto } from './dto/config.dto';
+import * as config from 'config';
 
 @Entity()
 export class ServerConfig {
@@ -14,8 +15,14 @@ export class ServerConfig {
       primary: true,
     },
   )
+  @JoinColumn({ name: 'id' })
   server: Server;
 
   @Column('json')
-  config: ServerConfigInterface;
+  config: ServerConfigDto;
+
+  @AfterLoad()
+  initConfigDto(): void {
+    this.config = new ServerConfigDto(this.config);
+  }
 }

@@ -1,6 +1,6 @@
 import { TeamspeakConnectionProtocol } from '../server.types';
 
-export class CreateServerDto {
+export class ServerDto {
   serverName: string;
   host: string;
   serverPort: number;

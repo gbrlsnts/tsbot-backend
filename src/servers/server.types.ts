@@ -1,14 +1,5 @@
 import { Server } from './server.entity';
-
-export interface ServerConfigInterface {
-  host: string;
-  serverPort: number;
-  queryPort: number;
-  botName: string;
-  protocol: TeamspeakConnectionProtocol;
-  username: string;
-  password: string;
-}
+import { ServerConfigDto } from './dto/config.dto';
 
 export enum TeamspeakConnectionProtocol {
   RAW = 'RAW',
@@ -24,5 +15,5 @@ export interface ServerResponse {
 }
 
 export interface ServerConfigResponse {
-  config: Partial<ServerConfigInterface>;
+  config: Partial<ServerConfigDto>;
 }

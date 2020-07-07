@@ -3,10 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ServerRepository } from './server.repository';
 import { Server } from './server.entity';
 import { User } from '../users/user.entity';
-import { CreateServerDto } from './dto/create-server.dto';
+import { ServerDto } from './dto/server.dto';
 import { ServerConfigRepository } from './server-config.repository';
 import { serverNameExists } from '../messages/server.messages';
 import { ServerConfig } from './server-config.entity';
+import { ServerConfigDto } from './dto/config.dto';
 
 @Injectable()
 export class ServersService {
@@ -27,16 +28,35 @@ export class ServersService {
   /**
    * Get a server by the id
    * @param id the server id
+   * @param withConfig if config should be included
    * @throws NotFoundException
    */
   async getServerById(id: number): Promise<Server> {
     const server = await this.serverRepository.findOne({
-      where: { id },
+      where: { id }
     });
 
     if (!server) throw new NotFoundException();
 
     return server;
+  }
+
+    /**
+   * Get a server by the id
+   * @param id the server id
+   * @param withConfig if config should be included
+   * @throws NotFoundException
+   */
+  async getServerWithConfigById(id: number): Promise<Server> {
+    const server = await this.serverRepository.find({
+      where: { id },
+      relations: ['config'],
+      take: 1,
+    });
+
+    if (server.length === 0) throw new NotFoundException();
+
+    return server[0];
   }
 
   async getServerConfigById(id: number): Promise<ServerConfig> {
@@ -54,7 +74,7 @@ export class ServersService {
    * @param user user that will own the server
    * @param dto data to persist
    */
-  async createServer(user: User, dto: CreateServerDto): Promise<Server> {
+  async createServer(user: User, dto: ServerDto): Promise<Server> {
     const exists = await this.checkServerExistsByUser(user.id, dto.serverName);
 
     if (exists) throw new ConflictException(serverNameExists);
@@ -79,16 +99,34 @@ export class ServersService {
       },
     });
 
-    await this.configRepository.save(serverConfig);
+    const created = await this.serverRepository.saveTransactionServerAndConfig(server, serverConfig);
 
-    return server;
+    delete created.config;
+
+    return created;
   }
 
   /**
    * Update a server properties
    */
-  updateServer(): Promise<Server> {
-    return;
+  async updateServer(user: User, id: number, dto: ServerDto): Promise<Server> {
+    const server = await this.getServerWithConfigById(id);
+
+    if(server.name !== dto.serverName) {
+      const exists = await this.checkServerExistsByUser(user.id, dto.serverName);
+      if(exists) throw new ConflictException(serverNameExists);
+
+      server.name = dto.serverName;
+    }
+
+    const updatedConfigDto = new ServerConfigDto(dto);
+    server.config.config = server.config.config.merge(updatedConfigDto);
+
+    const updated = await this.serverRepository.saveTransactionServerAndConfig(server, server.config);
+
+    delete updated.config;
+
+    return updated;
   }
 
   /**

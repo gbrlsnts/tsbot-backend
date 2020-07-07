@@ -13,7 +13,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/get-user-decorator';
 import { ServersService } from './servers.service';
 import { ServersListResponse, ServerResponse, ServerConfigResponse } from './server.types';
-import { CreateServerDto } from './dto/create-server.dto';
+import { ServerDto } from './dto/server.dto';
 import { User } from '../users/user.entity';
 
 @Controller('servers')
@@ -49,7 +49,7 @@ export class ServersController {
   @Post()
   async createServer(
     @GetUser() user: User,
-    @Body() dto: CreateServerDto,
+    @Body() dto: ServerDto,
   ): Promise<ServerResponse> {
     const server = await this.serverService.createServer(user, dto);
 
@@ -57,8 +57,14 @@ export class ServersController {
   }
 
   @Patch('/:id')
-  updateServer(): void {
-    return;
+  async updateServer(
+    @GetUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: ServerDto,
+  ): Promise<ServerResponse> {
+    const server = await this.serverService.updateServer(user, id, dto);
+
+    return { server };
   }
 
   @Delete('/:id')
