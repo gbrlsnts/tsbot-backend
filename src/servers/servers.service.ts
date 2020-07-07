@@ -6,7 +6,6 @@ import { User } from '../users/user.entity';
 import { ServerDto } from './dto/server.dto';
 import { ServerConfigRepository } from './server-config.repository';
 import { serverNameExists } from '../messages/server.messages';
-import { ServerConfig } from './server-config.entity';
 import { ServerConfigDto } from './dto/config.dto';
 
 @Injectable()
@@ -59,16 +58,6 @@ export class ServersService {
     return server[0];
   }
 
-  async getServerConfigById(id: number): Promise<ServerConfig> {
-    const config = await this.configRepository.findOne({
-      where: { id }
-    });
-
-    if (!config) throw new NotFoundException();
-
-    return config;
-  }
-
   /**
    * Create a server and its configuration
    * @param user user that will own the server
@@ -107,7 +96,10 @@ export class ServersService {
   }
 
   /**
-   * Update a server properties
+   * Update a server and it's config
+   * @param user user that owns the server
+   * @param id server id
+   * @param dto dto with the update data
    */
   async updateServer(user: User, id: number, dto: ServerDto): Promise<Server> {
     const server = await this.getServerWithConfigById(id);

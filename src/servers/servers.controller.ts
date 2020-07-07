@@ -15,11 +15,12 @@ import { ServersService } from './servers.service';
 import { ServersListResponse, ServerResponse, ServerConfigResponse } from './server.types';
 import { ServerDto } from './dto/server.dto';
 import { User } from '../users/user.entity';
+import { ServersConfigService } from './servers-config.service';
 
 @Controller('servers')
 @UseGuards(JwtAuthGuard)
 export class ServersController {
-  constructor(private serverService: ServersService) {}
+  constructor(private serverService: ServersService, private configService: ServersConfigService) {}
 
   @Get()
   async getServers(): Promise<ServersListResponse> {
@@ -41,7 +42,7 @@ export class ServersController {
   async getServerConfigById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ServerConfigResponse> {
-    const serverConfig = await this.serverService.getServerConfigById(id);
+    const serverConfig = await this.configService.getServerConfigById(id);
 
     return { config: serverConfig.config };
   }
