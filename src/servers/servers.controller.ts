@@ -9,6 +9,7 @@ import {
   Param,
   Body,
   ValidationPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/get-user-decorator';
@@ -21,6 +22,7 @@ import {
 import { ServerDto } from './dto/server.dto';
 import { User } from '../users/user.entity';
 import { ServersConfigService } from './servers-config.service';
+import { atLeastOnePropertyDefined } from '../messages/global.messages';
 
 @Controller('servers')
 @UseGuards(JwtAuthGuard)
@@ -69,8 +71,12 @@ export class ServersController {
   async updateServer(
     @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,
-    @Body(ValidationPipe) dto: ServerDto,
+    @Body(new ValidationPipe({
+      skipMissingProperties: true,
+    })) dto: ServerDto,
   ): Promise<ServerResponse> {
+    if(Object.keys(dto).length === 0) throw new BadRequestException(atLeastOnePropertyDefined);
+
     const server = await this.serverService.updateServer(user, id, dto);
 
     return { server };
