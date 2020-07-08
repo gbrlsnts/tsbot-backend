@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { Server } from './server.entity';
 import { ServerConfigDto } from './dto/config.dto';
-import * as config from 'config';
 
 @Entity()
 export class ServerConfig {

@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Param,
   Body,
+  ValidationPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/get-user-decorator';
@@ -57,7 +58,7 @@ export class ServersController {
   @Post()
   async createServer(
     @GetUser() user: User,
-    @Body() dto: ServerDto,
+    @Body(ValidationPipe) dto: ServerDto,
   ): Promise<ServerResponse> {
     const server = await this.serverService.createServer(user, dto);
 
@@ -68,7 +69,7 @@ export class ServersController {
   async updateServer(
     @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: ServerDto,
+    @Body(ValidationPipe) dto: ServerDto,
   ): Promise<ServerResponse> {
     const server = await this.serverService.updateServer(user, id, dto);
 
