@@ -1,5 +1,11 @@
 import { TeamspeakConnectionProtocol } from '../server.types';
-import { MinLength, MaxLength, IsPort, IsIn, IsOptional } from 'class-validator';
+import {
+  MinLength,
+  MaxLength,
+  IsPort,
+  IsIn,
+  IsOptional,
+} from 'class-validator';
 import { IsFqdnOrIp } from '../validation/fqdn-ip.validation';
 
 export class ServerDto {

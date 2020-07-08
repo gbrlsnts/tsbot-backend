@@ -71,11 +71,15 @@ export class ServersController {
   async updateServer(
     @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ValidationPipe({
-      skipMissingProperties: true,
-    })) dto: ServerDto,
+    @Body(
+      new ValidationPipe({
+        skipMissingProperties: true,
+      }),
+    )
+    dto: ServerDto,
   ): Promise<ServerResponse> {
-    if(Object.keys(dto).length === 0) throw new BadRequestException(atLeastOnePropertyDefined);
+    if (Object.keys(dto).length === 0)
+      throw new BadRequestException(atLeastOnePropertyDefined);
 
     const server = await this.serverService.updateServer(user, id, dto);
 

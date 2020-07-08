@@ -1,1 +1,2 @@
-export const atLeastOnePropertyDefined = 'At least one property must be defined';
+export const atLeastOnePropertyDefined =
+  'At least one property must be defined';
