@@ -12,7 +12,8 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { GetUser } from '../auth/get-user-decorator';
+import { ServerRolesGuard, ServerRoles } from './guards/server-roles.guard';
+import { GetUser } from '../auth/decorators/get-user-decorator';
 import { ServersService } from './servers.service';
 import {
   ServersListResponse,
@@ -23,9 +24,10 @@ import { ServerDto } from './dto/server.dto';
 import { User } from '../users/user.entity';
 import { ServersConfigService } from './servers-config.service';
 import { atLeastOnePropertyDefined } from '../messages/global.messages';
+import { SetServerRoles } from './decorators/set-server-roles.decorator';
 
 @Controller('servers')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ServerRolesGuard)
 export class ServersController {
   constructor(
     private serverService: ServersService,
@@ -40,6 +42,9 @@ export class ServersController {
   }
 
   @Get('/:id')
+  @SetServerRoles({
+    roles: [ServerRoles.OWNER],
+  })
   async getServerById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ServerResponse> {
@@ -49,6 +54,9 @@ export class ServersController {
   }
 
   @Get('/:id/config')
+  @SetServerRoles({
+    roles: [ServerRoles.OWNER],
+  })
   async getServerConfigById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ServerConfigResponse> {
@@ -68,6 +76,9 @@ export class ServersController {
   }
 
   @Patch('/:id')
+  @SetServerRoles({
+    roles: [ServerRoles.OWNER],
+  })
   async updateServer(
     @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,
@@ -87,6 +98,9 @@ export class ServersController {
   }
 
   @Delete('/:id')
+  @SetServerRoles({
+    roles: [ServerRoles.OWNER],
+  })
   deleteServer(
     @Param('id', ParseIntPipe)
     id: number,

@@ -5,12 +5,16 @@ import { ServersController } from './servers.controller';
 import { ServerRepository } from './server.repository';
 import { ServerConfigRepository } from './server-config.repository';
 import { ServersConfigService } from './servers-config.service';
+import { AuthModule } from '../auth/auth.module';
+import { ServerRolesGuard } from './guards/server-roles.guard';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ServerRepository, ServerConfigRepository]),
+    AuthModule,
   ],
-  providers: [ServersService, ServersConfigService],
+  providers: [ServersService, ServersConfigService, ServerRolesGuard],
   controllers: [ServersController],
+  exports: [ServersService],
 })
 export class ServersModule {}
