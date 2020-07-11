@@ -4,10 +4,7 @@ import { UserManagerController } from './user-manager.controller';
 import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [
-    UsersModule,
-    AuthModule,
-  ],
+  imports: [UsersModule, AuthModule],
   providers: [],
   controllers: [UserManagerController],
 })

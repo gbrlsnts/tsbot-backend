@@ -10,21 +10,20 @@ import {
   Body,
   ValidationPipe,
   BadRequestException,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ServerRolesGuard, ServerRoles } from './guards/server-roles.guard';
 import { GetUser } from '../auth/decorators/get-user-decorator';
 import { ServersService } from './servers.service';
-import {
-  ServersListResponse,
-  ServerResponse,
-  ServerConfigResponse,
-} from './server.types';
 import { ServerDto } from './dto/server.dto';
 import { User } from '../users/user.entity';
 import { ServersConfigService } from './servers-config.service';
 import { atLeastOnePropertyDefined } from '../messages/global.messages';
 import { SetServerRoles } from './decorators/set-server-roles.decorator';
+import { Server } from './server.entity';
+import { ServerConfig } from './server-config.entity';
 
 @Controller('servers')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
@@ -35,51 +34,42 @@ export class ServersController {
   ) {}
 
   @Get()
-  async getServers(): Promise<ServersListResponse> {
-    const servers = await this.serverService.getServers();
-
-    return { servers };
+  getServers(): Promise<Server[]> {
+    return this.serverService.getServers();
   }
 
   @Get('/:id')
   @SetServerRoles({
     roles: [ServerRoles.OWNER],
   })
-  async getServerById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<ServerResponse> {
-    const server = await this.serverService.getServerById(id);
-
-    return { server };
+  getServerById(@Param('id', ParseIntPipe) id: number): Promise<Server> {
+    return this.serverService.getServerById(id);
   }
 
   @Get('/:id/config')
+  @UseInterceptors(ClassSerializerInterceptor)
   @SetServerRoles({
     roles: [ServerRoles.OWNER],
   })
-  async getServerConfigById(
+  getServerConfigById(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ServerConfigResponse> {
-    const serverConfig = await this.configService.getServerConfigById(id);
-
-    return { config: serverConfig.config };
+  ): Promise<ServerConfig> {
+    return this.configService.getServerConfigById(id);
   }
 
   @Post()
-  async createServer(
+  createServer(
     @GetUser() user: User,
     @Body(ValidationPipe) dto: ServerDto,
-  ): Promise<ServerResponse> {
-    const server = await this.serverService.createServer(user, dto);
-
-    return { server };
+  ): Promise<Server> {
+    return this.serverService.createServer(user, dto);
   }
 
   @Patch('/:id')
   @SetServerRoles({
     roles: [ServerRoles.OWNER],
   })
-  async updateServer(
+  updateServer(
     @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,
     @Body(
@@ -88,13 +78,11 @@ export class ServersController {
       }),
     )
     dto: ServerDto,
-  ): Promise<ServerResponse> {
+  ): Promise<Server> {
     if (Object.keys(dto).length === 0)
       throw new BadRequestException(atLeastOnePropertyDefined);
 
-    const server = await this.serverService.updateServer(user, id, dto);
-
-    return { server };
+    return this.serverService.updateServer(user, id, dto);
   }
 
   @Delete('/:id')

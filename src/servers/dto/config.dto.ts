@@ -1,4 +1,5 @@
 import { TeamspeakConnectionProtocol } from '../server.types';
+import { Exclude } from 'class-transformer';
 
 export class ServerConfigDto {
   host: string;
@@ -7,6 +8,8 @@ export class ServerConfigDto {
   botName: string;
   protocol: TeamspeakConnectionProtocol;
   username: string;
+
+  @Exclude()
   password: string;
 
   /**
@@ -35,6 +38,17 @@ export class ServerConfigDto {
       otherDto.password && otherDto.password.length > 0
         ? otherDto.password
         : this.password;
+
+    return newDto;
+  }
+
+  /**
+   * Get an instance of this dto without the password field
+   */
+  withoutPassword(): ServerConfigDto {
+    const newDto = new ServerConfigDto(this);
+
+    delete newDto.password;
 
     return newDto;
   }

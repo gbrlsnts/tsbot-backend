@@ -7,45 +7,40 @@ import {
   Patch,
   ValidationPipe,
   UseGuards,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { UpdateEmailDto } from '../users/dto/update-email.dto';
 import { UpdatePasswordDto } from '../users/dto/update-password.dto';
-import { UsersListResponse, UserResponse } from '../users/users.types';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { LoggedUserGuard } from '../auth/guards/self-user.guard';
+import { User } from '../users/user.entity';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(ClassSerializerInterceptor)
 export class UserManagerController {
   constructor(private usersService: UsersService) {}
 
   @Get()
-  async getUsers(): Promise<UsersListResponse> {
-    const users = await this.usersService.getUsers();
-
-    return { users };
+  async getUsers(): Promise<User[]> {
+    return this.usersService.getUsers();
   }
 
   @Get('/:id')
   @UseGuards(LoggedUserGuard)
-  async getUserById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<UserResponse> {
-    const user = await this.usersService.getUserById(id);
-
-    return { user };
+  getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    return this.usersService.getUserById(id);
   }
 
   @Patch('/:id/email')
   @UseGuards(LoggedUserGuard)
-  async updateUserEmail(
+  updateUserEmail(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) updateEmailDto: UpdateEmailDto,
-  ): Promise<UserResponse> {
-    const user = await this.usersService.updateEmail(id, updateEmailDto);
-
-    return { user };
+  ): Promise<User> {
+    return this.usersService.updateEmail(id, updateEmailDto);
   }
 
   @Patch('/:id/password')

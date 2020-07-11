@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Server } from '../servers/server.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 @Unique(['email'])
@@ -18,6 +19,7 @@ export class User {
   email: string;
 
   @Column()
+  @Exclude()
   password: string;
 
   @OneToMany(
