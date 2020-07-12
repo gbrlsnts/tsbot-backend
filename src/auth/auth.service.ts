@@ -25,7 +25,7 @@ export class AuthService {
     let payload: JwtPayload;
 
     try {
-      const user = await this.usersService.getUserByEmail(email, true);
+      const user = await this.usersService.getUserByEmail(email);
       const valid = await user.validatePassword(password);
 
       if (!valid) throw new UnauthorizedException();

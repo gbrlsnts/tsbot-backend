@@ -11,8 +11,6 @@ import { UpdateEmailDto } from './dto/update-email.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as messages from '../messages/user.messages';
 
-const safeColumns: (keyof User)[] = ['id', 'email'];
-
 @Injectable()
 export class UsersService {
   constructor(
@@ -24,18 +22,15 @@ export class UsersService {
    * Get all users
    */
   getUsers(): Promise<User[]> {
-    return this.usersRepository.find({
-      select: safeColumns,
-    });
+    return this.usersRepository.find();
   }
 
   /**
    * Get an user by id
    * @param id user id
    */
-  async getUserById(id: number, allColumns = false): Promise<User> {
+  async getUserById(id: number): Promise<User> {
     const user = await this.usersRepository.findOne({
-      select: !allColumns ? safeColumns : undefined,
       where: { id },
     });
 
@@ -48,9 +43,8 @@ export class UsersService {
    * Get an user by id
    * @param id user id
    */
-  async getUserByEmail(email: string, allColumns = false): Promise<User> {
+  async getUserByEmail(email: string): Promise<User> {
     const user = await this.usersRepository.findOne({
-      select: !allColumns ? safeColumns : undefined,
       where: { email },
     });
 

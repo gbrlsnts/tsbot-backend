@@ -18,6 +18,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { LoggedUserGuard } from '../auth/guards/self-user.guard';
 import { User } from '../users/user.entity';
 import { appSerializeOptions } from '../constants';
+import { IsAdminGuard } from 'src/auth/guards/admin.guard';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -27,6 +28,7 @@ export class UserManagerController {
   constructor(private usersService: UsersService) {}
 
   @Get()
+  @UseGuards(IsAdminGuard)
   async getUsers(): Promise<User[]> {
     return this.usersService.getUsers();
   }

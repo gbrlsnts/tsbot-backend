@@ -26,6 +26,7 @@ import { SetServerRoles } from './decorators/set-server-roles.decorator';
 import { Server } from './server.entity';
 import { ServerConfig } from './server-config.entity';
 import { appSerializeOptions } from '../constants';
+import { IsAdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('servers')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
@@ -38,6 +39,7 @@ export class ServersController {
   ) {}
 
   @Get()
+  @UseGuards(IsAdminGuard)
   getServers(): Promise<Server[]> {
     return this.serverService.getServers();
   }
