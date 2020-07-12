@@ -29,6 +29,8 @@ import { appSerializeOptions } from '../constants';
 
 @Controller('servers')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
+@UseInterceptors(ClassSerializerInterceptor)
+@SerializeOptions(appSerializeOptions)
 export class ServersController {
   constructor(
     private serverService: ServersService,
@@ -49,8 +51,6 @@ export class ServersController {
   }
 
   @Get('/:id/config')
-  @UseInterceptors(ClassSerializerInterceptor)
-  @SerializeOptions(appSerializeOptions)
   @SetServerRoles({
     roles: [ServerRoles.OWNER],
   })
