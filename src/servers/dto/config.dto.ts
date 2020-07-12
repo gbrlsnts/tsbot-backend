@@ -1,15 +1,25 @@
 import { TeamspeakConnectionProtocol } from '../server.types';
-import { Exclude } from 'class-transformer';
+import { Expose } from 'class-transformer';
 
 export class ServerConfigDto {
+  @Expose()
   host: string;
+
+  @Expose()
   serverPort: number;
+
+  @Expose()
   queryPort: number;
+
+  @Expose()
   botName: string;
+
+  @Expose()
   protocol: TeamspeakConnectionProtocol;
+
+  @Expose()
   username: string;
 
-  @Exclude()
   password: string;
 
   /**

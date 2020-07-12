@@ -7,20 +7,30 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Server } from '../servers/server.entity';
-import { Exclude } from 'class-transformer';
+import { Expose } from 'class-transformer';
+import { serializationGroups } from '../types';
 
 @Entity()
 @Unique(['email'])
 export class User {
   @PrimaryGeneratedColumn()
+  @Expose()
   id: number;
 
   @Column()
+  @Expose()
   email: string;
 
   @Column()
-  @Exclude()
   password: string;
+
+  @Column({
+    default: false,
+  })
+  @Expose({
+    groups: [serializationGroups.APP_ADMIN],
+  })
+  isAdmin: boolean;
 
   @OneToMany(
     () => Server,

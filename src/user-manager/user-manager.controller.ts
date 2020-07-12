@@ -9,6 +9,7 @@ import {
   UseGuards,
   UseInterceptors,
   ClassSerializerInterceptor,
+  SerializeOptions,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { UpdateEmailDto } from '../users/dto/update-email.dto';
@@ -16,10 +17,12 @@ import { UpdatePasswordDto } from '../users/dto/update-password.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { LoggedUserGuard } from '../auth/guards/self-user.guard';
 import { User } from '../users/user.entity';
+import { appSerializeOptions } from '../constants';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
+@SerializeOptions(appSerializeOptions)
 export class UserManagerController {
   constructor(private usersService: UsersService) {}
 

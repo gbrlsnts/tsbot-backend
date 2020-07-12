@@ -8,10 +8,12 @@ import {
 } from 'typeorm';
 import { Server } from './server.entity';
 import { ServerConfigDto } from './dto/config.dto';
+import { Expose } from 'class-transformer';
 
 @Entity()
 export class ServerConfig {
   @PrimaryColumn()
+  @Expose()
   id: number;
 
   @OneToOne(
@@ -24,7 +26,8 @@ export class ServerConfig {
   @JoinColumn({ name: 'id' })
   server: Server;
 
-  @Column('json')
+  @Column('jsonb')
+  @Expose()
   config: ServerConfigDto;
 
   @AfterLoad()

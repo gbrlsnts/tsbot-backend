@@ -12,6 +12,7 @@ import {
   BadRequestException,
   UseInterceptors,
   ClassSerializerInterceptor,
+  SerializeOptions,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ServerRolesGuard, ServerRoles } from './guards/server-roles.guard';
@@ -24,6 +25,7 @@ import { atLeastOnePropertyDefined } from '../messages/global.messages';
 import { SetServerRoles } from './decorators/set-server-roles.decorator';
 import { Server } from './server.entity';
 import { ServerConfig } from './server-config.entity';
+import { appSerializeOptions } from '../constants';
 
 @Controller('servers')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
@@ -48,6 +50,7 @@ export class ServersController {
 
   @Get('/:id/config')
   @UseInterceptors(ClassSerializerInterceptor)
+  @SerializeOptions(appSerializeOptions)
   @SetServerRoles({
     roles: [ServerRoles.OWNER],
   })
