@@ -11,6 +11,7 @@ import { ServerDto } from './dto/server.dto';
 import { ServerConfigRepository } from './server-config.repository';
 import { serverNameExists } from '../messages/server.messages';
 import { ServerConfigDto } from './dto/config.dto';
+import { IsNull } from 'typeorm';
 
 @Injectable()
 export class ServersService {
@@ -23,9 +24,12 @@ export class ServersService {
 
   /**
    * Get all servers
+   * @param withDeleted indicates if deleted servers should be included
    */
-  getServers(): Promise<Server[]> {
-    return this.serverRepository.find();
+  getServers(withDeleted = false): Promise<Server[]> {
+    return this.serverRepository.find({
+      withDeleted
+    });
   }
 
   /**
@@ -140,7 +144,10 @@ export class ServersService {
    * @throws NotFoundException
    */
   async deleteServer(id: number): Promise<void> {
-    const result = await this.serverRepository.softDelete(id);
+    const result = await this.serverRepository.softDelete({
+      id,
+      deletedAt: IsNull(),
+    });
 
     if (result.affected == 0) throw new NotFoundException();
   }
