@@ -75,7 +75,6 @@ export class ServersController {
     roles: [ServerRoles.OWNER],
   })
   updateServer(
-    @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,
     @Body(
       new ValidationPipe({
@@ -87,7 +86,7 @@ export class ServersController {
     if (Object.keys(dto).length === 0)
       throw new BadRequestException(atLeastOnePropertyDefined);
 
-    return this.serverService.updateServer(user, id, dto);
+    return this.serverService.updateServer(id, dto);
   }
 
   @Delete('/:id')

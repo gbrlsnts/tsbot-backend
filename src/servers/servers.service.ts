@@ -108,16 +108,15 @@ export class ServersService {
 
   /**
    * Update a server and it's config
-   * @param user user that owns the server
    * @param id server id
    * @param dto dto with the update data
    */
-  async updateServer(user: User, id: number, dto: ServerDto): Promise<Server> {
+  async updateServer(id: number, dto: ServerDto): Promise<Server> {
     const server = await this.getServerWithConfigById(id);
 
     if (server.name !== dto.serverName) {
       const exists = await this.checkServerExistsByUser(
-        user.id,
+        server.ownerId,
         dto.serverName,
       );
       if (exists) throw new ConflictException(serverNameExists);
