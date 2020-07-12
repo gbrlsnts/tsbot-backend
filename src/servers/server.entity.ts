@@ -7,11 +7,13 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { ServerConfig } from './server-config.entity';
 import { Expose } from 'class-transformer';
 import { serializationGroups } from '../types';
+import { Client } from './clients/client.entity';
 
 @Entity()
 export class Server {
@@ -52,4 +54,7 @@ export class Server {
     user => user.servers,
   )
   owner: User;
+
+  @OneToMany(() => Client, client => client.server)
+  clients: Client[];
 }

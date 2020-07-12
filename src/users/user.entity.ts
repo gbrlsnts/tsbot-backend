@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { Server } from '../servers/server.entity';
 import { Expose } from 'class-transformer';
 import { serializationGroups } from '../types';
+import { Client } from '../servers/clients/client.entity';
 
 @Entity()
 @Unique(['email'])
@@ -37,6 +38,12 @@ export class User {
     server => server.owner,
   )
   servers: Server[];
+
+  @OneToMany(
+    () => Client,
+    client => client.user,
+  )
+  clients: Client[];
 
   /**
    * Set a new hashed password
