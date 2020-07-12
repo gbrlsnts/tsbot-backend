@@ -1,15 +1,19 @@
-import { Controller, Get, Param, ParseIntPipe, Post, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Patch,
+} from '@nestjs/common';
 import { ClientsService } from './clients.service';
 
 @Controller('/servers/:server/clients')
 export class ClientsController {
-
-  constructor(private clientsService: ClientsService) {};
+  constructor(private clientsService: ClientsService) {}
 
   @Get('')
-  getAllServerClients(
-    @Param('server', ParseIntPipe) serverId: number,
-  ): void {
+  getAllServerClients(@Param('server', ParseIntPipe) serverId: number): void {
     console.log(serverId);
   }
 
@@ -23,7 +27,7 @@ export class ClientsController {
 
   @Post()
   createServerClientById(
-    @Param('server', ParseIntPipe) serverId: number
+    @Param('server', ParseIntPipe) serverId: number,
   ): void {
     console.log(serverId);
   }

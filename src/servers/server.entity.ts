@@ -45,7 +45,7 @@ export class Server {
 
   @DeleteDateColumn()
   @Expose({
-    groups: [serializationGroups.APP_ADMIN]
+    groups: [serializationGroups.APP_ADMIN],
   })
   deletedAt: Date;
 
@@ -55,6 +55,9 @@ export class Server {
   )
   owner: User;
 
-  @OneToMany(() => Client, client => client.server)
+  @OneToMany(
+    () => Client,
+    client => client.server,
+  )
   clients: Client[];
 }

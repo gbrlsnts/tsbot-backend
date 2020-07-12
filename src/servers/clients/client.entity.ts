@@ -1,5 +1,5 @@
-import { PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
-import { Expose } from "class-transformer";
+import { PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Expose } from 'class-transformer';
 import { User } from '../../users/user.entity';
 import { Server } from '../server.entity';
 
@@ -25,9 +25,15 @@ export class Client {
   @Expose()
   tsClientDbId: number;
 
-  @ManyToOne(() => User, user => user.clients)
+  @ManyToOne(
+    () => User,
+    user => user.clients,
+  )
   user: User;
 
-  @ManyToOne(() => User, server => server.clients)
+  @ManyToOne(
+    () => User,
+    server => server.clients,
+  )
   server: Server;
 }

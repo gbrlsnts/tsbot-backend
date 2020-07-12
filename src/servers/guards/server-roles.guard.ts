@@ -15,7 +15,7 @@ export class ServerRolesGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<AppRequest>();
 
-    if(req.user.isAdmin) return true;
+    if (req.user.isAdmin) return true;
 
     const options = this.reflector.get<ServerRolesOptions>(
       serverRolesMetadataKey,

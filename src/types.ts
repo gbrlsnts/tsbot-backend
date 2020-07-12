@@ -7,4 +7,4 @@ export interface AppRequest extends Request {
 
 export enum serializationGroups {
   APP_ADMIN = 'APP_ADMIN',
-};
+}

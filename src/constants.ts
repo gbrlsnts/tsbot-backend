@@ -1,4 +1,4 @@
-import { ClassTransformOptions } from "class-transformer";
+import { ClassTransformOptions } from 'class-transformer';
 
 export const passwordRegex = /((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
 

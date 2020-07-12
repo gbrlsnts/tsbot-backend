@@ -28,7 +28,7 @@ export class ServersService {
    */
   getServers(withDeleted = false): Promise<Server[]> {
     return this.serverRepository.find({
-      withDeleted
+      withDeleted,
     });
   }
 

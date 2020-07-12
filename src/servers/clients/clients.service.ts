@@ -7,7 +7,7 @@ import { Client } from './client.entity';
 export class ClientsService {
   constructor(
     @InjectRepository(ClientRepository)
-    private clientRepository: ClientRepository
+    private clientRepository: ClientRepository,
   ) {}
 
   async getClientById(id: number): Promise<Client> {
@@ -15,7 +15,7 @@ export class ClientsService {
       where: { id },
     });
 
-    if(!client) throw new NotFoundException();
+    if (!client) throw new NotFoundException();
 
     return client;
   }
@@ -33,5 +33,4 @@ export class ClientsService {
   async updateClient(): Promise<Client> {
     return;
   }
-
 }
