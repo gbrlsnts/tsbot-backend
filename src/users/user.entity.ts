@@ -8,7 +8,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { Server } from '../servers/server.entity';
 import { Expose } from 'class-transformer';
-import { serializationGroups } from '../types';
+import { serializationGroups } from '../shared/types';
 import { Client } from '../clients/client.entity';
 
 @Entity()

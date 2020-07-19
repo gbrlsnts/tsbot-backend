@@ -9,7 +9,7 @@ import { Server } from './server.entity';
 import { User } from '../users/user.entity';
 import { ServerDto } from './dto/server.dto';
 import { ServerConfigRepository } from './server-config.repository';
-import { serverNameExists } from '../messages/server.messages';
+import { serverNameExists } from '../shared/messages/server.messages';
 import { ServerConfigDto } from './dto/config.dto';
 import { IsNull } from 'typeorm';
 

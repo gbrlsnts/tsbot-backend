@@ -17,7 +17,7 @@ import { UpdatePasswordDto } from '../users/dto/update-password.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { LoggedUserGuard } from '../auth/guards/self-user.guard';
 import { User } from '../users/user.entity';
-import { appSerializeOptions } from '../constants';
+import { appSerializeOptions } from '../shared/constants';
 import { IsAdminGuard } from 'src/auth/guards/admin.guard';
 
 @Controller('users')

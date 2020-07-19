@@ -1,6 +1,6 @@
 import { IsEmail, IsString, MinLength, Matches } from 'class-validator';
-import { passwordRegex } from '../../constants';
-import { passwordWeak } from '../../messages/user.messages';
+import { passwordRegex } from '../../shared/constants';
+import { passwordWeak } from '../../shared/messages/user.messages';
 
 export class UserCredentialsDto {
   @IsEmail()

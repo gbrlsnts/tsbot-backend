@@ -21,11 +21,11 @@ import { ServersService } from './servers.service';
 import { ServerDto } from './dto/server.dto';
 import { User } from '../users/user.entity';
 import { ServersConfigService } from './servers-config.service';
-import { atLeastOnePropertyDefined } from '../messages/global.messages';
+import { atLeastOnePropertyDefined } from '../shared/messages/global.messages';
 import { SetServerRoles } from './decorators/set-server-roles.decorator';
 import { Server } from './server.entity';
 import { ServerConfig } from './server-config.entity';
-import { appSerializeOptions } from '../constants';
+import { appSerializeOptions } from '../shared/constants';
 import { IsAdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('servers')

@@ -7,7 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { UserCredentialsDto } from '../users/dto/user-credentials.dto';
 import { AccessToken, JwtPayload } from './auth.types';
-import { invalidCredentials } from '../messages/auth.messages';
+import { invalidCredentials } from '../shared/messages/auth.messages';
 
 @Injectable()
 export class AuthService {

@@ -12,7 +12,7 @@ import {
 import { User } from '../users/user.entity';
 import { ServerConfig } from './server-config.entity';
 import { Expose } from 'class-transformer';
-import { serializationGroups } from '../types';
+import { serializationGroups } from '../shared/types';
 import { Client } from '../clients/client.entity';
 
 @Entity()

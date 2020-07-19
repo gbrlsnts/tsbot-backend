@@ -17,7 +17,7 @@ import { SaveClientDto } from './dto/save-client.dto';
 import { GetUser } from '../auth/decorators/get-user-decorator';
 import { User } from '../users/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { appSerializeOptions } from '../constants';
+import { appSerializeOptions } from '../shared/constants';
 import { ServerRolesGuard } from '../servers/guards/server-roles.guard';
 
 @Controller('/servers/:server/clients')

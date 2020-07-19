@@ -9,7 +9,7 @@ import { User } from './user.entity';
 import { UserCredentialsDto } from './dto/user-credentials.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import * as messages from '../messages/user.messages';
+import * as messages from '../shared/messages/user.messages';
 
 @Injectable()
 export class UsersService {
