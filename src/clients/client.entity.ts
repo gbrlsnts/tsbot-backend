@@ -9,8 +9,8 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Expose } from 'class-transformer';
-import { User } from '../../users/user.entity';
-import { Server } from '../server.entity';
+import { User } from '../users/user.entity';
+import { Server } from '../servers/server.entity';
 import { ClientHistory } from './client-history.entity';
 
 @Entity()

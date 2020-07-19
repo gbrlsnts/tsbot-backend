@@ -7,6 +7,7 @@ import { UserManagerModule } from './user-manager/user-manager.module';
 import { ServersModule } from './servers/servers.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseMapperInterceptor } from './global/interceptors/response-mapper.interceptor';
+import { ClientsModule } from './clients/clients.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ResponseMapperInterceptor } from './global/interceptors/response-mapper
     AuthModule,
     UserManagerModule,
     ServersModule,
+    ClientsModule,
   ],
   controllers: [],
   providers: [

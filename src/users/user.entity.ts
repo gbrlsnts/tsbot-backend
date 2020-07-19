@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { Server } from '../servers/server.entity';
 import { Expose } from 'class-transformer';
 import { serializationGroups } from '../types';
-import { Client } from '../servers/clients/client.entity';
+import { Client } from '../clients/client.entity';
 
 @Entity()
 @Unique(['email'])

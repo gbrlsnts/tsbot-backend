@@ -7,13 +7,11 @@ import { ServerConfigRepository } from './server-config.repository';
 import { ServersConfigService } from './servers-config.service';
 import { AuthModule } from '../auth/auth.module';
 import { ServerRolesGuard } from './guards/server-roles.guard';
-import { ClientsModule } from './clients/clients.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ServerRepository, ServerConfigRepository]),
     AuthModule,
-    ClientsModule,
   ],
   providers: [ServersService, ServersConfigService, ServerRolesGuard],
   controllers: [ServersController],
