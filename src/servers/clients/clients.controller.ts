@@ -4,7 +4,6 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Patch,
   Body,
   ValidationPipe,
 } from '@nestjs/common';
@@ -35,15 +34,6 @@ export class ClientsController {
 
   @Post()
   createServerClientById(
-    @GetUser() user: User,
-    @Param('server', ParseIntPipe) serverId: number,
-    @Body(ValidationPipe) dto: SaveClientDto,
-  ): Promise<Client> {
-    return this.clientsService.saveClient(user.id, serverId, dto);
-  }
-
-  @Patch('/:id')
-  updateServerClient(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
     @Body(ValidationPipe) dto: SaveClientDto,
