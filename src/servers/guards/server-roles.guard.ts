@@ -58,4 +58,5 @@ export interface ServerRolesOptions {
 
 export enum ServerRoles {
   OWNER = 'OWNER',
+  CLIENT = 'CLIENT',
 }

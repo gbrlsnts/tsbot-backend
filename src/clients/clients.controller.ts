@@ -18,7 +18,8 @@ import { GetUser } from '../auth/decorators/get-user-decorator';
 import { User } from '../users/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { appSerializeOptions } from '../shared/constants';
-import { ServerRolesGuard } from '../servers/guards/server-roles.guard';
+import { ServerRolesGuard, ServerRoles } from '../servers/guards/server-roles.guard';
+import { SetServerRoles } from '../servers/decorators/set-server-roles.decorator';
 
 @Controller('/servers/:server/clients')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
@@ -28,6 +29,9 @@ export class ClientsController {
   constructor(private clientsService: ClientsService) {}
 
   @Get()
+  @SetServerRoles({
+    roles: [ServerRoles.OWNER],
+  })
   getAllServerClients(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<Client[]> {
@@ -35,6 +39,9 @@ export class ClientsController {
   }
 
   @Get('/:id')
+  @SetServerRoles({
+    roles: [ServerRoles.OWNER, ServerRoles.CLIENT],
+  })
   getServerClientById(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) clientId: number,
