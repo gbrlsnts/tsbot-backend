@@ -53,7 +53,7 @@ export class Client {
   user: User;
 
   @ManyToOne(
-    () => User,
+    () => Server,
     server => server.clients,
   )
   server: Server;

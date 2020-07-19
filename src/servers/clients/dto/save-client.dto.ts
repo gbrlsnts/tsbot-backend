@@ -1,7 +1,8 @@
-import { IsInt, Min, Length } from 'class-validator';
+import { IsInt, Min } from 'class-validator';
+import { FixedLength } from '../../../validation/fixed-length.validation';
 
 export class SaveClientDto {
-  @Length(28)
+  @FixedLength(28)
   tsUniqueId: string;
 
   @IsInt()

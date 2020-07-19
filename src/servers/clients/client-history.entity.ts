@@ -65,8 +65,11 @@ export class ClientHistory {
    */
   static fromClient(client: Client): ClientHistory {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { createdAt, ...copy } = client;
+    const { id, createdAt, ...copy } = client;
 
-    return new ClientHistory(copy);
+    const history = new ClientHistory(copy);
+    history.clientId = client.id;
+
+    return history;
   }
 }

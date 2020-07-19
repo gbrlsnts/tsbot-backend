@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientRepository } from './client.repository';
 import { Client } from './client.entity';
 import { SaveClientDto } from './dto/save-client.dto';
 import { ClientHistoryRepository } from './client-history.repository';
-import { ClientHistory } from './client-history.entity';
+import { getConnection } from 'typeorm';
 
 @Injectable()
 export class ClientsService {
@@ -49,25 +49,41 @@ export class ClientsService {
     serverId: number,
     dto: SaveClientDto,
   ): Promise<Client> {
+    const { tsUniqueId, tsClientDbId } = dto;
+
     let client: Client = await this.clientRepository.findOne({
       where: { userId, serverId },
     });
 
-    if (!client) {
-      client = this.clientRepository.create({
-        userId,
-        serverId,
-        tsUniqueId: dto.tsUniqueId,
-        tsClientDbId: dto.tsClientDbId,
-      });
-    } else {
-      // push existing data to history
-      await this.historyRepository.save(ClientHistory.fromClient(client));
+    if(client.tsUniqueId === tsUniqueId && client.tsClientDbId === tsClientDbId)
+      return client;
 
-      client.tsUniqueId = dto.tsUniqueId;
-      client.tsClientDbId = dto.tsClientDbId;
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      if (!client) {
+        client = this.clientRepository.create({
+          userId,
+          serverId,
+          tsUniqueId,
+          tsClientDbId,
+        });
+      } else {
+        // push existing data to history
+        await this.historyRepository.pushClientToHistory(client);
+  
+        client.tsUniqueId = tsUniqueId;
+        client.tsClientDbId = tsClientDbId;
+      }
+  
+      await queryRunner.commitTransaction();
+
+      return this.clientRepository.save(client); 
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
     }
-
-    return this.clientRepository.save(client);
   }
 }
