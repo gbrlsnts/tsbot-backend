@@ -50,6 +50,9 @@ export class ClientsController {
   }
 
   @Post()
+  @SetServerRoles({
+    roles: [ServerRoles.OWNER],
+  })
   createServerClientById(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
