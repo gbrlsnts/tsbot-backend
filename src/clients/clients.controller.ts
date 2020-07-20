@@ -31,6 +31,7 @@ export class ClientsController {
 
   @Get()
   @SetServerRoles({
+    idParam: 'server',
     roles: [ServerRoles.OWNER],
   })
   getAllServerClients(
@@ -41,6 +42,7 @@ export class ClientsController {
 
   @Get('/:id')
   @SetServerRoles({
+    idParam: 'server',
     roles: [ServerRoles.OWNER],
   })
   getServerClientById(
@@ -53,6 +55,7 @@ export class ClientsController {
   @Post()
   @HttpCode(200)
   @SetServerRoles({
+    idParam: 'server',
     roles: [ServerRoles.OWNER],
   })
   saveServerClientById(

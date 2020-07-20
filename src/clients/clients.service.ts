@@ -40,6 +40,24 @@ export class ClientsService {
     return client;
   }
 
+  async getServerClientByUserId(serverId: number, userId: number): Promise<Client> {
+    const client = await this.clientRepository.findOne({
+      where: { serverId, userId },
+    });
+
+    if (!client) throw new NotFoundException();
+
+    return client;
+  }
+
+  async checkServerClientByUserId(serverId: number, userId: number): Promise<boolean> {
+    const count = await this.clientRepository.count({
+      where: { serverId, userId },
+    });
+
+    return count > 0;
+  }
+
   getAllClientsByServerId(serverId: number): Promise<Client[]> {
     return this.clientRepository.find({
       where: { serverId },
