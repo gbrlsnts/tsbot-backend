@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   SerializeOptions,
   ClassSerializerInterceptor,
+  HttpCode,
 } from '@nestjs/common';
 import { ClientsService } from './clients.service';
 import { Client } from './client.entity';
@@ -50,10 +51,11 @@ export class ClientsController {
   }
 
   @Post()
+  @HttpCode(200)
   @SetServerRoles({
     roles: [ServerRoles.OWNER],
   })
-  createServerClientById(
+  saveServerClientById(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
     @Body(ValidationPipe) dto: SaveClientDto,
