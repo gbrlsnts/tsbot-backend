@@ -85,7 +85,6 @@ export class ClientsService {
 
       return savedClient;
     } catch (e) {
-      console.log(e);
       await queryRunner.rollbackTransaction();
 
       if(e.code == DbErrorCodes.DuplicateKey)
