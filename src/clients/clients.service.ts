@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientRepository } from './client.repository';
 import { Client } from './client.entity';
 import { SaveClientDto } from './dto/save-client.dto';
 import { ClientHistoryRepository } from './client-history.repository';
 import { getConnection } from 'typeorm';
+import { DbErrorCodes } from '../shared/database/codes';
+import { clientAlreadyExists } from '../shared/messages/client.messages';
 
 @Injectable()
 export class ClientsService {
@@ -55,7 +57,7 @@ export class ClientsService {
       where: { userId, serverId },
     });
 
-    if(client.tsUniqueId === tsUniqueId && client.tsClientDbId === tsClientDbId)
+    if(client && client.tsUniqueId === tsUniqueId && client.tsClientDbId === tsClientDbId)
       return client;
 
     const queryRunner = getConnection().createQueryRunner();
@@ -77,12 +79,18 @@ export class ClientsService {
         client.tsUniqueId = tsUniqueId;
         client.tsClientDbId = tsClientDbId;
       }
-  
+
+      const savedClient = await this.clientRepository.save(client);
       await queryRunner.commitTransaction();
 
-      return this.clientRepository.save(client); 
+      return savedClient;
     } catch (e) {
+      console.log(e);
       await queryRunner.rollbackTransaction();
+
+      if(e.code == DbErrorCodes.DuplicateKey)
+        throw new ConflictException(clientAlreadyExists);
+
       throw new InternalServerErrorException();
     }
   }

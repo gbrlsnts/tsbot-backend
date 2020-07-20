@@ -40,7 +40,7 @@ export class ClientsController {
 
   @Get('/:id')
   @SetServerRoles({
-    roles: [ServerRoles.OWNER, ServerRoles.CLIENT],
+    roles: [ServerRoles.OWNER],
   })
   getServerClientById(
     @Param('server', ParseIntPipe) serverId: number,
