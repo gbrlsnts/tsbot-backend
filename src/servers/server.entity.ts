@@ -10,7 +10,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from '../users/user.entity';
-import { ServerConfig } from './configs/server-config.entity';
+import { ServerConfig } from './configs/server/server-config.entity';
 import { Expose } from 'class-transformer';
 import { serializationGroups } from '../shared/types';
 import { Client } from '../clients/client.entity';

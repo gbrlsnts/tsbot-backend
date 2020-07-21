@@ -6,8 +6,8 @@ import {
   JoinColumn,
   AfterLoad,
 } from 'typeorm';
-import { Server } from '../server.entity';
-import { ServerConfigDto } from '../dto/config.dto';
+import { Server } from '../../server.entity';
+import { ServerConfigDto } from '../../dto/config.dto';
 import { Expose } from 'class-transformer';
 
 @Entity()
