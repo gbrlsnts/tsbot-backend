@@ -20,11 +20,11 @@ import { GetUser } from '../auth/decorators/get-user-decorator';
 import { ServersService } from './servers.service';
 import { ServerDto } from './dto/server.dto';
 import { User } from '../users/user.entity';
-import { ServersConfigService } from './servers-config.service';
+import { ServersConfigService } from './configs/servers-config.service';
 import { atLeastOnePropertyDefined } from '../shared/messages/global.messages';
 import { SetServerRoles } from './decorators/set-server-roles.decorator';
 import { Server } from './server.entity';
-import { ServerConfig } from './server-config.entity';
+import { ServerConfig } from './configs/server-config.entity';
 import { appSerializeOptions } from '../shared/constants';
 import { IsAdminGuard } from '../auth/guards/admin.guard';
 
