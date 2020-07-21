@@ -8,7 +8,7 @@ import { ServerRepository } from './server.repository';
 import { Server } from './server.entity';
 import { User } from '../users/user.entity';
 import { ServerDto } from './dto/server.dto';
-import { ServerConfigRepository } from './server-config.repository';
+import { ServerConfigRepository } from './configs/server/server-config.repository';
 import { serverNameExists } from '../shared/messages/server.messages';
 import { ServerConfigDto } from './dto/config.dto';
 import { IsNull } from 'typeorm';

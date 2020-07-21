@@ -20,7 +20,7 @@ import { GetUser } from '../auth/decorators/get-user-decorator';
 import { ServersService } from './servers.service';
 import { ServerDto } from './dto/server.dto';
 import { User } from '../users/user.entity';
-import { ServersConfigService } from './configs/servers-config.service';
+import { ServersConfigService } from './configs/server/servers-config.service';
 import { atLeastOnePropertyDefined } from '../shared/messages/global.messages';
 import { SetServerRoles } from './decorators/set-server-roles.decorator';
 import { Server } from './server.entity';
