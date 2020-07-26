@@ -5,7 +5,7 @@ import {
   BaseEntity,
   ManyToMany,
 } from 'typeorm';
-import { ChannelConfig } from '../servers/channel/channel-config.entity';
+import { ChannelConfig } from '../servers/configs/channel/channel-config.entity';
 
 @Entity()
 export class ServerPermission extends BaseEntity {

@@ -6,8 +6,8 @@ import {
   JoinTable,
   ManyToOne,
 } from 'typeorm';
-import { ServerPermission } from '../../server-ref-data/server-permission.entity';
-import { Codec } from '../../server-ref-data/codec.entity';
+import { ServerPermission } from '../../../server-ref-data/server-permission.entity';
+import { Codec } from '../../../server-ref-data/codec.entity';
 
 @Entity()
 export class ChannelConfig {
