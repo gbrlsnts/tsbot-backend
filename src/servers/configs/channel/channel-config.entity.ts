@@ -5,14 +5,22 @@ import {
   ManyToMany,
   JoinTable,
   ManyToOne,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { ServerPermission } from '../../../server-ref-data/server-permission.entity';
 import { Codec } from '../../../server-ref-data/codec.entity';
+import { Zone } from '../zone/zone/zone.entity';
 
 @Entity()
 export class ChannelConfig {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({
+    nullable: true
+  })
+  zoneId: number;
 
   @Column({
     unsigned: true,
@@ -41,4 +49,15 @@ export class ChannelConfig {
     codec => codec.channelConfigs,
   )
   codec: Codec;
+
+  @OneToOne(
+    () => Zone,
+    zone => zone.channelConfig,
+    {
+      nullable: true,
+      onDelete: 'CASCADE',
+    },
+  )
+  @JoinColumn()
+  zone: Zone;
 }
