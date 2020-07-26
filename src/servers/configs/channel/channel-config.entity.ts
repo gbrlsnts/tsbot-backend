@@ -2,25 +2,29 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToMany,
-  JoinTable,
   ManyToOne,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { ServerPermission } from '../../../server-ref-data/server-permission.entity';
 import { Codec } from '../../../server-ref-data/codec.entity';
 import { Zone } from '../zone/zone/zone.entity';
+import { Server } from '../../server.entity';
+import { ChannelConfigPermission } from './channel-perm.entity';
 
 @Entity()
 export class ChannelConfig {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  serverId: number;
+
   @Column({
     nullable: true
   })
-  zoneId: number;
+  zoneId?: number;
 
   @Column({
     unsigned: true,
@@ -35,14 +39,14 @@ export class ChannelConfig {
   })
   codecQuality: number;
 
-  @ManyToMany(
-    () => ServerPermission,
-    perm => perm.channelConfigs,
+  @ManyToOne(() => Server, server => server.channelConfigs)
+  server: Server;
+
+  @OneToMany(
+    () => ChannelConfigPermission,
+    perm => perm.config,
   )
-  @JoinTable({
-    name: 'channel_config_perm',
-  })
-  permissions: ServerPermission[];
+  permissions: ChannelConfigPermission[];
 
   @ManyToOne(
     () => Codec,

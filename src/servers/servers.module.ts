@@ -13,6 +13,7 @@ import { ChannelConfigRepository } from './configs/channel/channel-config.reposi
 import { ZoneRepository } from './configs/zone/zone/zone.repository';
 import { ChannelConfigService } from './configs/channel/channel-config.service';
 import { ZoneService } from './configs/zone/zone/zone.service';
+import { ServerRefDataModule } from '../server-ref-data/server-ref-data.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ZoneService } from './configs/zone/zone/zone.service';
     ]),
     AuthModule,
     forwardRef(() => ClientsModule),
+    ServerRefDataModule,
   ],
   providers: [
     ServersService,

@@ -2,13 +2,12 @@ import {
   Column,
   PrimaryGeneratedColumn,
   Entity,
-  BaseEntity,
   OneToMany,
 } from 'typeorm';
 import { ChannelConfig } from 'src/servers/configs/channel/channel-config.entity';
 
 @Entity()
-export class Codec extends BaseEntity {
+export class Codec {
   @PrimaryGeneratedColumn()
   id: number;
 

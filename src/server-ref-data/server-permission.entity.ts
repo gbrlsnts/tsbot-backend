@@ -2,22 +2,13 @@ import {
   Column,
   PrimaryGeneratedColumn,
   Entity,
-  BaseEntity,
-  ManyToMany,
 } from 'typeorm';
-import { ChannelConfig } from '../servers/configs/channel/channel-config.entity';
 
 @Entity()
-export class ServerPermission extends BaseEntity {
+export class ServerPermission {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   permid: string;
-
-  @ManyToMany(
-    () => ChannelConfig,
-    config => config.permissions,
-  )
-  channelConfigs: ChannelConfig[];
 }
