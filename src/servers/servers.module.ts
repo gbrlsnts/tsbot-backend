@@ -13,7 +13,7 @@ import { ClientsModule } from '../clients/clients.module';
   imports: [
     TypeOrmModule.forFeature([ServerRepository, ServerConfigRepository]),
     AuthModule,
-    forwardRef(() => ClientsModule)
+    forwardRef(() => ClientsModule),
   ],
   providers: [ServersService, ServersConfigService, ServerRolesGuard],
   controllers: [ServersController],

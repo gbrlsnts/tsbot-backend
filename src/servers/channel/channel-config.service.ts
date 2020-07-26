@@ -4,6 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class ChannelConfigService {
   constructor(
     @InjectRepository(ChannelConfigRepository)
-    private configRepository: ChannelConfigRepository
+    private configRepository: ChannelConfigRepository,
   ) {}
 }

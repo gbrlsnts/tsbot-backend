@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, ManyToOne } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  JoinTable,
+  ManyToOne,
+} from 'typeorm';
 import { ServerPermission } from '../../server-ref-data/server-permission.entity';
 import { Codec } from '../../server-ref-data/codec.entity';
 
@@ -8,7 +15,7 @@ export class ChannelConfig {
   id: number;
 
   @Column({
-    unsigned: true
+    unsigned: true,
   })
   allowedSubChannels: number;
 
@@ -16,16 +23,22 @@ export class ChannelConfig {
   codecId: number;
 
   @Column({
-    unsigned: true
+    unsigned: true,
   })
   codecQuality: number;
 
-  @ManyToMany(() => ServerPermission, perm => perm.channelConfigs)
+  @ManyToMany(
+    () => ServerPermission,
+    perm => perm.channelConfigs,
+  )
   @JoinTable({
     name: 'channel_config_perm',
   })
   permissions: ServerPermission[];
 
-  @ManyToOne(() => Codec, codec => codec.channelConfigs)
+  @ManyToOne(
+    () => Codec,
+    codec => codec.channelConfigs,
+  )
   codec: Codec;
 }

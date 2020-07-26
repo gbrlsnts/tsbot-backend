@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, InternalServerErrorException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientRepository } from './client.repository';
 import { Client } from './client.entity';
@@ -40,7 +45,10 @@ export class ClientsService {
     return client;
   }
 
-  async getServerClientByUserId(serverId: number, userId: number): Promise<Client> {
+  async getServerClientByUserId(
+    serverId: number,
+    userId: number,
+  ): Promise<Client> {
     const client = await this.clientRepository.findOne({
       where: { serverId, userId },
     });
@@ -50,7 +58,10 @@ export class ClientsService {
     return client;
   }
 
-  async checkServerClientByUserId(serverId: number, userId: number): Promise<boolean> {
+  async checkServerClientByUserId(
+    serverId: number,
+    userId: number,
+  ): Promise<boolean> {
     const count = await this.clientRepository.count({
       where: { serverId, userId },
     });
@@ -75,7 +86,11 @@ export class ClientsService {
       where: { userId, serverId },
     });
 
-    if(client && client.tsUniqueId === tsUniqueId && client.tsClientDbId === tsClientDbId)
+    if (
+      client &&
+      client.tsUniqueId === tsUniqueId &&
+      client.tsClientDbId === tsClientDbId
+    )
       return client;
 
     const queryRunner = getConnection().createQueryRunner();
@@ -93,7 +108,7 @@ export class ClientsService {
       } else {
         // push existing data to history
         await this.historyRepository.pushClientToHistory(client);
-  
+
         client.tsUniqueId = tsUniqueId;
         client.tsClientDbId = tsClientDbId;
       }
@@ -105,7 +120,7 @@ export class ClientsService {
     } catch (e) {
       await queryRunner.rollbackTransaction();
 
-      if(e.code == DbErrorCodes.DuplicateKey)
+      if (e.code == DbErrorCodes.DuplicateKey)
         throw new ConflictException(clientAlreadyExists);
 
       throw new InternalServerErrorException();

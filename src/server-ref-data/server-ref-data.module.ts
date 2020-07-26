@@ -4,6 +4,6 @@ import { ServerRefDataService } from './server-ref-data.service';
 
 @Module({
   controllers: [ServerRefDataController],
-  providers: [ServerRefDataService]
+  providers: [ServerRefDataService],
 })
 export class ServerRefDataModule {}

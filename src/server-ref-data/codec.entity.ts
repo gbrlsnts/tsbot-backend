@@ -1,5 +1,11 @@
-import { Column, PrimaryGeneratedColumn, Entity, BaseEntity, OneToMany } from "typeorm";
-import { ChannelConfig } from "src/servers/channel/channel-config.entity";
+import {
+  Column,
+  PrimaryGeneratedColumn,
+  Entity,
+  BaseEntity,
+  OneToMany,
+} from 'typeorm';
+import { ChannelConfig } from 'src/servers/channel/channel-config.entity';
 
 @Entity()
 export class Codec extends BaseEntity {
@@ -12,6 +18,9 @@ export class Codec extends BaseEntity {
   @Column()
   name: string;
 
-  @OneToMany(() => ChannelConfig, config => config.codec)
+  @OneToMany(
+    () => ChannelConfig,
+    config => config.codec,
+  )
   channelConfigs: ChannelConfig[];
 }

@@ -1,3 +1,5 @@
 import { Repository } from 'typeorm';
 
-export class ChannelConfigRepository extends Repository<ChannelConfigRepository> {}
+export class ChannelConfigRepository extends Repository<
+  ChannelConfigRepository
+> {}

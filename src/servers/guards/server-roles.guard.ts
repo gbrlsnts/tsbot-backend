@@ -39,17 +39,21 @@ export class ServerRolesGuard implements CanActivate {
    * @param serverId the server id to check
    * @param roles the roles which have access
    */
-  private async hasAccess(userId: number, serverId: number, roles: ServerRoles[]): Promise<boolean> {
-    for(const role of roles) {
-      switch(role) {
+  private async hasAccess(
+    userId: number,
+    serverId: number,
+    roles: ServerRoles[],
+  ): Promise<boolean> {
+    for (const role of roles) {
+      switch (role) {
         case ServerRoles.OWNER:
           const isOwner = await this.isServerOwner(userId, serverId);
-          if(isOwner) return true;
+          if (isOwner) return true;
           break;
 
         case ServerRoles.CLIENT:
           const isClient = await this.isServerClient(userId, serverId);
-          if(isClient) return true;
+          if (isClient) return true;
           break;
       }
     }
@@ -62,23 +66,31 @@ export class ServerRolesGuard implements CanActivate {
    * @param userId the id of the logged in user
    * @param serverId the server id to check
    */
-  private async isServerOwner(userId: number, serverId: number): Promise<boolean> {
+  private async isServerOwner(
+    userId: number,
+    serverId: number,
+  ): Promise<boolean> {
     const server = await this.serversService.getServerById(serverId);
 
     return server.ownerId === userId;
   }
 
-    /**
+  /**
    * Checks if the logged in user is a server client
    * @param user the id of the logged in user
    * @param serverId the server id to check
    */
-  private async isServerClient(userId: number, serverId: number): Promise<boolean> {
-    const exists = await this.clientsService.checkServerClientByUserId(serverId, userId);
+  private async isServerClient(
+    userId: number,
+    serverId: number,
+  ): Promise<boolean> {
+    const exists = await this.clientsService.checkServerClientByUserId(
+      serverId,
+      userId,
+    );
 
     return exists;
   }
-  
 }
 
 export interface ServerRolesOptions {

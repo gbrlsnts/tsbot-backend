@@ -1,1 +1,2 @@
-export const clientAlreadyExists = 'the teamspeak client already exists in the server';
+export const clientAlreadyExists =
+  'the teamspeak client already exists in the server';

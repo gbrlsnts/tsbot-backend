@@ -4,7 +4,10 @@ import {
   isString,
 } from 'class-validator';
 
-export function FixedLength(length: number, validationOptions?: ValidationOptions) {
+export function FixedLength(
+  length: number,
+  validationOptions?: ValidationOptions,
+) {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function(object: Object, propertyName: string): void {
     registerDecorator({

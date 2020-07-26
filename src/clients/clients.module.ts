@@ -13,6 +13,6 @@ import { ServersModule } from '../servers/servers.module';
   ],
   providers: [ClientsService],
   controllers: [ClientsController],
-  exports: [ClientsService]
+  exports: [ClientsService],
 })
 export class ClientsModule {}
