@@ -11,4 +11,7 @@ export class ServerPermission {
 
   @Column()
   permid: string;
+
+  @Column()
+  name: string;
 }

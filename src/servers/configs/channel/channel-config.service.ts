@@ -36,6 +36,16 @@ export class ChannelConfigService {
     return config;
   }
 
+  async getServerConfigById(serverId: number, id: number): Promise<ChannelConfig> {
+    const config = await this.configRepository.findOne({
+      where: { serverId, id },
+    });
+
+    if(!config) throw new NotFoundException();
+
+    return config;
+  }
+
   async createConfig(serverId: number, dto: ChannelConfigDto): Promise<ChannelConfig> {
     const { codecId, zoneId } = dto;
 
