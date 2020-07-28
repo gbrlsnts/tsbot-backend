@@ -6,6 +6,10 @@ export class ZoneService {
     private zoneRepository: ZoneRepository,
   ) {}
 
+  /**
+   * Check if a zone id exists
+   * @param id
+   */
   async checkZoneExists(id: number): Promise<boolean> {
     const zoneCount = await this.zoneRepository.count({
       where: { id },
@@ -14,14 +18,15 @@ export class ZoneService {
     return zoneCount > 0;
   }
 
-  async checkZoneExistsByUserId(id: number, userId: number): Promise<boolean> {
-    const zoneCount = await this.zoneRepository
-      .createQueryBuilder('zone')
-      .innerJoin('server', 'server')
-      .where('zone.id = :id ', { id })
-      .andWhere('server.userId = :userId', { userId })
-      .getCount();
-
+  /**
+   * Check if a given zone id belongs to a server
+   * @param id
+   * @param serverId
+   */
+  async checkZoneBelongsToServer(id: number, serverId: number): Promise<boolean> {
+    const zoneCount = await this.zoneRepository.count({
+      where: { id, serverId }
+    });
 
     return zoneCount > 0;
   }

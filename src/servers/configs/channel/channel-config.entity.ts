@@ -7,7 +7,6 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { ServerPermission } from '../../../server-ref-data/server-permission.entity';
 import { Codec } from '../../../server-ref-data/codec.entity';
 import { Zone } from '../zone/zone/zone.entity';
 import { Server } from '../../server.entity';

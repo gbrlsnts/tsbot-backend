@@ -6,6 +6,9 @@ export class Zone {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  serverId: number;
+
   @Column({
     unsigned: true,
   })
