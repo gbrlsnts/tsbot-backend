@@ -43,10 +43,10 @@ export class ChannelConfigController {
     idParam: 'server',
     roles: [ServerRoles.OWNER],
   })
-  createConfig(
+  async createConfig(
     @Param('server', ParseIntPipe) serverId: number,
     @Body(ValidationPipe) dto: ChannelConfigDto,
   ): Promise<ChannelConfig> {
-    return this.configService.createConfig(serverId, dto);
+    return await this.configService.createConfig(serverId, dto);
   }
 }

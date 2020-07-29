@@ -56,7 +56,7 @@ export class ChannelConfigService {
       serverId,
       ...dto,
     });
-
+    // todo: handle permissions duplicate or dont exist
     return this.configRepository.save(config);
   }
 
