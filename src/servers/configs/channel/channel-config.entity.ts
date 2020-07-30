@@ -40,7 +40,6 @@ export class ChannelConfig {
   allowedSubChannels: number;
 
   @Column()
-  @Expose()
   codecId: number;
 
   @Column({
@@ -76,5 +75,6 @@ export class ChannelConfig {
     },
   )
   @JoinColumn()
+  @Expose()
   zone: Zone;
 }

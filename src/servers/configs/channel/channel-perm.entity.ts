@@ -7,7 +7,6 @@ import { Expose } from "class-transformer";
 @Unique('uniq_perm', ['permissionId', 'configId'])
 export class ChannelConfigPermission {
   @PrimaryGeneratedColumn()
-  @Expose()
   id: number;
 
   @Column()
@@ -15,7 +14,6 @@ export class ChannelConfigPermission {
   permissionId: number;
 
   @Column()
-  @Expose()
   configId: number;
 
   @ManyToOne(() => ServerPermission)
