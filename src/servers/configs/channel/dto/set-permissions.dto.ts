@@ -1,4 +1,4 @@
 import { PermissionDto } from './permission.dto';
-export class AddPermissionsDto {
+export class SetPermissionsDto {
   permissions: PermissionDto[];
 }

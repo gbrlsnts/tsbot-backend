@@ -1,14 +1,16 @@
-import { ChannelConfigRepository } from './channel-config.repository';
+import { getConnection } from 'typeorm';
+import { NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ChannelConfigRepository } from './channel-config.repository';
 import { ChannelConfig } from './channel-config.entity';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ChannelConfigDto } from './dto/channel-config.dto';
 import { ServerRefDataService } from '../../../server-ref-data/server-ref-data.service';
-import { codecDoesNotExist, zoneDoesNotExists } from '../../../shared/messages/server.messages';
+import { codecDoesNotExist, zoneDoesNotExists, configAlreadyExists } from '../../../shared/messages/server.messages';
 import { ZoneService } from '../zone/zone/zone.service';
-import { AddPermissionsDto } from './dto/add-permissions.dto';
+import { SetPermissionsDto } from './dto/set-permissions.dto';
 import { ChannelConfigPermission } from './channel-perm.entity';
 import { ChannelConfigPermissionRepository } from './channel-perm.repository';
+import { DbErrorCodes } from '../../../shared/database/codes';
 
 export class ChannelConfigService {
   constructor(
@@ -56,40 +58,61 @@ export class ChannelConfigService {
       serverId,
       ...dto,
     });
-    // todo: handle permissions duplicate or dont exist
-    return this.configRepository.save(config);
+
+    try {
+        return await this.configRepository.save(config);
+    } catch(e) {
+      if(e.code == DbErrorCodes.DuplicateKey)
+        throw new ConflictException(configAlreadyExists);
+
+      throw e;
+    }
   }
 
   async updateConfig(id: number, dto: ChannelConfigDto): Promise<ChannelConfig> {
-    const { codecId, allowedSubChannels, codecQuality } = dto;
+    const { codecId } = dto;
 
     const config = await this.getConfigById(id);
 
     if(codecId) await this.validateCodecId(codecId);
 
-    config.allowedSubChannels = allowedSubChannels;
-    config.codecId = codecId;
-    config.codecQuality = codecQuality;
+    Object.assign(config, dto);
 
     return this.configRepository.save(config);
   }
 
-  addConfigPermissions(configId: number, dto: AddPermissionsDto): Promise<ChannelConfigPermission[]> {
-    // todo: check for conflicts
+  async setConfigPermissions(configId: number, dto: SetPermissionsDto): Promise<ChannelConfigPermission[]> {
     const permissions = dto.permissions.map(p => ({
       ...p,
       configId,
     }));
 
-    return this.permRepository.save(permissions);
-  }
+    const deleteIds = permissions.map(p => ({ permissionId: p.permissionId, configId }));
 
-  async removeConfigPermissions(perms: number[]): Promise<number> {
-    const result = await this.permRepository.delete(perms);
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (result.affected == 0) throw new NotFoundException();
+    try {
+      await this.permRepository
+        .createQueryBuilder('p')
+        .delete()
+        .from(ChannelConfigPermission)
+        .where(deleteIds)
+        .execute();
+  
+      const saved = await this.permRepository.save(permissions, {
+        transaction: false,
+      });
+      await queryRunner.commitTransaction();
 
-    return result.affected;
+      return saved;
+    } catch (e) {
+      queryRunner.rollbackTransaction();
+
+      throw e;
+    }
+
   }
 
   async deleteConfig(id: number): Promise<void> {
