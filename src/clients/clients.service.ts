@@ -107,13 +107,15 @@ export class ClientsService {
         });
       } else {
         // push existing data to history
-        await this.historyRepository.pushClientToHistory(client);
+        await this.historyRepository.pushClientToHistory(client, false);
 
         client.tsUniqueId = tsUniqueId;
         client.tsClientDbId = tsClientDbId;
       }
 
-      const savedClient = await this.clientRepository.save(client);
+      const savedClient = await this.clientRepository.save(client, {
+        transaction: false,
+      });
       await queryRunner.commitTransaction();
 
       return savedClient;
