@@ -55,7 +55,7 @@ export class ChannelConfig {
   @OneToMany(
     () => ChannelConfigPermission,
     perm => perm.config,
-    { cascade: true }
+    { cascade: true, eager: true }
   )
   @Expose()
   permissions: ChannelConfigPermission[];
