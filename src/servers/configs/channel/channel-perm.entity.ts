@@ -2,24 +2,19 @@ import {
   Entity,
   Column,
   ManyToOne,
-  PrimaryGeneratedColumn,
-  Unique,
+  PrimaryColumn,
 } from 'typeorm';
 import { ChannelConfig } from './channel-config.entity';
 import { ServerPermission } from '../../../server-ref-data/server-permission.entity';
 import { Expose } from 'class-transformer';
 
 @Entity()
-@Unique('uniq_perm', ['permissionId', 'configId'])
 export class ChannelConfigPermission {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
+  @PrimaryColumn()
   @Expose()
   permissionId: number;
 
-  @Column()
+  @PrimaryColumn()
   configId: number;
 
   @ManyToOne(() => ServerPermission)

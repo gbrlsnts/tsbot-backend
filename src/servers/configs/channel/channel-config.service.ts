@@ -107,26 +107,21 @@ export class ChannelConfigService {
       configId,
     }));
 
-    const deleteIds = permissions.map(p => ({
-      permissionId: p.permissionId,
-      configId,
-    }));
-
     const queryRunner = getConnection().createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      await this.permRepository
-        .createQueryBuilder('p')
-        .delete()
-        .from(ChannelConfigPermission)
-        .where(deleteIds)
-        .execute();
+      await this.permRepository.delete({ configId });
 
-      const saved = await this.permRepository.save(permissions, {
-        transaction: false,
-      });
+      let saved = [];
+
+      if(permissions.length > 0) {
+        saved = await this.permRepository.save(permissions, {
+          transaction: false,
+        });
+      }
+
       await queryRunner.commitTransaction();
 
       return saved;
