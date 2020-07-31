@@ -4,7 +4,10 @@ import { Client } from './client.entity';
 
 @EntityRepository(ClientHistory)
 export class ClientHistoryRepository extends Repository<ClientHistory> {
-  pushClientToHistory(client: Client, transaction = true): Promise<ClientHistory> {
+  pushClientToHistory(
+    client: Client,
+    transaction = true,
+  ): Promise<ClientHistory> {
     const history = ClientHistory.fromClient(client);
 
     return this.save(history, { transaction });

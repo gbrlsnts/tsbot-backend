@@ -1,4 +1,18 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards, UseInterceptors, SerializeOptions, ClassSerializerInterceptor, Body, ValidationPipe, Post, Patch, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+  UseInterceptors,
+  SerializeOptions,
+  ClassSerializerInterceptor,
+  Body,
+  ValidationPipe,
+  Post,
+  Patch,
+  Put,
+} from '@nestjs/common';
 import { ChannelConfigService } from './channel-config.service';
 import { ChannelConfig } from './channel-config.entity';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
@@ -23,7 +37,7 @@ export class ChannelConfigController {
     roles: [ServerRoles.OWNER],
   })
   getConfigsByServer(
-    @Param('server', ParseIntPipe) serverId: number
+    @Param('server', ParseIntPipe) serverId: number,
   ): Promise<ChannelConfig[]> {
     return this.configService.getConfigsByServerId(serverId);
   }
@@ -35,7 +49,7 @@ export class ChannelConfigController {
   })
   getConfigById(
     @Param('server', ParseIntPipe) serverId: number,
-    @Param('id', ParseIntPipe) id: number
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<ChannelConfig> {
     return this.configService.getServerConfigById(serverId, id);
   }

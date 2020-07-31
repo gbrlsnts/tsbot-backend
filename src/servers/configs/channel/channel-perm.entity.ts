@@ -1,7 +1,13 @@
-import { Entity, Column, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 import { ChannelConfig } from './channel-config.entity';
 import { ServerPermission } from '../../../server-ref-data/server-permission.entity';
-import { Expose } from "class-transformer";
+import { Expose } from 'class-transformer';
 
 @Entity()
 @Unique('uniq_perm', ['permissionId', 'configId'])
@@ -19,12 +25,15 @@ export class ChannelConfigPermission {
   @ManyToOne(() => ServerPermission)
   @Expose()
   permission: ServerPermission;
-  
-  @ManyToOne(() => ChannelConfig, config => config.permissions)
+
+  @ManyToOne(
+    () => ChannelConfig,
+    config => config.permissions,
+  )
   config: ChannelConfig;
 
   @Column({
-    unsigned: true
+    unsigned: true,
   })
   @Expose()
   value: number;

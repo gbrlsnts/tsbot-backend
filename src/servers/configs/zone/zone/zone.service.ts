@@ -23,9 +23,12 @@ export class ZoneService {
    * @param id
    * @param serverId
    */
-  async checkZoneBelongsToServer(id: number, serverId: number): Promise<boolean> {
+  async checkZoneBelongsToServer(
+    id: number,
+    serverId: number,
+  ): Promise<boolean> {
     const zoneCount = await this.zoneRepository.count({
-      where: { id, serverId }
+      where: { id, serverId },
     });
 
     return zoneCount > 0;

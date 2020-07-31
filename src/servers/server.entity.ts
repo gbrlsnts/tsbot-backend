@@ -62,6 +62,9 @@ export class Server {
   )
   clients: Client[];
 
-  @OneToMany(() => ChannelConfig, config => config.server)
+  @OneToMany(
+    () => ChannelConfig,
+    config => config.server,
+  )
   channelConfigs: ChannelConfig[];
 }

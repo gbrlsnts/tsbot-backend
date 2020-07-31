@@ -1,9 +1,4 @@
-import {
-  Column,
-  PrimaryGeneratedColumn,
-  Entity,
-  OneToMany,
-} from 'typeorm';
+import { Column, PrimaryGeneratedColumn, Entity, OneToMany } from 'typeorm';
 import { ChannelConfig } from 'src/servers/configs/channel/channel-config.entity';
 
 @Entity()

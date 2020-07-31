@@ -1,11 +1,19 @@
 import { getConnection } from 'typeorm';
-import { NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChannelConfigRepository } from './channel-config.repository';
 import { ChannelConfig } from './channel-config.entity';
 import { ChannelConfigDto } from './dto/channel-config.dto';
 import { ServerRefDataService } from '../../../server-ref-data/server-ref-data.service';
-import { codecDoesNotExist, zoneDoesNotExists, configAlreadyExists } from '../../../shared/messages/server.messages';
+import {
+  codecDoesNotExist,
+  zoneDoesNotExists,
+  configAlreadyExists,
+} from '../../../shared/messages/server.messages';
 import { ZoneService } from '../zone/zone/zone.service';
 import { SetPermissionsDto } from './dto/set-permissions.dto';
 import { ChannelConfigPermission } from './channel-perm.entity';
@@ -33,26 +41,32 @@ export class ChannelConfigService {
       where: { id },
     });
 
-    if(!config) throw new NotFoundException();
+    if (!config) throw new NotFoundException();
 
     return config;
   }
 
-  async getServerConfigById(serverId: number, id: number): Promise<ChannelConfig> {
+  async getServerConfigById(
+    serverId: number,
+    id: number,
+  ): Promise<ChannelConfig> {
     const config = await this.configRepository.findOne({
       where: { serverId, id },
     });
 
-    if(!config) throw new NotFoundException();
+    if (!config) throw new NotFoundException();
 
     return config;
   }
 
-  async createConfig(serverId: number, dto: ChannelConfigDto): Promise<ChannelConfig> {
+  async createConfig(
+    serverId: number,
+    dto: ChannelConfigDto,
+  ): Promise<ChannelConfig> {
     const { codecId, zoneId } = dto;
 
     await this.validateCodecId(codecId);
-    if(zoneId) await this.validateZoneId(zoneId, serverId);
+    if (zoneId) await this.validateZoneId(zoneId, serverId);
 
     const config = this.configRepository.create({
       serverId,
@@ -60,34 +74,43 @@ export class ChannelConfigService {
     });
 
     try {
-        return await this.configRepository.save(config);
-    } catch(e) {
-      if(e.code == DbErrorCodes.DuplicateKey)
+      return await this.configRepository.save(config);
+    } catch (e) {
+      if (e.code == DbErrorCodes.DuplicateKey)
         throw new ConflictException(configAlreadyExists);
 
       throw e;
     }
   }
 
-  async updateConfig(id: number, dto: ChannelConfigDto): Promise<ChannelConfig> {
+  async updateConfig(
+    id: number,
+    dto: ChannelConfigDto,
+  ): Promise<ChannelConfig> {
     const { codecId } = dto;
 
     const config = await this.getConfigById(id);
 
-    if(codecId) await this.validateCodecId(codecId);
+    if (codecId) await this.validateCodecId(codecId);
 
     Object.assign(config, dto);
 
     return this.configRepository.save(config);
   }
 
-  async setConfigPermissions(configId: number, dto: SetPermissionsDto): Promise<ChannelConfigPermission[]> {
+  async setConfigPermissions(
+    configId: number,
+    dto: SetPermissionsDto,
+  ): Promise<ChannelConfigPermission[]> {
     const permissions = dto.permissions.map(p => ({
       ...p,
       configId,
     }));
 
-    const deleteIds = permissions.map(p => ({ permissionId: p.permissionId, configId }));
+    const deleteIds = permissions.map(p => ({
+      permissionId: p.permissionId,
+      configId,
+    }));
 
     const queryRunner = getConnection().createQueryRunner();
     await queryRunner.connect();
@@ -100,7 +123,7 @@ export class ChannelConfigService {
         .from(ChannelConfigPermission)
         .where(deleteIds)
         .execute();
-  
+
       const saved = await this.permRepository.save(permissions, {
         transaction: false,
       });
@@ -112,7 +135,6 @@ export class ChannelConfigService {
 
       throw e;
     }
-
   }
 
   async deleteConfig(id: number): Promise<void> {
@@ -124,12 +146,15 @@ export class ChannelConfigService {
   private async validateCodecId(id: number): Promise<void> {
     const codecExists = await this.refDataService.checkCodecExists(id);
 
-    if(!codecExists) throw new BadRequestException(codecDoesNotExist);
+    if (!codecExists) throw new BadRequestException(codecDoesNotExist);
   }
 
   private async validateZoneId(id: number, serverId: number): Promise<void> {
-    const zoneExists = await this.zoneService.checkZoneBelongsToServer(id, serverId);
+    const zoneExists = await this.zoneService.checkZoneBelongsToServer(
+      id,
+      serverId,
+    );
 
-    if(!zoneExists) throw new BadRequestException(zoneDoesNotExists);
+    if (!zoneExists) throw new BadRequestException(zoneDoesNotExists);
   }
 }

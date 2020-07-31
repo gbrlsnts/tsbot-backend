@@ -24,7 +24,7 @@ export class ServerRefDataService {
 
   async checkCodecExists(id: number): Promise<boolean> {
     const codec = await this.codecRepository.count({
-      where: { id }
+      where: { id },
     });
 
     return codec > 0;

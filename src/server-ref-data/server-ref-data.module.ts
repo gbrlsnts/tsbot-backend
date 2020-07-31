@@ -7,15 +7,10 @@ import { CodecRepository } from './codec.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      ServerPermissionRepository,
-      CodecRepository,
-    ]),
+    TypeOrmModule.forFeature([ServerPermissionRepository, CodecRepository]),
   ],
   controllers: [ServerRefDataController],
   providers: [ServerRefDataService],
-  exports: [
-    ServerRefDataService,
-  ]
+  exports: [ServerRefDataService],
 })
 export class ServerRefDataModule {}

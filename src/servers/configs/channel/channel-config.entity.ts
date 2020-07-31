@@ -28,7 +28,7 @@ export class ChannelConfig {
   serverId: number;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   @Expose()
   zoneId?: number;
@@ -48,13 +48,16 @@ export class ChannelConfig {
   @Expose()
   codecQuality: number;
 
-  @ManyToOne(() => Server, server => server.channelConfigs)
+  @ManyToOne(
+    () => Server,
+    server => server.channelConfigs,
+  )
   server: Server;
 
   @OneToMany(
     () => ChannelConfigPermission,
     perm => perm.config,
-    { cascade: true, eager: true }
+    { cascade: true, eager: true },
   )
   @Expose()
   permissions: ChannelConfigPermission[];
