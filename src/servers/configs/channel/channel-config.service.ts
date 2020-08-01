@@ -18,7 +18,8 @@ import { SetPermissionsDto } from './dto/set-permissions.dto';
 import { ChannelConfigPermission } from './channel-perm.entity';
 import { ChannelConfigPermissionRepository } from './channel-perm.repository';
 import { DbErrorCodes } from '../../../shared/database/codes';
-import { ChannelConfigDto } from './dto/channel-config.dto';
+import { CreateConfigDto } from './dto/create-config.dto';
+import { UpdateConfigDto } from './dto/update-config.dto';
 
 export class ChannelConfigService {
   constructor(
@@ -81,7 +82,7 @@ export class ChannelConfigService {
    */
   async createConfig(
     serverId: number,
-    dto: ChannelConfigDto,
+    dto: CreateConfigDto,
   ): Promise<ChannelConfig> {
     const { codecId, zoneId } = dto;
 
@@ -110,16 +111,13 @@ export class ChannelConfigService {
    */
   async updateConfig(
     id: number,
-    dto: ChannelConfigDto,
+    dto: UpdateConfigDto,
   ): Promise<ChannelConfig> {
     const { codecId } = dto;
+    if (codecId) await this.validateCodecId(codecId);
 
     const config = await this.getConfigById(id, false);
-
-    if (codecId) await this.validateCodecId(codecId);
     
-    delete dto.zoneId;
-    delete dto.permissions;
     Object.assign(config, dto);
 
     return this.configRepository.save(config);
