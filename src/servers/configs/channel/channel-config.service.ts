@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChannelConfigRepository } from './channel-config.repository';
 import { ChannelConfig } from './channel-config.entity';
-import { ChannelConfigDto } from './dto/channel-config.dto';
 import { ServerRefDataService } from '../../../server-ref-data/server-ref-data.service';
 import {
   codecDoesNotExist,
@@ -19,6 +18,7 @@ import { SetPermissionsDto } from './dto/set-permissions.dto';
 import { ChannelConfigPermission } from './channel-perm.entity';
 import { ChannelConfigPermissionRepository } from './channel-perm.repository';
 import { DbErrorCodes } from '../../../shared/database/codes';
+import { ChannelConfigDto } from './dto/channel-config.dto';
 
 export class ChannelConfigService {
   constructor(
@@ -43,10 +43,12 @@ export class ChannelConfigService {
   /**
    * Get a config by its Id
    * @param id config id
+   * @param loadEagerRelations if eager relations should be loaded
    */
-  async getConfigById(id: number): Promise<ChannelConfig> {
+  async getConfigById(id: number, loadEagerRelations = true): Promise<ChannelConfig> {
     const config = await this.configRepository.findOne({
       where: { id },
+      loadEagerRelations
     });
 
     if (!config) throw new NotFoundException();
@@ -112,10 +114,12 @@ export class ChannelConfigService {
   ): Promise<ChannelConfig> {
     const { codecId } = dto;
 
-    const config = await this.getConfigById(id);
+    const config = await this.getConfigById(id, false);
 
     if (codecId) await this.validateCodecId(codecId);
-
+    
+    delete dto.zoneId;
+    delete dto.permissions;
     Object.assign(config, dto);
 
     return this.configRepository.save(config);
@@ -130,10 +134,15 @@ export class ChannelConfigService {
     configId: number,
     dto: SetPermissionsDto,
   ): Promise<ChannelConfigPermission[]> {
-    const permissions = dto.permissions.map(p => new ChannelConfigPermission({
-      ...p,
-      configId,
-    }));
+    await this.getConfigById(configId, false);
+
+    const permissions = dto.permissions.map(
+      p =>
+        new ChannelConfigPermission({
+          ...p,
+          configId,
+        }),
+    );
 
     const queryRunner = getConnection().createQueryRunner();
     await queryRunner.connect();
@@ -144,7 +153,7 @@ export class ChannelConfigService {
 
       let saved = [];
 
-      if(permissions.length > 0) {
+      if (permissions.length > 0) {
         saved = await this.permRepository.save(permissions, {
           transaction: false,
         });
