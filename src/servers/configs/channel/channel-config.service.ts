@@ -12,6 +12,7 @@ import {
   codecDoesNotExist,
   zoneDoesNotExists,
   configAlreadyExists,
+  deleteDefaultConfigNotAllowed,
 } from '../../../shared/messages/server.messages';
 import { ZoneService } from '../zone/zone/zone.service';
 import { SetPermissionsDto } from './dto/set-permissions.dto';
@@ -172,9 +173,11 @@ export class ChannelConfigService {
    * @param id config id
    */
   async deleteConfig(id: number): Promise<void> {
-    const result = await this.configRepository.delete(id);
+    const config = await this.getConfigById(id);
 
-    if (result.affected == 0) throw new NotFoundException();
+    if(!config.zoneId) throw new BadRequestException(deleteDefaultConfigNotAllowed);
+
+    await this.configRepository.delete(id);
   }
 
   /**
