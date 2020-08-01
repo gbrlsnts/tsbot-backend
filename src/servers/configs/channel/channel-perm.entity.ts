@@ -24,6 +24,7 @@ export class ChannelConfigPermission {
   @ManyToOne(
     () => ChannelConfig,
     config => config.permissions,
+    { onDelete: 'CASCADE' }
   )
   config: ChannelConfig;
 
@@ -32,4 +33,12 @@ export class ChannelConfigPermission {
   })
   @Expose()
   value: number;
+
+  /**
+   * Initialize this entity with data
+   * @param init properties to initialize the dto with
+   */
+  constructor(init?: Partial<ChannelConfigPermission>) {
+    Object.assign(this, init);
+  }
 }

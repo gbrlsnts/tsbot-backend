@@ -102,7 +102,7 @@ export class ChannelConfigService {
     configId: number,
     dto: SetPermissionsDto,
   ): Promise<ChannelConfigPermission[]> {
-    const permissions = dto.permissions.map(p => ({
+    const permissions = dto.permissions.map(p => new ChannelConfigPermission({
       ...p,
       configId,
     }));

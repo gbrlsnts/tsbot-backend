@@ -12,6 +12,7 @@ import {
   Post,
   Patch,
   Put,
+  Delete,
 } from '@nestjs/common';
 import { ChannelConfigService } from './channel-config.service';
 import { ChannelConfig } from './channel-config.entity';
@@ -59,11 +60,11 @@ export class ChannelConfigController {
     idParam: 'server',
     roles: [ServerRoles.OWNER],
   })
-  async createConfig(
+  createConfig(
     @Param('server', ParseIntPipe) serverId: number,
     @Body(ValidationPipe) dto: ChannelConfigDto,
   ): Promise<ChannelConfig> {
-    return await this.configService.createConfig(serverId, dto);
+    return this.configService.createConfig(serverId, dto);
   }
 
   @Patch('/:id')
@@ -71,11 +72,11 @@ export class ChannelConfigController {
     idParam: 'server',
     roles: [ServerRoles.OWNER],
   })
-  async updateConfig(
+  updateConfig(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) dto: ChannelConfigDto,
   ): Promise<ChannelConfig> {
-    return await this.configService.createConfig(id, dto);
+    return this.configService.createConfig(id, dto);
   }
 
   @Put('/:id/permissions')
@@ -83,10 +84,21 @@ export class ChannelConfigController {
     idParam: 'server',
     roles: [ServerRoles.OWNER],
   })
-  async setConfigPermissions(
+  setConfigPermissions(
     @Param('id', ParseIntPipe) configId: number,
     @Body(ValidationPipe) dto: SetPermissionsDto,
   ): Promise<ChannelConfigPermission[]> {
-    return await this.configService.setConfigPermissions(configId, dto);
+    return this.configService.setConfigPermissions(configId, dto);
+  }
+
+  @Delete('/:id')
+  @SetServerRoles({
+    idParam: 'server',
+    roles: [ServerRoles.OWNER],
+  })
+  deleteConfig(
+    @Param('id', ParseIntPipe) configId: number
+  ): Promise<void> {
+    return this.configService.deleteConfig(configId);
   }
 }
