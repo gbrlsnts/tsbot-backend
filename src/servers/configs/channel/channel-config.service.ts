@@ -30,12 +30,20 @@ export class ChannelConfigService {
     private refDataService: ServerRefDataService,
   ) {}
 
+  /**
+   * Get all configs by server id
+   * @param serverId server id
+   */
   getConfigsByServerId(serverId: number): Promise<ChannelConfig[]> {
     return this.configRepository.find({
       where: { serverId },
     });
   }
 
+  /**
+   * Get a config by its Id
+   * @param id config id
+   */
   async getConfigById(id: number): Promise<ChannelConfig> {
     const config = await this.configRepository.findOne({
       where: { id },
@@ -46,6 +54,11 @@ export class ChannelConfigService {
     return config;
   }
 
+  /**
+   * Get a config by server
+   * @param serverId server id
+   * @param id config id
+   */
   async getServerConfigById(
     serverId: number,
     id: number,
@@ -59,6 +72,11 @@ export class ChannelConfigService {
     return config;
   }
 
+  /**
+   * Create a config and link permissions
+   * @param serverId server id
+   * @param dto data to create a config
+   */
   async createConfig(
     serverId: number,
     dto: ChannelConfigDto,
@@ -83,6 +101,11 @@ export class ChannelConfigService {
     }
   }
 
+  /**
+   * Update a config
+   * @param id config id
+   * @param dto data to update
+   */
   async updateConfig(
     id: number,
     dto: ChannelConfigDto,
@@ -98,6 +121,11 @@ export class ChannelConfigService {
     return this.configRepository.save(config);
   }
 
+  /**
+   * Set config permissions from the dto
+   * @param configId config id
+   * @param dto permissions to set
+   */
   async setConfigPermissions(
     configId: number,
     dto: SetPermissionsDto,
@@ -132,18 +160,33 @@ export class ChannelConfigService {
     }
   }
 
+  /**
+   * Delete a config
+   * @param id config id
+   */
   async deleteConfig(id: number): Promise<void> {
     const result = await this.configRepository.delete(id);
 
     if (result.affected == 0) throw new NotFoundException();
   }
 
+  /**
+   * Validate a codec id existence.
+   * @param id codec id
+   * @throws BadRequestException when the codec doesn't exist
+   */
   private async validateCodecId(id: number): Promise<void> {
     const codecExists = await this.refDataService.checkCodecExists(id);
 
     if (!codecExists) throw new BadRequestException(codecDoesNotExist);
   }
 
+  /**
+   * Validate a zone existence for a server
+   * @param id codec id
+   * @param serverId server id
+   * @throws BadRequestException when the zone doesn't exist
+   */
   private async validateZoneId(id: number, serverId: number): Promise<void> {
     const zoneExists = await this.zoneService.checkZoneBelongsToServer(
       id,
