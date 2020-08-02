@@ -10,9 +10,9 @@ import { ServerRolesGuard } from './guards/server-roles.guard';
 import { ClientsModule } from '../clients/clients.module';
 import { ChannelConfigController } from './configs/channel/channel-config.controller';
 import { ChannelConfigRepository } from './configs/channel/channel-config.repository';
-import { ZoneRepository } from './configs/zone/zone/zone.repository';
+import { ZoneRepository } from './configs/zone/zone.repository';
 import { ChannelConfigService } from './configs/channel/channel-config.service';
-import { ZoneService } from './configs/zone/zone/zone.service';
+import { ZoneService } from './configs/zone/zone.service';
 import { ServerRefDataModule } from '../server-ref-data/server-ref-data.module';
 import { ChannelConfigPermission } from './configs/channel/channel-perm.entity';
 

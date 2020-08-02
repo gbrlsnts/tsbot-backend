@@ -9,7 +9,7 @@ import {
   Index,
 } from 'typeorm';
 import { Codec } from '../../../server-ref-data/codec.entity';
-import { Zone } from '../zone/zone/zone.entity';
+import { Zone } from '../zone/zone.entity';
 import { Server } from '../../server.entity';
 import { ChannelConfigPermission } from './channel-perm.entity';
 import { Expose } from 'class-transformer';

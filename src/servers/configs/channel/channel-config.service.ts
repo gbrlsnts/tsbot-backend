@@ -14,7 +14,7 @@ import {
   configAlreadyExists,
   deleteDefaultConfigNotAllowed,
 } from '../../../shared/messages/server.messages';
-import { ZoneService } from '../zone/zone/zone.service';
+import { ZoneService } from '../zone/zone.service';
 import { SetPermissionsDto } from './dto/set-permissions.dto';
 import { ChannelConfigPermission } from './channel-perm.entity';
 import { ChannelConfigPermissionRepository } from './channel-perm.repository';

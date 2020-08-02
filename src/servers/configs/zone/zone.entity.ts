@@ -1,5 +1,5 @@
 import { PrimaryGeneratedColumn, Column, OneToOne, Entity } from 'typeorm';
-import { ChannelConfig } from '../../channel/channel-config.entity';
+import { ChannelConfig } from '../channel/channel-config.entity';
 import { Expose } from 'class-transformer';
 
 @Entity()
@@ -11,6 +11,10 @@ export class Zone {
   @Column()
   @Expose()
   serverId: number;
+
+  @Column()
+  @Expose()
+  name: string;
 
   @Column({
     unsigned: true,
