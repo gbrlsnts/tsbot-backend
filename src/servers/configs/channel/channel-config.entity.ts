@@ -34,15 +34,19 @@ export class ChannelConfig {
   zoneId?: number;
 
   @Column({
+    nullable: true,
     unsigned: true,
   })
   @Expose()
   allowedSubChannels: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   codecId: number;
 
   @Column({
+    nullable: true,
     unsigned: true,
   })
   @Expose()
