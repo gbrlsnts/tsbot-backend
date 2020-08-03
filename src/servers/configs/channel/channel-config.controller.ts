@@ -25,6 +25,7 @@ import { SetPermissionsDto } from './dto/set-permissions.dto';
 import { ChannelConfigPermission } from './channel-perm.entity';
 import { CreateConfigDto } from './dto/create-config.dto';
 import { UpdateConfigDto } from './dto/update-config.dto';
+import { appValidationPipeOptions } from '../../../shared/constants';
 
 @Controller('/servers/:server/configs/channels')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
@@ -63,7 +64,7 @@ export class ChannelConfigController {
   })
   createConfig(
     @Param('server', ParseIntPipe) serverId: number,
-    @Body(ValidationPipe) dto: CreateConfigDto,
+    @Body(new ValidationPipe(appValidationPipeOptions)) dto: CreateConfigDto,
   ): Promise<ChannelConfig> {
     return this.configService.createConfig(serverId, dto);
   }
@@ -75,7 +76,7 @@ export class ChannelConfigController {
   })
   updateConfig(
     @Param('id', ParseIntPipe) id: number,
-    @Body(ValidationPipe) dto: UpdateConfigDto,
+    @Body(new ValidationPipe(appValidationPipeOptions)) dto: UpdateConfigDto,
   ): Promise<ChannelConfig> {
     return this.configService.updateConfig(id, dto);
   }
@@ -87,7 +88,7 @@ export class ChannelConfigController {
   })
   setConfigPermissions(
     @Param('id', ParseIntPipe) configId: number,
-    @Body(ValidationPipe) dto: SetPermissionsDto,
+    @Body(new ValidationPipe(appValidationPipeOptions)) dto: SetPermissionsDto,
   ): Promise<ChannelConfigPermission[]> {
     return this.configService.setConfigPermissions(configId, dto);
   }
