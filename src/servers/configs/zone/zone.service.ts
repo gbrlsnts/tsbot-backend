@@ -1,8 +1,9 @@
 import { ZoneRepository } from './zone.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Zone } from './zone.entity';
-import { NotFoundException, ConflictException } from '@nestjs/common';
+import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { ZoneDto } from './dto/zone.dto';
+import { propLessThanAnother } from '../../../shared/messages/global.messages';
 
 export class ZoneService {
   constructor(
@@ -65,7 +66,10 @@ export class ZoneService {
     const { name } = dto;
     await this.validateZoneName(name, serverId);
 
-    const zone = this.zoneRepository.create(dto);
+    const zone = this.zoneRepository.create({
+      serverId,
+      ...dto
+    });
 
     return this.zoneRepository.save(zone);
   }
@@ -76,11 +80,14 @@ export class ZoneService {
    * @param dto zone data
    */
   async updateZone(id: number, dto: ZoneDto): Promise<Zone> {
-    const { name: newName } = dto;
+    const { name: newName, minutesInactiveNotify: newMinutesNotify } = dto;
     const zone = await this.getZoneById(id);
 
     if(zone.name !== newName)
       await this.validateZoneName(newName, zone.serverId);
+
+    if(zone.minutesInactiveNotify != newMinutesNotify)
+      this.validateInactiveMinutes(zone, newMinutesNotify);
 
     Object.assign(zone, dto);
 
@@ -147,5 +154,19 @@ export class ZoneService {
     const nameExists = await this.checkZoneNameExistsByServer(name, serverId);
 
     if(nameExists) throw new ConflictException();
+  }
+
+  /**
+   * Validate that the new inactive minutes notify are less than the inactive delete
+   * @param zone zone to validate
+   * @param newMinutesNotify new minutes to set
+   */
+  private validateInactiveMinutes(zone: Zone, newMinutesNotify: number): void {
+    if(newMinutesNotify < zone.minutesInactiveDelete)
+      return;
+    
+    throw new BadRequestException(
+      propLessThanAnother('minutesInactiveNotify', 'minutesInactiveDelete')
+    );
   }
 }

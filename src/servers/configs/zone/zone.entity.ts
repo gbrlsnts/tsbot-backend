@@ -12,7 +12,9 @@ export class Zone {
   @Expose()
   serverId: number;
 
-  @Column()
+  @Column({
+    length: 100,
+  })
   @Expose()
   name: string;
 
@@ -38,13 +40,13 @@ export class Zone {
     unsigned: true,
   })
   @Expose()
-  secondsInactiveNotify: number;
+  minutesInactiveNotify: number;
 
   @Column({
     unsigned: true,
   })
   @Expose()
-  secondsInactiveMax: number;
+  minutesInactiveDelete: number;
 
   @OneToOne(
     () => ChannelConfig,

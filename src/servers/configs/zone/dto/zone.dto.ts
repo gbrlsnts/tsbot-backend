@@ -1,4 +1,5 @@
-import { IsPositive, IsBoolean, IsOptional, IsString, IsNotEmpty } from "class-validator";
+import { IsPositive, IsBoolean, IsOptional, IsString, IsNotEmpty, Min, Max } from "class-validator";
+import { LessThanField } from '../../../../shared/validation/less-than-field.validation';
 
 export class ZoneDto {
   @IsString()
@@ -23,15 +24,17 @@ export class ZoneDto {
   })
   separator: boolean;
 
-  @IsPositive()
+  @Min(5)
+  @LessThanField('minutesInactiveDelete')
   @IsOptional({
     groups: ['patch']
   })
-  secondsInactiveNotify: number;
+  minutesInactiveNotify: number;
 
-  @IsPositive()
+  @Min(5)
+  @Max(1052000)
   @IsOptional({
     groups: ['patch']
   })
-  secondsInactiveMax: number;
+  minutesInactiveDelete: number;
 }

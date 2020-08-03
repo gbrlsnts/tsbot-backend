@@ -15,6 +15,7 @@ import { ChannelConfigService } from './configs/channel/channel-config.service';
 import { ZoneService } from './configs/zone/zone.service';
 import { ServerRefDataModule } from '../server-ref-data/server-ref-data.module';
 import { ChannelConfigPermission } from './configs/channel/channel-perm.entity';
+import { ZoneController } from './configs/zone/zone.controller';
 
 @Module({
   imports: [
@@ -36,7 +37,7 @@ import { ChannelConfigPermission } from './configs/channel/channel-perm.entity';
     ChannelConfigService,
     ZoneService,
   ],
-  controllers: [ServersController, ChannelConfigController],
+  controllers: [ServersController, ChannelConfigController, ZoneController],
   exports: [ServersService, ServerRolesGuard],
 })
 export class ServersModule {}
