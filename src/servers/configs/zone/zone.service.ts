@@ -2,8 +2,9 @@ import { ZoneRepository } from './zone.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Zone } from './zone.entity';
 import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
-import { ZoneDto } from './dto/zone.dto';
+import { UpdateZoneDto } from './dto/update-zone.dto';
 import { propLessThanAnother } from '../../../shared/messages/global.messages';
+import { CreateZoneDto } from './dto/create-zone.dto';
 
 export class ZoneService {
   constructor(
@@ -62,7 +63,7 @@ export class ZoneService {
    * @param serverId server id
    * @param dto zone data
    */
-  async createZone(serverId: number, dto: ZoneDto): Promise<Zone> {
+  async createZone(serverId: number, dto: CreateZoneDto): Promise<Zone> {
     const { name } = dto;
     await this.validateZoneName(name, serverId);
 
@@ -79,15 +80,15 @@ export class ZoneService {
    * @param id zone id
    * @param dto zone data
    */
-  async updateZone(id: number, dto: ZoneDto): Promise<Zone> {
-    const { name: newName, minutesInactiveNotify: newMinutesNotify } = dto;
+  async updateZone(id: number, dto: UpdateZoneDto): Promise<Zone> {
+    const { name: newName, minutesInactiveNotify: newMinutesNotify, minutesInactiveDelete: newMinutesDelete } = dto;
     const zone = await this.getZoneById(id);
 
     if(zone.name !== newName)
       await this.validateZoneName(newName, zone.serverId);
 
-    if(zone.minutesInactiveNotify != newMinutesNotify)
-      this.validateInactiveMinutes(zone, newMinutesNotify);
+    if(zone.minutesInactiveNotify != newMinutesNotify || zone.minutesInactiveDelete != newMinutesDelete)
+      this.validateInactiveMinutes(zone, newMinutesNotify, newMinutesDelete);
 
     Object.assign(zone, dto);
 
@@ -159,12 +160,19 @@ export class ZoneService {
   /**
    * Validate that the new inactive minutes notify are less than the inactive delete
    * @param zone zone to validate
-   * @param newMinutesNotify new minutes to set
+   * @param newMinutesNotify new minutes notify to set
+   * @param newMinutesDelete new minutes delete to set
    */
-  private validateInactiveMinutes(zone: Zone, newMinutesNotify: number): void {
-    if(newMinutesNotify < zone.minutesInactiveDelete)
+  private validateInactiveMinutes(zone: Zone, newMinutesNotify: number, newMinutesDelete: number): void {
+    if(newMinutesNotify && newMinutesDelete && newMinutesNotify <= newMinutesDelete)
       return;
-    
+
+    if(newMinutesNotify && newMinutesNotify < zone.minutesInactiveDelete)
+      return;
+
+    else if(newMinutesDelete && newMinutesDelete > zone.minutesInactiveNotify)
+      return;
+      
     throw new BadRequestException(
       propLessThanAnother('minutesInactiveNotify', 'minutesInactiveDelete')
     );

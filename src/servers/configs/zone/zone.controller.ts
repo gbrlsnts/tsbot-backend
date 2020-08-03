@@ -20,7 +20,9 @@ import { ZoneService } from './zone.service';
 import { Zone } from './zone.entity';
 import { SetServerRoles } from '../../decorators/set-server-roles.decorator';
 import { ServerRoles } from '../../guards/server-roles.guard';
-import { ZoneDto } from './dto/zone.dto';
+import { UpdateZoneDto } from './dto/update-zone.dto';
+import { appValidationPipeOptions } from '../../../shared/constants';
+import { CreateZoneDto } from './dto/create-zone.dto';
 
 @Controller('/servers/:server/configs/zones')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
@@ -59,7 +61,7 @@ export class ZoneController {
   })
   createZone(
     @Param('server', ParseIntPipe) serverId: number,
-    @Body(ValidationPipe) dto: ZoneDto,
+    @Body(new ValidationPipe(appValidationPipeOptions)) dto: CreateZoneDto,
   ): Promise<Zone> {
     return this.zoneService.createZone(serverId, dto);
   }
@@ -71,9 +73,7 @@ export class ZoneController {
   })
   updateZone(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ValidationPipe({
-      groups: ['patch']
-    })) dto: ZoneDto,
+    @Body(new ValidationPipe(appValidationPipeOptions)) dto: UpdateZoneDto,
   ): Promise<Zone> {
     return this.zoneService.updateZone(id, dto);
   }

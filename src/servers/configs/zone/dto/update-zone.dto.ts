@@ -1,40 +1,31 @@
 import { IsPositive, IsBoolean, IsOptional, IsString, IsNotEmpty, Min, Max } from "class-validator";
 import { LessThanField } from '../../../../shared/validation/less-than-field.validation';
 
-export class ZoneDto {
+export class UpdateZoneDto {
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   name: string;
 
   @IsPositive()
-  @IsOptional({
-    groups: ['patch']
-  })
+  @IsOptional()
   channelIdStart: number;
 
   @IsPositive()
-  @IsOptional({
-    groups: ['patch']
-  })
+  @IsOptional()
   channelIdEnd: number;
 
   @IsBoolean()
-  @IsOptional({
-    groups: ['patch']
-  })
+  @IsOptional()
   separator: boolean;
 
   @Min(5)
   @LessThanField('minutesInactiveDelete')
-  @IsOptional({
-    groups: ['patch']
-  })
+  @IsOptional()
   minutesInactiveNotify: number;
 
   @Min(5)
   @Max(1052000)
-  @IsOptional({
-    groups: ['patch']
-  })
+  @IsOptional()
   minutesInactiveDelete: number;
 }
