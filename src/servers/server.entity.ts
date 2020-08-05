@@ -15,6 +15,7 @@ import { Expose } from 'class-transformer';
 import { serializationGroups } from '../shared/types';
 import { Client } from '../clients/client.entity';
 import { ChannelConfig } from './configs/channel/channel-config.entity';
+import { ServerGroup } from '../server-groups/server-group.entity';
 
 @Entity()
 export class Server {
@@ -67,4 +68,7 @@ export class Server {
     config => config.server,
   )
   channelConfigs: ChannelConfig[];
+
+  @OneToMany(() =>  ServerGroup, group => group.server)
+  serverGroups: ServerGroup[];
 }

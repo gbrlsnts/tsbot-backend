@@ -9,6 +9,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseMapperInterceptor } from './global/interceptors/response-mapper.interceptor';
 import { ClientsModule } from './clients/clients.module';
 import { ServerRefDataModule } from './server-ref-data/server-ref-data.module';
+import { ServerGroupsModule } from './server-groups/server-groups.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ServerRefDataModule } from './server-ref-data/server-ref-data.module';
     ServersModule,
     ClientsModule,
     ServerRefDataModule,
+    ServerGroupsModule,
   ],
   controllers: [],
   providers: [
