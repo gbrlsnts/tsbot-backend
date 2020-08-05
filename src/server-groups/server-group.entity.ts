@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Unique } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  Unique,
+} from 'typeorm';
 import { Expose } from 'class-transformer';
 import { Server } from '../servers/server.entity';
 
@@ -10,13 +16,13 @@ export class ServerGroup {
   id: number;
 
   @Column({
-    unsigned: true
+    unsigned: true,
   })
   @Expose()
   tsId: number;
 
   @Column({
-    unsigned: true
+    unsigned: true,
   })
   @Expose()
   serverId: number;
@@ -25,6 +31,9 @@ export class ServerGroup {
   @Expose()
   name: string;
 
-  @ManyToOne(() => Server, server => server.serverGroups)
+  @ManyToOne(
+    () => Server,
+    server => server.serverGroups,
+  )
   server: Server;
 }

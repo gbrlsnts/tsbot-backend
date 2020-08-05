@@ -25,7 +25,10 @@ import { atLeastOnePropertyDefined } from '../shared/messages/global.messages';
 import { SetServerRoles } from './decorators/set-server-roles.decorator';
 import { Server } from './server.entity';
 import { ServerConfig } from './configs/server/server-config.entity';
-import { appSerializeOptions, appValidationPipeOptions } from '../shared/constants';
+import {
+  appSerializeOptions,
+  appValidationPipeOptions,
+} from '../shared/constants';
 import { IsAdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('servers')

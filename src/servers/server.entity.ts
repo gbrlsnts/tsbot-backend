@@ -69,6 +69,9 @@ export class Server {
   )
   channelConfigs: ChannelConfig[];
 
-  @OneToMany(() =>  ServerGroup, group => group.server)
+  @OneToMany(
+    () => ServerGroup,
+    group => group.server,
+  )
   serverGroups: ServerGroup[];
 }

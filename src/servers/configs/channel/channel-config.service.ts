@@ -47,10 +47,13 @@ export class ChannelConfigService {
    * @param id config id
    * @param loadEagerRelations if eager relations should be loaded
    */
-  async getConfigById(id: number, loadEagerRelations = true): Promise<ChannelConfig> {
+  async getConfigById(
+    id: number,
+    loadEagerRelations = true,
+  ): Promise<ChannelConfig> {
     const config = await this.configRepository.findOne({
       where: { id },
-      loadEagerRelations
+      loadEagerRelations,
     });
 
     if (!config) throw new NotFoundException();
@@ -110,15 +113,12 @@ export class ChannelConfigService {
    * @param id config id
    * @param dto data to update
    */
-  async updateConfig(
-    id: number,
-    dto: UpdateConfigDto,
-  ): Promise<ChannelConfig> {
+  async updateConfig(id: number, dto: UpdateConfigDto): Promise<ChannelConfig> {
     const { codecId } = dto;
     if (codecId) await this.validateCodecId(codecId);
 
     const config = await this.getConfigById(id, false);
-    
+
     Object.assign(config, dto);
 
     return this.configRepository.save(config);
@@ -175,7 +175,8 @@ export class ChannelConfigService {
   async deleteConfig(id: number): Promise<void> {
     const config = await this.getConfigById(id);
 
-    if(!config.zoneId) throw new BadRequestException(deleteDefaultConfigNotAllowed);
+    if (!config.zoneId)
+      throw new BadRequestException(deleteDefaultConfigNotAllowed);
 
     await this.configRepository.delete(id);
   }

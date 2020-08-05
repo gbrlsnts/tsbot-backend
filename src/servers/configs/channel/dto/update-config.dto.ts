@@ -1,9 +1,4 @@
-import {
-  IsPositive,
-  IsOptional,
-  Min,
-  Max,
-} from 'class-validator';
+import { IsPositive, IsOptional, Min, Max } from 'class-validator';
 
 export class UpdateConfigDto {
   @IsPositive()

@@ -1,7 +1,11 @@
 import { ZoneRepository } from './zone.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Zone } from './zone.entity';
-import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { UpdateZoneDto } from './dto/update-zone.dto';
 import { propLessThanAnother } from '../../../shared/messages/global.messages';
 import { CreateZoneDto } from './dto/create-zone.dto';
@@ -25,7 +29,7 @@ export class ZoneService {
    */
   getAllZonesByServer(serverId: number): Promise<Zone[]> {
     return this.zoneRepository.find({
-      where: { serverId }
+      where: { serverId },
     });
   }
 
@@ -35,10 +39,10 @@ export class ZoneService {
    */
   async getZoneById(id: number): Promise<Zone> {
     const zone = await this.zoneRepository.findOne({
-      where: { id }
+      where: { id },
     });
 
-    if(!zone) throw new NotFoundException();
+    if (!zone) throw new NotFoundException();
 
     return zone;
   }
@@ -50,10 +54,10 @@ export class ZoneService {
    */
   async getZoneIdByServer(id: number, serverId: number): Promise<Zone> {
     const zone = await this.zoneRepository.findOne({
-      where: { id, serverId }
+      where: { id, serverId },
     });
 
-    if(!zone) throw new NotFoundException();
+    if (!zone) throw new NotFoundException();
 
     return zone;
   }
@@ -69,7 +73,7 @@ export class ZoneService {
 
     const zone = this.zoneRepository.create({
       serverId,
-      ...dto
+      ...dto,
     });
 
     return this.zoneRepository.save(zone);
@@ -81,13 +85,20 @@ export class ZoneService {
    * @param dto zone data
    */
   async updateZone(id: number, dto: UpdateZoneDto): Promise<Zone> {
-    const { name: newName, minutesInactiveNotify: newMinutesNotify, minutesInactiveDelete: newMinutesDelete } = dto;
+    const {
+      name: newName,
+      minutesInactiveNotify: newMinutesNotify,
+      minutesInactiveDelete: newMinutesDelete,
+    } = dto;
     const zone = await this.getZoneById(id);
 
-    if(zone.name !== newName)
+    if (zone.name !== newName)
       await this.validateZoneName(newName, zone.serverId);
 
-    if(zone.minutesInactiveNotify != newMinutesNotify || zone.minutesInactiveDelete != newMinutesDelete)
+    if (
+      zone.minutesInactiveNotify != newMinutesNotify ||
+      zone.minutesInactiveDelete != newMinutesDelete
+    )
       this.validateInactiveMinutes(zone, newMinutesNotify, newMinutesDelete);
 
     Object.assign(zone, dto);
@@ -110,7 +121,10 @@ export class ZoneService {
    * @param name zone name to check
    * @param serverId server id
    */
-  async checkZoneNameExistsByServer(name: string, serverId: number): Promise<boolean> {
+  async checkZoneNameExistsByServer(
+    name: string,
+    serverId: number,
+  ): Promise<boolean> {
     const zoneCount = await this.zoneRepository.count({
       where: { name, serverId },
     });
@@ -151,10 +165,13 @@ export class ZoneService {
    * @param name zone name to check
    * @param serverId server id
    */
-  private async validateZoneName(name: string, serverId: number): Promise<void> {
+  private async validateZoneName(
+    name: string,
+    serverId: number,
+  ): Promise<void> {
     const nameExists = await this.checkZoneNameExistsByServer(name, serverId);
 
-    if(nameExists) throw new ConflictException();
+    if (nameExists) throw new ConflictException();
   }
 
   /**
@@ -163,18 +180,25 @@ export class ZoneService {
    * @param newMinutesNotify new minutes notify to set
    * @param newMinutesDelete new minutes delete to set
    */
-  private validateInactiveMinutes(zone: Zone, newMinutesNotify: number, newMinutesDelete: number): void {
-    if(newMinutesNotify && newMinutesDelete && newMinutesNotify <= newMinutesDelete)
+  private validateInactiveMinutes(
+    zone: Zone,
+    newMinutesNotify: number,
+    newMinutesDelete: number,
+  ): void {
+    if (
+      newMinutesNotify &&
+      newMinutesDelete &&
+      newMinutesNotify <= newMinutesDelete
+    )
       return;
 
-    if(newMinutesNotify && newMinutesNotify < zone.minutesInactiveDelete)
+    if (newMinutesNotify && newMinutesNotify < zone.minutesInactiveDelete)
+      return;
+    else if (newMinutesDelete && newMinutesDelete > zone.minutesInactiveNotify)
       return;
 
-    else if(newMinutesDelete && newMinutesDelete > zone.minutesInactiveNotify)
-      return;
-      
     throw new BadRequestException(
-      propLessThanAnother('minutesInactiveNotify', 'minutesInactiveDelete')
+      propLessThanAnother('minutesInactiveNotify', 'minutesInactiveDelete'),
     );
   }
 }

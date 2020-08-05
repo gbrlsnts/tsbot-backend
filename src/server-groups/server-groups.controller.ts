@@ -1,6 +1,19 @@
-import { Controller, UseGuards, ClassSerializerInterceptor, UseInterceptors, SerializeOptions, Get, ParseIntPipe, Param, Put } from '@nestjs/common';
+import {
+  Controller,
+  UseGuards,
+  ClassSerializerInterceptor,
+  UseInterceptors,
+  SerializeOptions,
+  Get,
+  ParseIntPipe,
+  Param,
+  Put,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ServerRolesGuard, ServerRoles } from '../servers/guards/server-roles.guard';
+import {
+  ServerRolesGuard,
+  ServerRoles,
+} from '../servers/guards/server-roles.guard';
 import { appSerializeOptions } from '../shared/constants';
 import { ServerGroupsService } from './server-groups.service';
 import { ServerGroup } from './server-group.entity';
@@ -29,9 +42,7 @@ export class ServerGroupsController {
     idParam: 'server',
     roles: [ServerRoles.OWNER],
   })
-  syncGroupsByServerId(
-    @Param('server', ParseIntPipe) serverId: number,
-  ): void {
+  syncGroupsByServerId(@Param('server', ParseIntPipe) serverId: number): void {
     return this.groupsService.syncGroupsByServerId(serverId);
   }
 }

@@ -83,9 +83,7 @@ export class ZoneController {
     idParam: 'server',
     roles: [ServerRoles.OWNER],
   })
-  deleteZone(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<void> {
+  deleteZone(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.zoneService.deleteZone(id);
   }
 }

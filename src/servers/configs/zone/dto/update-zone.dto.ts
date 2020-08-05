@@ -1,4 +1,12 @@
-import { IsPositive, IsBoolean, IsOptional, IsString, IsNotEmpty, Min, Max } from "class-validator";
+import {
+  IsPositive,
+  IsBoolean,
+  IsOptional,
+  IsString,
+  IsNotEmpty,
+  Min,
+  Max,
+} from 'class-validator';
 import { LessThanField } from '../../../../shared/validation/less-than-field.validation';
 
 export class UpdateZoneDto {

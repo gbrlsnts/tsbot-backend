@@ -7,8 +7,12 @@ import { ServersModule } from '../servers/servers.module';
 import { ClientsModule } from '../clients/clients.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ServerGroupRepository]), ServersModule, ClientsModule],
+  imports: [
+    TypeOrmModule.forFeature([ServerGroupRepository]),
+    ServersModule,
+    ClientsModule,
+  ],
   providers: [ServerGroupsService],
-  controllers: [ServerGroupsController]
+  controllers: [ServerGroupsController],
 })
 export class ServerGroupsModule {}

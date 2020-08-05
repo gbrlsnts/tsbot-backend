@@ -10,4 +10,4 @@ export const appSerializeOptions: ClassTransformOptions = {
 
 export const appValidationPipeOptions: ValidationPipeOptions = {
   whitelist: true,
-}
+};

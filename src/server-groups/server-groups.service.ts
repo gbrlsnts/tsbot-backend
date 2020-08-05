@@ -7,16 +7,16 @@ import { ServerGroup } from './server-group.entity';
 export class ServerGroupsService {
   constructor(
     @InjectRepository(ServerGroupRepository)
-    private groupRepository: ServerGroupRepository
+    private groupRepository: ServerGroupRepository,
   ) {}
 
   /**
    * Get all groups by server id
-   * @param serverId 
+   * @param serverId
    */
   getAllGroupsByServerId(serverId: number): Promise<ServerGroup[]> {
     return this.groupRepository.find({
-      where: { serverId }
+      where: { serverId },
     });
   }
 

@@ -18,7 +18,10 @@ import { SaveClientDto } from './dto/save-client.dto';
 import { GetUser } from '../auth/decorators/get-user-decorator';
 import { User } from '../users/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { appSerializeOptions, appValidationPipeOptions } from '../shared/constants';
+import {
+  appSerializeOptions,
+  appValidationPipeOptions,
+} from '../shared/constants';
 import {
   ServerRolesGuard,
   ServerRoles,
