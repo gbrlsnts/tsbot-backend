@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChannelConfigRepository } from './channel-config.repository';
 import { ChannelConfig } from './channel-config.entity';
-import { ServerRefDataService } from '../../../server-ref-data/server-ref-data.service';
+import { MetadataService } from '../../../metadata/metadata.service';
 import {
   codecDoesNotExist,
   zoneDoesNotExists,
@@ -29,7 +29,7 @@ export class ChannelConfigService {
     @InjectRepository(ChannelConfigPermissionRepository)
     private permRepository: ChannelConfigPermissionRepository,
     private zoneService: ZoneService,
-    private refDataService: ServerRefDataService,
+    private refDataService: MetadataService,
   ) {}
 
   /**

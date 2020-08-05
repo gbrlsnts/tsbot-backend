@@ -1,11 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
 import { ServerPermission } from './server-permission.entity';
-import { ServerRefDataService } from './server-ref-data.service';
+import { MetadataService } from './metadata.service';
 import { Codec } from './codec.entity';
 
-@Controller('reference')
-export class ServerRefDataController {
-  constructor(private refDataService: ServerRefDataService) {}
+@Controller('metadata')
+export class MetadataController {
+  constructor(private refDataService: MetadataService) {}
 
   @Get('/server-permissions')
   getAllPermissions(): Promise<ServerPermission[]> {

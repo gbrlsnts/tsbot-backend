@@ -1,6 +1,6 @@
 import { Entity, Column, ManyToOne, PrimaryColumn } from 'typeorm';
 import { ChannelConfig } from './channel-config.entity';
-import { ServerPermission } from '../../../server-ref-data/server-permission.entity';
+import { ServerPermission } from '../../../metadata/server-permission.entity';
 import { Expose } from 'class-transformer';
 
 @Entity()

@@ -6,7 +6,7 @@ import { ServerPermissionRepository } from './server-permission.repository';
 import { CodecRepository } from './codec.repository';
 
 @Injectable()
-export class ServerRefDataService {
+export class MetadataService {
   constructor(
     @InjectRepository(ServerPermissionRepository)
     private permRepository: ServerPermissionRepository,

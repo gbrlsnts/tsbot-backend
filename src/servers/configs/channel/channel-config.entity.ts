@@ -8,7 +8,7 @@ import {
   OneToMany,
   Index,
 } from 'typeorm';
-import { Codec } from '../../../server-ref-data/codec.entity';
+import { Codec } from '../../../metadata/codec.entity';
 import { Zone } from '../zone/zone.entity';
 import { Server } from '../../server.entity';
 import { ChannelConfigPermission } from './channel-perm.entity';

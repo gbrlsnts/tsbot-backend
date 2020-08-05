@@ -13,7 +13,7 @@ import { ChannelConfigRepository } from './configs/channel/channel-config.reposi
 import { ZoneRepository } from './configs/zone/zone.repository';
 import { ChannelConfigService } from './configs/channel/channel-config.service';
 import { ZoneService } from './configs/zone/zone.service';
-import { ServerRefDataModule } from '../server-ref-data/server-ref-data.module';
+import { MetadataModule } from '../metadata/metadata.module';
 import { ChannelConfigPermission } from './configs/channel/channel-perm.entity';
 import { ZoneController } from './configs/zone/zone.controller';
 
@@ -28,7 +28,7 @@ import { ZoneController } from './configs/zone/zone.controller';
     ]),
     AuthModule,
     forwardRef(() => ClientsModule),
-    ServerRefDataModule,
+    MetadataModule,
   ],
   providers: [
     ServersService,

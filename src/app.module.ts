@@ -8,7 +8,7 @@ import { ServersModule } from './servers/servers.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseMapperInterceptor } from './global/interceptors/response-mapper.interceptor';
 import { ClientsModule } from './clients/clients.module';
-import { ServerRefDataModule } from './server-ref-data/server-ref-data.module';
+import { MetadataModule } from './metadata/metadata.module';
 import { ServerGroupsModule } from './server-groups/server-groups.module';
 
 @Module({
@@ -19,7 +19,7 @@ import { ServerGroupsModule } from './server-groups/server-groups.module';
     UserManagerModule,
     ServersModule,
     ClientsModule,
-    ServerRefDataModule,
+    MetadataModule,
     ServerGroupsModule,
   ],
   controllers: [],

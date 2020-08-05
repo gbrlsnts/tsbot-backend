@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ServerRefDataController } from './server-ref-data.controller';
-import { ServerRefDataService } from './server-ref-data.service';
+import { MetadataController } from './metadata.controller';
+import { MetadataService } from './metadata.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServerPermissionRepository } from './server-permission.repository';
 import { CodecRepository } from './codec.repository';
@@ -9,8 +9,8 @@ import { CodecRepository } from './codec.repository';
   imports: [
     TypeOrmModule.forFeature([ServerPermissionRepository, CodecRepository]),
   ],
-  controllers: [ServerRefDataController],
-  providers: [ServerRefDataService],
-  exports: [ServerRefDataService],
+  controllers: [MetadataController],
+  providers: [MetadataService],
+  exports: [MetadataService],
 })
-export class ServerRefDataModule {}
+export class MetadataModule {}
