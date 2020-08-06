@@ -16,6 +16,9 @@ import { ZoneService } from './configs/zone/zone.service';
 import { MetadataModule } from '../metadata/metadata.module';
 import { ChannelConfigPermission } from './configs/channel/channel-perm.entity';
 import { ZoneController } from './configs/zone/zone.controller';
+import { GroupConfigService } from './configs/group/group-config.service';
+import { GroupCategoryRepository } from './configs/group/group-category.repository';
+import { GroupConfigRepository } from './configs/group/group-config.repository';
 
 @Module({
   imports: [
@@ -25,6 +28,8 @@ import { ZoneController } from './configs/zone/zone.controller';
       ChannelConfigRepository,
       ChannelConfigPermission,
       ZoneRepository,
+      GroupCategoryRepository,
+      GroupConfigRepository,
     ]),
     AuthModule,
     forwardRef(() => ClientsModule),
@@ -36,6 +41,7 @@ import { ZoneController } from './configs/zone/zone.controller';
     ServerRolesGuard,
     ChannelConfigService,
     ZoneService,
+    GroupConfigService,
   ],
   controllers: [ServersController, ChannelConfigController, ZoneController],
   exports: [ServersService, ServerRolesGuard],

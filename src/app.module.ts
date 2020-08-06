@@ -10,6 +10,7 @@ import { ResponseMapperInterceptor } from './global/interceptors/response-mapper
 import { ClientsModule } from './clients/clients.module';
 import { MetadataModule } from './metadata/metadata.module';
 import { ServerGroupsModule } from './server-groups/server-groups.module';
+import { IconsModule } from './icons/icons.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ServerGroupsModule } from './server-groups/server-groups.module';
     ClientsModule,
     MetadataModule,
     ServerGroupsModule,
+    IconsModule,
   ],
   controllers: [],
   providers: [

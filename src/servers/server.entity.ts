@@ -16,6 +16,7 @@ import { serializationGroups } from '../shared/types';
 import { Client } from '../clients/client.entity';
 import { ChannelConfig } from './configs/channel/channel-config.entity';
 import { ServerGroup } from '../server-groups/server-group.entity';
+import { GroupCategory } from './configs/group/group-category.entity';
 
 @Entity()
 export class Server {
@@ -74,4 +75,10 @@ export class Server {
     group => group.server,
   )
   serverGroups: ServerGroup[];
+
+  @OneToMany(
+    () => GroupCategory,
+    cat => cat.server,
+  )
+  groupCategories: GroupCategory[];
 }

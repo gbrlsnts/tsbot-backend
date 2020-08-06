@@ -4,9 +4,11 @@ import {
   Column,
   ManyToOne,
   Unique,
+  OneToOne,
 } from 'typeorm';
 import { Expose } from 'class-transformer';
 import { Server } from '../servers/server.entity';
+import { GroupConfig } from '../servers/configs/group/group-config.entity';
 
 @Entity()
 @Unique('uniq_server_group', ['tsId', 'serverId'])
@@ -36,4 +38,10 @@ export class ServerGroup {
     server => server.serverGroups,
   )
   server: Server;
+
+  @OneToOne(
+    () => GroupConfig,
+    config => config.group,
+  )
+  config: GroupConfig;
 }
