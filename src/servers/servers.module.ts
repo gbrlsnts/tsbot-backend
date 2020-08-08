@@ -16,7 +16,7 @@ import { ZoneService } from './configs/zone/zone.service';
 import { MetadataModule } from '../metadata/metadata.module';
 import { ChannelConfigPermission } from './configs/channel/channel-perm.entity';
 import { ZoneController } from './configs/zone/zone.controller';
-import { GroupConfigService } from './configs/group/group-config.service';
+import { GroupCategoryService } from './configs/group/group-category.service';
 import { GroupCategoryRepository } from './configs/group/group-category.repository';
 import { GroupConfigRepository } from './configs/group/group-config.repository';
 
@@ -41,7 +41,7 @@ import { GroupConfigRepository } from './configs/group/group-config.repository';
     ServerRolesGuard,
     ChannelConfigService,
     ZoneService,
-    GroupConfigService,
+    GroupCategoryService,
   ],
   controllers: [ServersController, ChannelConfigController, ZoneController],
   exports: [ServersService, ServerRolesGuard],
