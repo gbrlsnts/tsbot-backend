@@ -19,6 +19,7 @@ import { ZoneController } from './configs/zone/zone.controller';
 import { GroupCategoryService } from './configs/group/group-category.service';
 import { GroupCategoryRepository } from './configs/group/group-category.repository';
 import { GroupConfigRepository } from './configs/group/group-config.repository';
+import { GroupCategoryController } from './configs/group/group-category.controller';
 
 @Module({
   imports: [
@@ -43,7 +44,7 @@ import { GroupConfigRepository } from './configs/group/group-config.repository';
     ZoneService,
     GroupCategoryService,
   ],
-  controllers: [ServersController, ChannelConfigController, ZoneController],
+  controllers: [ServersController, ChannelConfigController, ZoneController, GroupCategoryController],
   exports: [ServersService, ServerRolesGuard],
 })
 export class ServersModule {}

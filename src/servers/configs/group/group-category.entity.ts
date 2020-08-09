@@ -9,6 +9,7 @@ import {
 import { Server } from '../../server.entity';
 import { Expose } from 'class-transformer';
 import { GroupConfig } from './group-config.entity';
+import { ServerGroup } from '../../../server-groups/server-group.entity';
 
 @Entity()
 @Unique('uniq_server_category', ['name', 'serverId'])
@@ -36,4 +37,13 @@ export class GroupCategory {
     group => group.category,
   )
   configs: GroupConfig[];
+
+  @Expose()
+  groups(): ServerGroup[] {
+    if(!this.configs) return;
+
+    return this.configs.map(config => {
+      return config.group;
+    });
+  }
 }
