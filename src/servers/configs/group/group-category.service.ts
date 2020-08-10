@@ -15,6 +15,11 @@ export class GroupCategoryService {
     private categoryRepository: GroupCategoryRepository
   ) {}
 
+  /**
+   * Get all categories by server id
+   * @param serverId 
+   * @param withGroups if the result should include related groups
+   */
   getAllCategoriesByServer(serverId: number, withGroups = false): Promise<GroupCategory[]> {
     const builder = this.categoryRepository
       .createQueryBuilder('c')
@@ -30,6 +35,11 @@ export class GroupCategoryService {
       .getMany();
   }
 
+  /**
+   * Get a category by id
+   * @param id 
+   * @throws NotFoundException when the category doesn't exist
+   */
   async getCategoryById(id: number): Promise<GroupCategory> {
     const category = await this.categoryRepository.findOne({
       where: { id },
@@ -40,6 +50,12 @@ export class GroupCategoryService {
     return category;
   }
 
+  /**
+   * Get a category by id and server
+   * @param id 
+   * @param serverId 
+   * @throws NotFoundException when the category doesn't exist
+   */
   async getCategoryServerById(id: number, serverId: number): Promise<GroupCategory> {
     const category = await this.categoryRepository.findOne({
       where: { id, serverId },
@@ -50,6 +66,12 @@ export class GroupCategoryService {
     return category;
   }
 
+  /**
+   * Create a category
+   * @param serverId server to link the category
+   * @param dto category data
+   * @throws ConflictException if the category name exists in the server
+   */
   async createCategory(serverId: number, dto: GroupCategoryDto): Promise<GroupCategory> {
     try {
       const category = this.categoryRepository.create({
@@ -66,6 +88,13 @@ export class GroupCategoryService {
     }
   }
 
+  /**
+   * Update a category
+   * @param id 
+   * @param dto category data
+   * @throws NotFoundException when the category doesn't exist
+   * @throws ConflictException if the category name exists in the server
+   */
   async updateCategory(id: number, dto: GroupCategoryDto): Promise<GroupCategory> {
     try {
       const category = await this.getCategoryById(id);
@@ -81,6 +110,12 @@ export class GroupCategoryService {
     }
   }
 
+  /**
+   * Delete a category
+   * @param id
+   * @throws BadRequestException if there are associated categories
+   * @throws NotFoundException when no records were deleted
+   */
   async deleteCategory(id: number): Promise<void> {
     const configCount = await this.categoryRepository
       .createQueryBuilder('c')
