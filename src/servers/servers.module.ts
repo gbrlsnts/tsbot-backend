@@ -20,6 +20,7 @@ import { GroupCategoryService } from './configs/group/group-category.service';
 import { GroupCategoryRepository } from './configs/group/group-category.repository';
 import { GroupConfigRepository } from './configs/group/group-config.repository';
 import { GroupCategoryController } from './configs/group/group-category.controller';
+import { ServerGroupsModule } from 'src/server-groups/server-groups.module';
 
 @Module({
   imports: [
@@ -33,8 +34,9 @@ import { GroupCategoryController } from './configs/group/group-category.controll
       GroupConfigRepository,
     ]),
     AuthModule,
-    forwardRef(() => ClientsModule),
     MetadataModule,
+    forwardRef(() => ClientsModule),
+    forwardRef(() => ServerGroupsModule),
   ],
   providers: [
     ServersService,

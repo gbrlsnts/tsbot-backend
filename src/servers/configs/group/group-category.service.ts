@@ -1,18 +1,26 @@
+import { getConnection, SelectQueryBuilder } from 'typeorm';
 import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { GroupCategoryRepository } from './group-category.repository';
 import { InjectRepository } from '@nestjs/typeorm';
+import { GroupCategoryRepository } from './group-category.repository';
 import { GroupCategory } from './group-category.entity';
 import { GroupConfig } from './group-config.entity';
 import { ServerGroup } from '../../../server-groups/server-group.entity';
 import { DbErrorCodes } from '../../../shared/database/codes';
-import { categoryAlreadyExists, categoryHasConfigs } from '../../../shared/messages/server.messages';
-import { GroupCategoryDto } from './dto/category.dto';
+import { categoryAlreadyExists, categoryHasConfigs, containsInvalidGroups } from '../../../shared/messages/server.messages';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { GroupConfigRepository } from './group-config.repository';
+import { ServerGroupsService } from '../../../server-groups/server-groups.service';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoryFindOptionsDto } from './dto/category-find.dto';
 
 @Injectable()
 export class GroupCategoryService {
   constructor(
     @InjectRepository(GroupCategoryRepository)
-    private categoryRepository: GroupCategoryRepository
+    private categoryRepository: GroupCategoryRepository,
+    @InjectRepository(GroupConfigRepository)
+    private configRepository: GroupConfigRepository,
+    private groupsService: ServerGroupsService,
   ) {}
 
   /**
@@ -21,18 +29,7 @@ export class GroupCategoryService {
    * @param withGroups if the result should include related groups
    */
   getAllCategoriesByServer(serverId: number, withGroups = false): Promise<GroupCategory[]> {
-    const builder = this.categoryRepository
-      .createQueryBuilder('c')
-      
-    if(withGroups) {
-      builder
-        .leftJoinAndMapMany('c.configs', GroupConfig, 'conf', 'c.id = conf.categoryId')
-        .leftJoinAndMapOne('conf.group', ServerGroup, 'g', 'conf.groupId = g.id');
-    }
-
-    return builder
-      .where('c.serverId = :serverId', { serverId })
-      .getMany();
+    return this.getCategorySelectQuery({ serverId }, withGroups).getMany();
   }
 
   /**
@@ -40,30 +37,8 @@ export class GroupCategoryService {
    * @param id 
    * @throws NotFoundException when the category doesn't exist
    */
-  async getCategoryById(id: number): Promise<GroupCategory> {
-    const category = await this.categoryRepository.findOne({
-      where: { id },
-    });
-
-    if(!category) throw new NotFoundException();
-
-    return category;
-  }
-
-  /**
-   * Get a category by id and server
-   * @param id 
-   * @param serverId 
-   * @throws NotFoundException when the category doesn't exist
-   */
-  async getCategoryServerById(id: number, serverId: number): Promise<GroupCategory> {
-    const category = await this.categoryRepository.findOne({
-      where: { id, serverId },
-    });
-
-    if(!category) throw new NotFoundException();
-
-    return category;
+  getCategoryById(options: CategoryFindOptionsDto, withGroups = false): Promise<GroupCategory> {
+    return this.getCategorySelectQuery(options, withGroups).getOne();
   }
 
   /**
@@ -72,7 +47,7 @@ export class GroupCategoryService {
    * @param dto category data
    * @throws ConflictException if the category name exists in the server
    */
-  async createCategory(serverId: number, dto: GroupCategoryDto): Promise<GroupCategory> {
+  async createCategory(serverId: number, dto: CreateCategoryDto): Promise<GroupCategory> {
     try {
       const category = this.categoryRepository.create({
         ...dto,
@@ -95,18 +70,45 @@ export class GroupCategoryService {
    * @throws NotFoundException when the category doesn't exist
    * @throws ConflictException if the category name exists in the server
    */
-  async updateCategory(id: number, dto: GroupCategoryDto): Promise<GroupCategory> {
+  async updateCategory(id: number, dto: UpdateCategoryDto): Promise<GroupCategory> {
+    const { name } = dto;
+    const groups = new Set(dto.groups); // remove dupes
+
+    let category = await this.getCategoryById({ id });
+    const { id: categoryId } = category;
+
+    if(groups && groups.size > 0) {
+      const groupsValid = await this.groupsService.checkGroupsByServer(category.serverId, Array.from(groups));
+      if(!groupsValid) throw new BadRequestException(containsInvalidGroups);
+    }
+
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
-      const category = await this.getCategoryById(id);
+      if(name) {
+        category.name = name;
+        
+        category = await this.categoryRepository.save(category, {
+          transaction: false,
+        });
+      }
 
-      Object.assign(category, dto);
+      await this.setCategoryGroups(categoryId, groups);
 
-      return await  this.categoryRepository.save(category);
+      await queryRunner.commitTransaction();
+
+      return this.getCategoryById({ id }, true);
     } catch (e) {
+      await queryRunner.rollbackTransaction();
+
       if(e.code == DbErrorCodes.DuplicateKey)
         throw new ConflictException(categoryAlreadyExists);
 
       throw e;
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -128,5 +130,53 @@ export class GroupCategoryService {
     const result = await this.categoryRepository.delete(id);
 
     if(result.affected === 0) throw new NotFoundException();
+  }
+
+  /**
+   * Set groups for a category. Doesn't run in a transaction.
+   * @param categoryId 
+   * @param groups 
+   */
+  private async setCategoryGroups(categoryId: number, groups: Set<number>): Promise<void> {
+    if(groups) {
+      await this.configRepository.delete({ categoryId });
+    }
+
+    if(groups && groups.size > 0) {
+      const configs = this.configRepository.create(Array.from(groups).map(groupId => ({
+        groupId,
+        categoryId,
+      })));
+
+      await this.configRepository.save(configs, {
+        transaction: false,
+      });
+    }
+  }
+
+  /**
+   * Builds a select query for one or more categories
+   * @param options find options
+   * @param withGroups if linked groups should be retrieved
+   */
+  private getCategorySelectQuery(options: CategoryFindOptionsDto, withGroups = false): SelectQueryBuilder<GroupCategory> {
+    const { id, serverId } = options;
+
+    const builder = this.categoryRepository
+      .createQueryBuilder('c')
+    
+    if(withGroups) {
+      builder
+        .leftJoinAndMapMany('c.configs', GroupConfig, 'conf', 'c.id = conf.categoryId')
+        .leftJoinAndMapOne('conf.group', ServerGroup, 'g', 'conf.groupId = g.id');
+    }
+
+    if(id)
+      builder.where('c.id = :id', { id });
+
+    if(serverId)
+      builder.where('c.serverId = :serverId', { serverId });
+
+    return builder;
   }
 }

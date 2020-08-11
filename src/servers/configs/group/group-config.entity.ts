@@ -1,11 +1,11 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   OneToOne,
   JoinColumn,
   ManyToOne,
   Unique,
+  PrimaryColumn,
 } from 'typeorm';
 import { Expose } from 'class-transformer';
 import { ServerGroup } from '../../../server-groups/server-group.entity';
@@ -14,13 +14,7 @@ import { GroupCategory } from './group-category.entity';
 @Entity()
 @Unique('uniq_group_cat', ['groupId', 'categoryId'])
 export class GroupConfig {
-  @PrimaryGeneratedColumn()
-  @Expose()
-  id: number;
-
-  @Column({
-    unsigned: true,
-  })
+  @PrimaryColumn()
   @Expose()
   groupId: number;
 

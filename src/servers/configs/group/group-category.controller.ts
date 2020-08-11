@@ -5,10 +5,11 @@ import { appSerializeOptions, appValidationPipeOptions } from '../../../shared/c
 import { GroupCategoryService } from './group-category.service';
 import { GroupCategory } from './group-category.entity';
 import { SetServerRoles } from '../../decorators/set-server-roles.decorator';
-import { GroupCategoryDto } from './dto/category.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
 import { CategoryFiltersDto } from './dto/category-filters.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
-@Controller('/servers/:server/configs/groups/categories')
+@Controller('/servers/:server/configs/groups')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions(appSerializeOptions)
@@ -34,7 +35,7 @@ export class GroupCategoryController {
   })
   createCategory(
     @Param('server', ParseIntPipe) serverId: number,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: GroupCategoryDto,
+    @Body(new ValidationPipe(appValidationPipeOptions)) dto: CreateCategoryDto,
   ): Promise<GroupCategory>  {
     return this.categoryService.createCategory(serverId, dto);
   }
@@ -46,7 +47,7 @@ export class GroupCategoryController {
   })
   updateCategory(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: GroupCategoryDto,
+    @Body(new ValidationPipe(appValidationPipeOptions)) dto: UpdateCategoryDto,
   ): Promise<GroupCategory>  {
     return this.categoryService.updateCategory(id, dto);
   }

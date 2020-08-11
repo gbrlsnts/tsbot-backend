@@ -28,4 +28,19 @@ export class ServerGroupsService {
     // this will trigger group sync from bot
     throw new InternalServerErrorException('Not Implemented');
   }
+
+  /**
+   * Check if all given groupIds are in the given server
+   * @param serverId 
+   * @param groupIds 
+   */
+  async checkGroupsByServer(serverId: number, groupIds: number[]): Promise<boolean> {
+    const count = await this.groupRepository
+      .createQueryBuilder('g')
+      .where({ serverId })
+      .andWhereInIds(groupIds)
+      .getCount();
+
+    return count === groupIds.length;
+  }
 }

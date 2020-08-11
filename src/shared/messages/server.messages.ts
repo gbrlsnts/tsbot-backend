@@ -7,3 +7,4 @@ export const deleteDefaultConfigNotAllowed =
 
 export const categoryAlreadyExists = 'Category already exists';
 export const categoryHasConfigs = 'Can not delete category: has associated configs'
+export const containsInvalidGroups = 'Request contains invalid goups';
