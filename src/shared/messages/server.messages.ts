@@ -9,3 +9,4 @@ export const categoryAlreadyExists = 'Category already exists';
 export const categoryHasConfigs =
   'Can not delete category: has associated configs';
 export const containsInvalidGroups = 'Request contains invalid goups';
+export const iconAlreadyExists = 'Icon already exists for the given teamspeak id';

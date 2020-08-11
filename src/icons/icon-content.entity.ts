@@ -7,7 +7,7 @@ export class IconContent {
   id: string;
 
   @Column('bytea')
-  content: ArrayBuffer;
+  content: Buffer;
 
   @OneToOne(
     () => Icon,
