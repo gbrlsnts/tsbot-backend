@@ -212,9 +212,9 @@ export class GroupCategoryService {
         );
     }
 
-    if (id) builder.where('c.id = :id', { id });
+    if (id) builder.andWhere('c.id = :id', { id });
 
-    if (serverId) builder.where('c.serverId = :serverId', { serverId });
+    if (serverId) builder.andWhere('c.serverId = :serverId', { serverId });
 
     return builder;
   }

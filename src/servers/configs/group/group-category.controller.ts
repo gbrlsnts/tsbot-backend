@@ -49,6 +49,21 @@ export class GroupCategoryController {
     );
   }
 
+  @Get('/:id')
+  @SetServerRoles({
+    idParam: 'server',
+    roles: [ServerRoles.OWNER],
+  })
+  getCategoryById(
+    @Param('server', ParseIntPipe) serverId: number,
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<GroupCategory> {
+    return this.categoryService.getCategoryById(
+      { id, serverId },
+      true,
+    );
+  }
+
   @Post()
   @SetServerRoles({
     idParam: 'server',
