@@ -31,10 +31,13 @@ export class ServerGroupsService {
 
   /**
    * Check if all given groupIds are in the given server
-   * @param serverId 
-   * @param groupIds 
+   * @param serverId
+   * @param groupIds
    */
-  async checkGroupsByServer(serverId: number, groupIds: number[]): Promise<boolean> {
+  async checkGroupsByServer(
+    serverId: number,
+    groupIds: number[],
+  ): Promise<boolean> {
     const count = await this.groupRepository
       .createQueryBuilder('g')
       .where({ serverId })

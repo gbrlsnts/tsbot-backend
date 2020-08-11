@@ -1,7 +1,25 @@
-import { Controller, UseGuards, UseInterceptors, SerializeOptions, ClassSerializerInterceptor, Post, Param, Body, ValidationPipe, ParseIntPipe, Patch, Get, Query, Delete } from "@nestjs/common";
+import {
+  Controller,
+  UseGuards,
+  UseInterceptors,
+  SerializeOptions,
+  ClassSerializerInterceptor,
+  Post,
+  Param,
+  Body,
+  ValidationPipe,
+  ParseIntPipe,
+  Patch,
+  Get,
+  Query,
+  Delete,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { ServerRolesGuard, ServerRoles } from '../../guards/server-roles.guard';
-import { appSerializeOptions, appValidationPipeOptions } from '../../../shared/constants';
+import {
+  appSerializeOptions,
+  appValidationPipeOptions,
+} from '../../../shared/constants';
 import { GroupCategoryService } from './group-category.service';
 import { GroupCategory } from './group-category.entity';
 import { SetServerRoles } from '../../decorators/set-server-roles.decorator';
@@ -25,7 +43,10 @@ export class GroupCategoryController {
     @Param('server', ParseIntPipe) serverId: number,
     @Query() filters: CategoryFiltersDto,
   ): Promise<GroupCategory[]> {
-    return this.categoryService.getAllCategoriesByServer(serverId, filters.withGroups);
+    return this.categoryService.getAllCategoriesByServer(
+      serverId,
+      filters.withGroups,
+    );
   }
 
   @Post()
@@ -36,7 +57,7 @@ export class GroupCategoryController {
   createCategory(
     @Param('server', ParseIntPipe) serverId: number,
     @Body(new ValidationPipe(appValidationPipeOptions)) dto: CreateCategoryDto,
-  ): Promise<GroupCategory>  {
+  ): Promise<GroupCategory> {
     return this.categoryService.createCategory(serverId, dto);
   }
 
@@ -48,7 +69,7 @@ export class GroupCategoryController {
   updateCategory(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe(appValidationPipeOptions)) dto: UpdateCategoryDto,
-  ): Promise<GroupCategory>  {
+  ): Promise<GroupCategory> {
     return this.categoryService.updateCategory(id, dto);
   }
 
@@ -57,9 +78,7 @@ export class GroupCategoryController {
     idParam: 'server',
     roles: [ServerRoles.OWNER],
   })
-  deleteCategory(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<void> {
+  deleteCategory(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.categoryService.deleteCategory(id);
   }
 }

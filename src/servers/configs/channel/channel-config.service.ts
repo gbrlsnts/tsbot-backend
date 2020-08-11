@@ -162,9 +162,11 @@ export class ChannelConfigService {
 
       return saved;
     } catch (e) {
-      queryRunner.rollbackTransaction();
+      await queryRunner.rollbackTransaction();
 
       throw e;
+    } finally {
+      await queryRunner.release();
     }
   }
 

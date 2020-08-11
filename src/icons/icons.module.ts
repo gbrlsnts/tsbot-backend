@@ -4,11 +4,6 @@ import { IconRepository } from './icon.repository';
 import { IconContentRepository } from './icon-content.repository';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      IconRepository,
-      IconContentRepository,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([IconRepository, IconContentRepository])],
 })
 export class IconsModule {}

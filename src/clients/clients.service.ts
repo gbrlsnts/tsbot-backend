@@ -126,6 +126,8 @@ export class ClientsService {
         throw new ConflictException(clientAlreadyExists);
 
       throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
     }
   }
 }

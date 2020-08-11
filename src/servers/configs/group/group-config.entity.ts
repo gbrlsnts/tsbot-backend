@@ -29,7 +29,7 @@ export class GroupConfig {
     group => group.config,
     {
       onDelete: 'CASCADE',
-    }
+    },
   )
   @JoinColumn({ name: 'groupId' })
   @Expose()

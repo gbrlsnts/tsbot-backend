@@ -40,7 +40,7 @@ export class GroupCategory {
 
   @Expose()
   groups(): ServerGroup[] {
-    if(!this.configs) return;
+    if (!this.configs) return;
 
     return this.configs.map(config => {
       return config.group;
