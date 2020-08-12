@@ -1,4 +1,4 @@
-import { IsBase64, IsInt, Max, IsPositive } from "class-validator";
+import { IsBase64, IsInt, Max, IsPositive, IsNotEmpty } from "class-validator";
 
 export class UploadIconDto {
   @IsInt()
@@ -7,5 +7,6 @@ export class UploadIconDto {
   tsId: number;
 
   @IsBase64()
+  @IsNotEmpty()
   content: string;
 }

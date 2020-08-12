@@ -10,7 +10,7 @@ import { Server } from '../servers/server.entity';
 import { DbErrorCodes } from '../shared/database/codes';
 import { iconAlreadyExists } from '../shared/messages/server.messages';
 import { IconContent } from './icon-content.entity';
-import { invalidMime } from '../shared/messages/icon.messages';
+import { invalidMime, invalidFileImage } from '../shared/messages/icon.messages';
 
 @Injectable()
 export class IconsService {
@@ -72,7 +72,7 @@ export class IconsService {
    */
   async uploadIcon(userId: number, serverId: number, dto: UploadIconDto): Promise<Icon> {
     const { tsId, content: encodedContent } = dto;
-    
+
     const content = Buffer.from(encodedContent, 'base64');
     const mime = await this.getIconMime(content);
 
@@ -144,9 +144,14 @@ export class IconsService {
    */
   private async getIconMime(content: Buffer): Promise<string> {
     const valid = ['image/png', 'image/jpeg'];
-    const image = await jimp.read(content);
+    let mime;
 
-    const mime = image.getMIME();
+    try {
+      const image = await jimp.read(content);
+      mime = image.getMIME();
+    } catch(e) {
+      throw new BadRequestException(invalidFileImage);
+    }
 
     if(!valid.includes(mime))
       throw new BadRequestException(invalidMime(valid));
