@@ -12,6 +12,7 @@ import { Expose } from 'class-transformer';
 import { User } from '../users/user.entity';
 import { Server } from '../servers/server.entity';
 import { ClientHistory } from './client-history.entity';
+import { Channel } from '../channels/channel.entity';
 
 @Entity()
 @Unique('uniq_sv_tsId', ['serverId', 'tsUniqueId'])
@@ -63,4 +64,7 @@ export class Client {
     arch => arch.client,
   )
   history: ClientHistory;
+
+  @OneToMany(() => Channel, channel => channel.client)
+  channels: Channel[];
 }

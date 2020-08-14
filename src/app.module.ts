@@ -11,6 +11,7 @@ import { ClientsModule } from './clients/clients.module';
 import { MetadataModule } from './metadata/metadata.module';
 import { ServerGroupsModule } from './server-groups/server-groups.module';
 import { IconsModule } from './icons/icons.module';
+import { ChannelsModule } from './channels/channels.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { IconsModule } from './icons/icons.module';
     MetadataModule,
     ServerGroupsModule,
     IconsModule,
+    ChannelsModule,
   ],
   controllers: [],
   providers: [
