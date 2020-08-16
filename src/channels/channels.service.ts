@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { getConnection } from 'typeorm';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChannelRepository } from './channel.repository';
 import { Channel } from './channel.entity';
 import { Client } from '../clients/client.entity';
 import { ChannelDto } from './dto/channel.dto';
 import { ClientsService } from '../clients/clients.service';
+import { TeamspeakService } from '../teamspeak/teamspeak.service';
+import { alreadyHasChannel } from '../shared/messages/channel.messages';
+import { Server } from '../servers/server.entity';
 
 @Injectable()
 export class ChannelsService {
@@ -12,23 +16,34 @@ export class ChannelsService {
         @InjectRepository(ChannelRepository)
         private channelRepository: ChannelRepository,
         private clientsService: ClientsService,
+        private teamspeakService: TeamspeakService,
     ) {}
 
     getChannelsByServerId(serverId: number): Promise<Channel[]> {
         return this.channelRepository
             .createQueryBuilder('ch')
-            .innerJoin(Client, 'cl')
+            .innerJoin(Client, 'cl', 'cl.id = ch.clientId')
             .where('cl.serverId = :serverId', { serverId })
             .getMany();
     }
 
-    getChannelByServerId(id: number, serverId: number): Promise<Channel> {
-        const channel =  this.channelRepository
-        .createQueryBuilder('ch')
-        .innerJoin(Client, 'cl')
-        .where('ch.id = :id', { id })
-        .andWhere('cl.serverId = :serverId', { serverId })
-        .getOne();
+    async getChannelByServerId(id: number, serverId: number): Promise<Channel> {
+        const channel = await this.channelRepository
+            .createQueryBuilder('ch')
+            .innerJoin(Client, 'cl', 'cl.id = ch.clientId')
+            .where('ch.id = :id', { id })
+            .andWhere('cl.serverId = :serverId', { serverId })
+            .getOne();
+
+        if(!channel) throw new NotFoundException();
+
+        return channel;
+    }
+
+    async getChannelById(id: number): Promise<Channel> {
+        const channel = await this.channelRepository.findOne({
+            where: { id }
+        });
 
         if(!channel) throw new NotFoundException();
 
@@ -36,33 +51,58 @@ export class ChannelsService {
     }
 
     async createChannel(userId: number, serverId: number, dto: ChannelDto): Promise<Channel> {
-        const client = await this.clientsService.getServerClientByUserId(serverId, userId);
+        const { id: clientId } = await this.clientsService.getServerClientByUserId(serverId, userId);
+        const hasChannel = await this.checkClientHasChannel(clientId);
 
-        // todo: create channel in teamspeak, returning ch id
+        if(hasChannel) throw new ConflictException(alreadyHasChannel);
+
+        const tsChannelId = await this.teamspeakService.createUserChannel(dto);
 
         const channel = this.channelRepository.create({
-            clientId: client.id,
-            tsChannelId: Math.floor(Math.random() * 1000) + 1, // temp, until there's no connection to teamspeak
+            clientId,
+            tsChannelId,
         });
 
-        return this.channelRepository.save(channel);
+        try {
+            return this.channelRepository.save(channel);
+        } catch (e) {
+            await this.teamspeakService.deleteUserChannel(tsChannelId);
+            throw e;
+        }
     }
 
     async deleteChannel(userId: number, id: number): Promise<void> {
-        const chQuery = this.channelRepository
-            .createQueryBuilder('c')
-            .select('c.id')
-            .innerJoin(Client, 'cl')
-            .where('c.id = :id', { id })
-            .andWhere('cl.userId = :userId', { userId });
-
-        const result = await this.channelRepository
+        const channel = await this.channelRepository
             .createQueryBuilder('ch')
-            .delete()
-            .where(`ch.id IN (${chQuery.getQuery()})`)
-            .setParameters(chQuery.getParameters())
-            .execute();
+            .innerJoin(Client, 'cl', 'cl.id = ch.clientId')
+            .innerJoin(Server, 's', 's.id = cl.serverId')
+            .where('ch.id = :id', { id })
+            .andWhere('cl.userId = :userId or s.ownerId = :userId', { userId })
+            .getOne();
 
-        if(result.affected > 0) throw new NotFoundException();
+        if(!channel) throw new NotFoundException();
+
+        const queryRunner = getConnection().createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            await this.teamspeakService.deleteUserChannel(channel.id);
+            await this.channelRepository.delete(channel.id);
+            await queryRunner.commitTransaction();
+        } catch (e) {
+            await queryRunner.rollbackTransaction();
+            throw e;
+        } finally {
+            await queryRunner.release();
+          }
+    }
+
+    async checkClientHasChannel(clientId: number): Promise<boolean> {
+        const count = await this.channelRepository.count({
+            where: { clientId }
+        });
+
+        return count > 0;
     }
 }

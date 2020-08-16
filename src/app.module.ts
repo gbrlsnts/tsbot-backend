@@ -12,6 +12,7 @@ import { MetadataModule } from './metadata/metadata.module';
 import { ServerGroupsModule } from './server-groups/server-groups.module';
 import { IconsModule } from './icons/icons.module';
 import { ChannelsModule } from './channels/channels.module';
+import { TeamspeakModule } from './teamspeak/teamspeak.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ChannelsModule } from './channels/channels.module';
     ServerGroupsModule,
     IconsModule,
     ChannelsModule,
+    TeamspeakModule,
   ],
   controllers: [],
   providers: [

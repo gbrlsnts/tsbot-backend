@@ -1,11 +1,9 @@
-import { Min, Max } from "class-validator";
+import { Length } from "class-validator";
 
 export class ChannelDto {
-    @Min(2)
-    @Max(28)
+    @Length(2, 28)
     name: string;
 
-    @Min(4)
-    @Max(100)
+    @Length(4, 100)
     password: string;
 }
