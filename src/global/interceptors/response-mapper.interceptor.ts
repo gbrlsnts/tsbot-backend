@@ -18,6 +18,10 @@ export class ResponseMapperInterceptor<T>
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<Response<T>> {
-    return next.handle().pipe(map(data => ({ data })));
+    return next.handle().pipe(map(data => {
+      if(!data) return;
+      
+      return { data };
+    }));
   }
 }
