@@ -77,7 +77,7 @@ export class ChannelsService {
             .innerJoin(Client, 'cl', 'cl.id = ch.clientId')
             .innerJoin(Server, 's', 's.id = cl.serverId')
             .where('ch.id = :id', { id })
-            .andWhere('cl.userId = :userId or s.ownerId = :userId', { userId })
+            .andWhere('(cl.userId = :userId OR s.ownerId = :userId)', { userId })
             .getOne();
 
         if(!channel) throw new NotFoundException();
