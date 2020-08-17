@@ -56,12 +56,9 @@ export class GroupCategoryController {
   })
   getCategoryById(
     @Param('server', ParseIntPipe) serverId: number,
-    @Param('id', ParseIntPipe) id: number
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<GroupCategory> {
-    return this.categoryService.getCategoryById(
-      { id, serverId },
-      true,
-    );
+    return this.categoryService.getCategoryById({ id, serverId }, true);
   }
 
   @Post()

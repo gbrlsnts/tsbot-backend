@@ -1,9 +1,28 @@
-import { Controller, Get, UseGuards, UseInterceptors, ClassSerializerInterceptor, SerializeOptions, Param, ParseIntPipe, ValidationPipe, Body, Post, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  SerializeOptions,
+  Param,
+  ParseIntPipe,
+  ValidationPipe,
+  Body,
+  Post,
+  Delete,
+} from '@nestjs/common';
 import { ChannelsService } from './channels.service';
 import { Channel } from './channel.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ServerRolesGuard, ServerRoles } from '../servers/guards/server-roles.guard';
-import { appSerializeOptions, appValidationPipeOptions } from '../shared/constants';
+import {
+  ServerRolesGuard,
+  ServerRoles,
+} from '../servers/guards/server-roles.guard';
+import {
+  appSerializeOptions,
+  appValidationPipeOptions,
+} from '../shared/constants';
 import { SetServerRoles } from '../servers/decorators/set-server-roles.decorator';
 import { ChannelDto } from './dto/channel.dto';
 import { GetUser } from '../auth/decorators/get-user-decorator';
@@ -47,7 +66,7 @@ export class ChannelsController {
   createChannel(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: ChannelDto
+    @Body(new ValidationPipe(appValidationPipeOptions)) dto: ChannelDto,
   ): Promise<Channel> {
     return this.channelsService.createChannel(user.id, serverId, dto);
   }

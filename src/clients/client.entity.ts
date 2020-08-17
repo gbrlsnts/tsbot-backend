@@ -65,6 +65,9 @@ export class Client {
   )
   history: ClientHistory;
 
-  @OneToMany(() => Channel, channel => channel.client)
+  @OneToMany(
+    () => Channel,
+    channel => channel.client,
+  )
   channels: Channel[];
 }

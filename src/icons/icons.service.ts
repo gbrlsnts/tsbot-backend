@@ -1,6 +1,11 @@
 import * as jimp from 'jimp';
 import { Brackets, getConnection } from 'typeorm';
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IconRepository } from './icon.repository';
 import { Icon } from './icon.entity';
@@ -10,7 +15,10 @@ import { Server } from '../servers/server.entity';
 import { DbErrorCodes } from '../shared/database/codes';
 import { iconAlreadyExists } from '../shared/messages/server.messages';
 import { IconContent } from './icon-content.entity';
-import { invalidMime, invalidFileImage } from '../shared/messages/icon.messages';
+import {
+  invalidMime,
+  invalidFileImage,
+} from '../shared/messages/icon.messages';
 
 @Injectable()
 export class IconsService {
@@ -23,32 +31,32 @@ export class IconsService {
 
   /**
    * Get all icons of a server
-   * @param serverId 
+   * @param serverId
    */
   getAllIconsByServer(serverId: number): Promise<Icon[]> {
     return this.iconRepository.find({
-      where: { serverId }
+      where: { serverId },
     });
   }
 
   /**
    * Get an icon by id
-   * @param id 
+   * @param id
    * @throws NotFoundException
    */
   async getIconById(id: string): Promise<Icon> {
     const icon = await this.iconRepository.findOne({
-      where: { id }
+      where: { id },
     });
 
-    if(!icon) throw new NotFoundException();
+    if (!icon) throw new NotFoundException();
 
     return icon;
   }
 
   /**
    * Get an icon content by icon id
-   * @param id 
+   * @param id
    * @throws NotFoundException
    */
   async getIconContentById(id: string): Promise<IconContent> {
@@ -58,7 +66,7 @@ export class IconsService {
       cache: true,
     });
 
-    if(!icon) throw new NotFoundException();
+    if (!icon) throw new NotFoundException();
 
     return icon;
   }
@@ -70,7 +78,11 @@ export class IconsService {
    * @param dto icon data
    * @throws ConflictException when there's a duplicate tsId in a server
    */
-  async uploadIcon(userId: number, serverId: number, dto: UploadIconDto): Promise<Icon> {
+  async uploadIcon(
+    userId: number,
+    serverId: number,
+    dto: UploadIconDto,
+  ): Promise<Icon> {
     const { tsId, content: encodedContent } = dto;
 
     const content = Buffer.from(encodedContent, 'base64');
@@ -88,22 +100,27 @@ export class IconsService {
     await queryRunner.startTransaction();
 
     try {
-      const saved = await this.iconRepository.save(icon, { transaction: false });
+      const saved = await this.iconRepository.save(icon, {
+        transaction: false,
+      });
 
-      await this.contentRepository.save({
-        id: saved.id,
-        content,
-      }, { transaction: false });
+      await this.contentRepository.save(
+        {
+          id: saved.id,
+          content,
+        },
+        { transaction: false },
+      );
 
       await queryRunner.commitTransaction();
 
       return saved;
-    } catch(e) {
+    } catch (e) {
       await queryRunner.rollbackTransaction();
 
-      if(e.code ==  DbErrorCodes.DuplicateKey)
+      if (e.code == DbErrorCodes.DuplicateKey)
         throw new ConflictException(iconAlreadyExists);
-      
+
       throw e;
     } finally {
       await queryRunner.release();
@@ -113,7 +130,7 @@ export class IconsService {
   /**
    * Delete an icon
    * @param userId user id deleting the icon
-   * @param id 
+   * @param id
    * @throws NotFoundException
    */
   async deleteIcon(userId: number, id: number): Promise<void> {
@@ -122,10 +139,13 @@ export class IconsService {
       .select('i.id')
       .innerJoin(Server, 's')
       .where('i.id = :id', { id })
-      .andWhere(new Brackets(qb => {
-        qb.where('s.ownerId = :userId', { userId })
-          .orWhere('i.uploadedById = :userId', { userId });
-      }));
+      .andWhere(
+        new Brackets(qb => {
+          qb.where('s.ownerId = :userId', {
+            userId,
+          }).orWhere('i.uploadedById = :userId', { userId });
+        }),
+      );
 
     const result = await this.iconRepository
       .createQueryBuilder('icon')
@@ -134,7 +154,7 @@ export class IconsService {
       .setParameters(permQb.getParameters())
       .execute();
 
-    if(result.affected > 0) throw new NotFoundException();
+    if (result.affected > 0) throw new NotFoundException();
   }
 
   /**
@@ -149,11 +169,11 @@ export class IconsService {
     try {
       const image = await jimp.read(content);
       mime = image.getMIME();
-    } catch(e) {
+    } catch (e) {
       throw new BadRequestException(invalidFileImage);
     }
 
-    if(!valid.includes(mime))
+    if (!valid.includes(mime))
       throw new BadRequestException(invalidMime(valid));
 
     return mime;
