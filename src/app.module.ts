@@ -13,6 +13,7 @@ import { ServerGroupsModule } from './server-groups/server-groups.module';
 import { IconsModule } from './icons/icons.module';
 import { ChannelsModule } from './channels/channels.module';
 import { TeamspeakModule } from './teamspeak/teamspeak.module';
+import { CrawlsModule } from './crawls/crawls.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TeamspeakModule } from './teamspeak/teamspeak.module';
     IconsModule,
     ChannelsModule,
     TeamspeakModule,
+    CrawlsModule,
   ],
   controllers: [],
   providers: [
