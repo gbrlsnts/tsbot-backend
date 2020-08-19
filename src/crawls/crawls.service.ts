@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InactiveChannelRepository } from './inactive-channel.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Crawl } from './crawl.entity';
 import { CrawlRepository } from './crawl.repository';
+import { CrawlZoneRepository } from './crawl-zone.repository';
 import { CrawlZone } from './crawl-zone.entity';
 import { CrawlDto } from './dto/crawl.dto';
+import { ZoneService } from '../servers/configs/zone/zone.service';
+import { zoneInvalid } from '../shared/messages/server.messages';
 
 @Injectable()
 export class CrawlsService {
@@ -14,16 +17,48 @@ export class CrawlsService {
      @InjectRepository(CrawlRepository)
      private crawlRepository: CrawlRepository,
      @InjectRepository(CrawlZone)
-     private crawlZoneRepository: CrawlZone
+     private crawlZoneRepository: CrawlZoneRepository,
+     private zoneService: ZoneService,
     ) {}
 
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    async getLastCrawl(serverId): Promise<Crawl> {
-      return;
+    async getLastCrawl(serverId: number): Promise<Crawl> {
+      return this.crawlRepository.findOne({
+        where: { serverId },
+        order: {
+          runAt: 'DESC',
+        },
+      });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async storeCrawl(serverId: number, dto: CrawlDto): Promise<Crawl> {
-      return;
+      const { zones, runAt } = dto;
+      const crawl = this.crawlRepository.create({ runAt });
+
+      const crawlZones = await Promise.all(zones.map(async z => {
+        const { zone: dirtyZone, inactiveChannels, totalChannels } = z;
+
+        let zoneId = Number(dirtyZone);
+
+        if(!zoneId) {
+          try {
+            zoneId = await this.zoneService.getZoneIdByName(
+              dirtyZone.toString(), 
+              serverId
+            );
+          } catch (e) {
+            throw new BadRequestException(zoneInvalid);
+          }
+        }
+
+        return {
+          zoneId,
+          inactiveChannels,
+          totalChannels,
+        };
+      }));
+
+      crawl.zones = this.crawlZoneRepository.create(crawlZones);
+      
+      return this.crawlRepository.save(crawl);
     }
 }

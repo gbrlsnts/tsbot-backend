@@ -1,5 +1,5 @@
 export class CrawlZoneDto {
-  zone: string;
+  zone: string | number;
   inactiveChannels: number;
   totalChannels: number;
 }

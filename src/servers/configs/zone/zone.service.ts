@@ -117,6 +117,24 @@ export class ZoneService {
   }
 
   /**
+   * Get a zone id by the zone name
+   * @param name zone name
+   * @param serverId server id
+   */
+  async getZoneIdByName(
+    name: string,
+    serverId: number
+  ): Promise<number> {
+    const zone = await this.zoneRepository.findOne({
+      where: { name, serverId },
+    });
+
+    if(!zone) throw new NotFoundException();
+
+    return zone.id;
+  }
+
+  /**
    * Check if a zone name exists for a server
    * @param name zone name to check
    * @param serverId server id
