@@ -8,6 +8,8 @@ import { CrawlZone } from './crawl-zone.entity';
 import { CrawlDto } from './dto/crawl.dto';
 import { ZoneService } from '../servers/configs/zone/zone.service';
 import { zoneInvalid } from '../shared/messages/server.messages';
+import { InactiveChannel } from './inactive-channel.entity';
+import { InactiveChannelDto } from './dto/inactive-channel.dto';
 
 @Injectable()
 export class CrawlsService {
@@ -60,5 +62,17 @@ export class CrawlsService {
       crawl.zones = this.crawlZoneRepository.create(crawlZones);
       
       return this.crawlRepository.save(crawl);
+    }
+
+    getInactiveChannelsByServer(serverId: number): Promise<InactiveChannel[]> {
+      return this.inactiveRepository.find({
+        where: { serverId },
+      });
+    }
+
+    async setInactiveChannelsInServer(serverId: number, dto: InactiveChannelDto[]): Promise<void> {
+      const channels = this.inactiveRepository.create(dto);
+
+      await this.inactiveRepository.save(channels);
     }
 }

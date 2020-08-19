@@ -20,7 +20,7 @@ export class InactiveChannel {
   @Expose()
   isNotified: boolean;
 
-  @UpdateDateColumn()
+  @Column()
   @Expose()
   updatedAt: Date;
 

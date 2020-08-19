@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, OneToMany, Column } from "typeorm";
 import { CrawlZone } from './crawl-zone.entity';
 
 @Entity()
@@ -6,7 +6,7 @@ export class Crawl {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn()
+  @Column()
   runAt: Date;
 
   @OneToMany(() => CrawlZone, zone => zone.crawl)
