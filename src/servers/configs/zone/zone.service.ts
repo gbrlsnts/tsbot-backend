@@ -121,15 +121,12 @@ export class ZoneService {
    * @param name zone name
    * @param serverId server id
    */
-  async getZoneIdByName(
-    name: string,
-    serverId: number
-  ): Promise<number> {
+  async getZoneIdByName(name: string, serverId: number): Promise<number> {
     const zone = await this.zoneRepository.findOne({
       where: { name, serverId },
     });
 
-    if(!zone) throw new NotFoundException();
+    if (!zone) throw new NotFoundException();
 
     return zone.id;
   }

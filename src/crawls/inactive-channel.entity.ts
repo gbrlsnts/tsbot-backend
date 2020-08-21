@@ -1,6 +1,6 @@
-import { PrimaryColumn, Column, ManyToOne, Entity, Unique } from "typeorm";
+import { PrimaryColumn, Column, ManyToOne, Entity, Unique } from 'typeorm';
 import { Server } from '../servers/server.entity';
-import { Expose } from "class-transformer";
+import { Expose } from 'class-transformer';
 
 @Entity()
 @Unique('uniq_inactive_sv', ['serverId', 'tsChannelId'])
