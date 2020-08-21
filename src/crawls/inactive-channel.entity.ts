@@ -1,4 +1,4 @@
-import { PrimaryColumn, Column, UpdateDateColumn, ManyToOne, Entity, Unique } from "typeorm";
+import { PrimaryColumn, Column, ManyToOne, Entity, Unique } from "typeorm";
 import { Server } from '../servers/server.entity';
 import { Expose } from "class-transformer";
 
