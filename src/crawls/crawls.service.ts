@@ -15,6 +15,7 @@ import { ZoneService } from '../servers/configs/zone/zone.service';
 import { zoneInvalid } from '../shared/messages/server.messages';
 import { InactiveChannel } from './inactive-channel.entity';
 import { SetInactiveChannelsDto } from './dto/set-inactive.dto';
+import { Zone } from '../servers/configs/zone/zone.entity';
 
 @Injectable()
 export class CrawlsService {
@@ -33,13 +34,13 @@ export class CrawlsService {
    * @param serverId server id
    */
   async getLastCrawl(serverId: number): Promise<Crawl> {
-    const crawl = await this.crawlRepository.findOne({
-      where: { serverId },
-      order: {
-        runAt: 'DESC',
-      },
-      relations: ['zones'],
-    });
+    const crawl = await this.crawlRepository
+      .createQueryBuilder('c')
+      .innerJoinAndMapMany('c.zones', CrawlZone, 'cl', 'c.id = cl.crawlId')
+      .innerJoinAndMapOne('cl.zone', Zone, 'z', 'cl.zoneId = z.id')
+      .where({ serverId })
+      .orderBy('c.runAt', 'DESC')
+      .getOne();
 
     if (!crawl) throw new NotFoundException();
 
