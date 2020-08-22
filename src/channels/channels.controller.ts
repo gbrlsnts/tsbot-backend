@@ -36,10 +36,7 @@ export class ChannelsController {
   constructor(private channelsService: ChannelsService) {}
 
   @Get()
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   getChannelsByServer(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<Channel[]> {
@@ -47,10 +44,7 @@ export class ChannelsController {
   }
 
   @Get('/:id')
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER, ServerRoles.CLIENT],
-  })
+  @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
   getChannelById(
     @Param('id', ParseIntPipe) id: number,
     @Param('server', ParseIntPipe) serverId: number,
@@ -59,10 +53,7 @@ export class ChannelsController {
   }
 
   @Post()
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER, ServerRoles.CLIENT],
-  })
+  @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
   createChannel(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
@@ -72,10 +63,7 @@ export class ChannelsController {
   }
 
   @Delete('/:id')
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER, ServerRoles.CLIENT],
-  })
+  @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
   deleteChannel(
     @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,

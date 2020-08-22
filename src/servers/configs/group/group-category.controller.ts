@@ -35,10 +35,7 @@ export class GroupCategoryController {
   constructor(private categoryService: GroupCategoryService) {}
 
   @Get()
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   getAllCategories(
     @Param('server', ParseIntPipe) serverId: number,
     @Query() filters: CategoryFiltersDto,
@@ -50,10 +47,7 @@ export class GroupCategoryController {
   }
 
   @Get('/:id')
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   getCategoryById(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
@@ -62,10 +56,7 @@ export class GroupCategoryController {
   }
 
   @Post()
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   createCategory(
     @Param('server', ParseIntPipe) serverId: number,
     @Body(new ValidationPipe(appValidationPipeOptions)) dto: CreateCategoryDto,
@@ -74,10 +65,7 @@ export class GroupCategoryController {
   }
 
   @Patch('/:id')
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   updateCategory(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe(appValidationPipeOptions)) dto: UpdateCategoryDto,
@@ -86,10 +74,7 @@ export class GroupCategoryController {
   }
 
   @Delete('/:id')
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   deleteCategory(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.categoryService.deleteCategory(id);
   }

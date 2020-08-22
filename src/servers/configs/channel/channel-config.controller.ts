@@ -35,10 +35,7 @@ export class ChannelConfigController {
   constructor(private configService: ChannelConfigService) {}
 
   @Get()
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   getConfigsByServer(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<ChannelConfig[]> {
@@ -46,10 +43,7 @@ export class ChannelConfigController {
   }
 
   @Get('/:id')
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   getConfigById(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
@@ -58,10 +52,7 @@ export class ChannelConfigController {
   }
 
   @Post()
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   createConfig(
     @Param('server', ParseIntPipe) serverId: number,
     @Body(new ValidationPipe(appValidationPipeOptions)) dto: CreateConfigDto,
@@ -70,10 +61,7 @@ export class ChannelConfigController {
   }
 
   @Patch('/:id')
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   updateConfig(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe(appValidationPipeOptions)) dto: UpdateConfigDto,
@@ -82,10 +70,7 @@ export class ChannelConfigController {
   }
 
   @Put('/:id/permissions')
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   setConfigPermissions(
     @Param('id', ParseIntPipe) configId: number,
     @Body(new ValidationPipe(appValidationPipeOptions)) dto: SetPermissionsDto,
@@ -94,10 +79,7 @@ export class ChannelConfigController {
   }
 
   @Delete('/:id')
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   deleteConfig(@Param('id', ParseIntPipe) configId: number): Promise<void> {
     return this.configService.deleteConfig(configId);
   }

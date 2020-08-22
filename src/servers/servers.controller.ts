@@ -48,17 +48,13 @@ export class ServersController {
   }
 
   @Get('/:id')
-  @SetServerRoles({
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER], 'id')
   getServerById(@Param('id', ParseIntPipe) id: number): Promise<Server> {
     return this.serverService.getServerById(id);
   }
 
   @Get('/:id/config')
-  @SetServerRoles({
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER], 'id')
   getServerConfigById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ServerConfig> {
@@ -74,9 +70,7 @@ export class ServersController {
   }
 
   @Patch('/:id')
-  @SetServerRoles({
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER], 'id')
   updateServer(
     @Param('id', ParseIntPipe) id: number,
     @Body(
@@ -94,9 +88,7 @@ export class ServersController {
   }
 
   @Delete('/:id')
-  @SetServerRoles({
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER], 'id')
   deleteServer(
     @Param('id', ParseIntPipe)
     id: number,

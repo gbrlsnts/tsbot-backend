@@ -1,7 +1,9 @@
 import { SetMetadata, CustomDecorator } from '@nestjs/common';
-import { ServerRolesOptions } from '../guards/server-roles.guard';
 import { serverRolesMetadataKey } from '../../auth/constants';
+import { ServerRoles } from '../guards/server-roles.guard';
 
 export const SetServerRoles = (
-  roles: ServerRolesOptions,
-): CustomDecorator<string> => SetMetadata(serverRolesMetadataKey, roles);
+  roles: ServerRoles[],
+  idParam?: string,
+): CustomDecorator<string> =>
+  SetMetadata(serverRolesMetadataKey, { roles, idParam });

@@ -68,10 +68,7 @@ export class IconsController {
   }
 
   @Post()
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   uploadIcon(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,

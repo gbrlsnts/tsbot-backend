@@ -36,10 +36,7 @@ export class ClientsController {
   constructor(private clientsService: ClientsService) {}
 
   @Get()
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   getAllServerClients(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<Client[]> {
@@ -47,10 +44,7 @@ export class ClientsController {
   }
 
   @Get('/:id')
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   getServerClientById(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) clientId: number,
@@ -60,10 +54,7 @@ export class ClientsController {
 
   @Post()
   @HttpCode(200)
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   saveServerClientById(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,

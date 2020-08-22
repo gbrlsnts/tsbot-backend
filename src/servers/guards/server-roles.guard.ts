@@ -25,7 +25,7 @@ export class ServerRolesGuard implements CanActivate {
 
     if (!options) return true;
 
-    const idParam = Number(req.params[options.idParam || 'id']);
+    const idParam = Number(req.params[options.idParam || 'server']);
 
     if (!idParam) return false;
 

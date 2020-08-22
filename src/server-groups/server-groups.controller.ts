@@ -27,10 +27,7 @@ export class ServerGroupsController {
   constructor(private groupsService: ServerGroupsService) {}
 
   @Get()
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   getAllGroupsByServerId(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<ServerGroup[]> {
@@ -38,10 +35,7 @@ export class ServerGroupsController {
   }
 
   @Put('/sync')
-  @SetServerRoles({
-    idParam: 'server',
-    roles: [ServerRoles.OWNER],
-  })
+  @SetServerRoles([ServerRoles.OWNER])
   syncGroupsByServerId(@Param('server', ParseIntPipe) serverId: number): void {
     return this.groupsService.syncGroupsByServerId(serverId);
   }
