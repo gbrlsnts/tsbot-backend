@@ -1,6 +1,7 @@
 import { Entity, PrimaryColumn, Column, ManyToOne } from 'typeorm';
 import { Crawl } from './crawl.entity';
 import { Zone } from '../servers/configs/zone/zone.entity';
+import { Expose } from 'class-transformer';
 
 @Entity()
 export class CrawlZone {
@@ -13,11 +14,20 @@ export class CrawlZone {
   @Column({
     unsigned: true,
   })
+  @Expose()
   inactiveChannels: number;
 
   @Column({
     unsigned: true,
+    default: 0,
   })
+  @Expose()
+  deletedChannels: number;
+
+  @Column({
+    unsigned: true,
+  })
+  @Expose()
   totalChannels: number;
 
   @ManyToOne(

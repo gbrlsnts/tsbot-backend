@@ -5,6 +5,8 @@ import { ServersModule } from '../servers/servers.module';
 import { InactiveChannelRepository } from './inactive-channel.repository';
 import { CrawlRepository } from './crawl.repository';
 import { CrawlZoneRepository } from './crawl-zone.repository';
+import { CrawlsController } from './crawls.controller';
+import { InactiveController } from './inactive.controller';
 
 @Module({
   imports: [
@@ -17,5 +19,6 @@ import { CrawlZoneRepository } from './crawl-zone.repository';
   ],
   providers: [CrawlsService],
   exports: [CrawlsService],
+  controllers: [CrawlsController, InactiveController],
 })
 export class CrawlsModule {}

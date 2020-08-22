@@ -1,5 +1,9 @@
 import { In, getConnection } from 'typeorm';
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InactiveChannelRepository } from './inactive-channel.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Crawl } from './crawl.entity';
@@ -10,7 +14,7 @@ import { CrawlDto } from './dto/crawl.dto';
 import { ZoneService } from '../servers/configs/zone/zone.service';
 import { zoneInvalid } from '../shared/messages/server.messages';
 import { InactiveChannel } from './inactive-channel.entity';
-import { InactiveChannelDto } from './dto/inactive-channel.dto';
+import { SetInactiveChannelsDto } from './dto/set-inactive.dto';
 
 @Injectable()
 export class CrawlsService {
@@ -29,12 +33,17 @@ export class CrawlsService {
    * @param serverId server id
    */
   async getLastCrawl(serverId: number): Promise<Crawl> {
-    return this.crawlRepository.findOne({
+    const crawl = await this.crawlRepository.findOne({
       where: { serverId },
       order: {
         runAt: 'DESC',
       },
+      relations: ['zones'],
     });
+
+    if (!crawl) throw new NotFoundException();
+
+    return crawl;
   }
 
   /**
@@ -44,29 +53,20 @@ export class CrawlsService {
    */
   async storeCrawl(serverId: number, dto: CrawlDto): Promise<Crawl> {
     const { zones, runAt } = dto;
-    const crawl = this.crawlRepository.create({ runAt });
+    const crawl = this.crawlRepository.create({ runAt, serverId });
 
     const crawlZones = await Promise.all(
       zones.map(async z => {
-        const { zone: dirtyZone, inactiveChannels, totalChannels } = z;
+        const { zone: dirtyZone } = z;
 
-        let zoneId = Number(dirtyZone);
-
-        if (!zoneId) {
-          try {
-            zoneId = await this.zoneService.getZoneIdByName(
-              dirtyZone.toString(),
-              serverId,
-            );
-          } catch (e) {
-            throw new BadRequestException(zoneInvalid);
-          }
-        }
+        const zoneId = await this.getValidZoneId(dirtyZone, serverId);
 
         return {
+          serverId,
           zoneId,
-          inactiveChannels,
-          totalChannels,
+          inactiveChannels: z.inactiveChannels,
+          deletedChannels: z.deletedChannels,
+          totalChannels: z.totalChannels,
         };
       }),
     );
@@ -74,6 +74,34 @@ export class CrawlsService {
     crawl.zones = this.crawlZoneRepository.create(crawlZones);
 
     return this.crawlRepository.save(crawl);
+  }
+
+  /**
+   * Check if a zone belongs to a serverr
+   * @param checkZoneId zone id or name to check
+   * @param serverId server id
+   */
+  private async getValidZoneId(
+    checkZoneId: string | number,
+    serverId: number,
+  ): Promise<number> {
+    const zoneId = Number(checkZoneId);
+
+    try {
+      // not a number, try to get by name
+      if (!zoneId) {
+        return await this.zoneService.getZoneIdByName(
+          checkZoneId.toString(),
+          serverId,
+        );
+      }
+
+      const zone = await this.zoneService.getZoneIdByServer(zoneId, serverId);
+
+      return zone.id;
+    } catch (e) {
+      throw new BadRequestException(zoneInvalid);
+    }
   }
 
   /**
@@ -93,9 +121,9 @@ export class CrawlsService {
    */
   async setInactiveChannelsInServer(
     serverId: number,
-    dto: InactiveChannelDto[],
+    dto: SetInactiveChannelsDto,
   ): Promise<void> {
-    const channels = this.inactiveRepository.create(dto);
+    const channels = this.inactiveRepository.create(dto.channels);
 
     channels.forEach(c => {
       c.serverId = serverId;
@@ -112,16 +140,19 @@ export class CrawlsService {
     await queryRunner.startTransaction();
 
     try {
-      await this.inactiveRepository.delete({
-        serverId,
-        tsChannelId: In(toDelete),
-      });
+      if (toDelete.length > 0) {
+        await this.inactiveRepository.delete({
+          serverId,
+          tsChannelId: In(toDelete),
+        });
+      }
 
       await this.inactiveRepository.save(channels, { transaction: false });
 
       await queryRunner.commitTransaction();
     } catch (e) {
       await queryRunner.rollbackTransaction();
+      throw e;
     } finally {
       await queryRunner.release();
     }
