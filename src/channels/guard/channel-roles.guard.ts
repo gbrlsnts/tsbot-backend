@@ -36,12 +36,8 @@ export class ChannelRolesGuard implements CanActivate {
    * @param userId the logged in user id
    * @param channelId the channel id to check
    */
-  private async hasAccess(userId: number, channelId: number): Promise<boolean> {
-    const channel = await this.channelsService.getChannelById(channelId, {
-      relations: ['client'],
-    });
-
-    return channel.client.userId === userId;
+  private hasAccess(userId: number, channelId: number): Promise<boolean> {
+    return this.channelsService.checkUserOwnsChannelOrServer(userId, channelId);
   }
 }
 

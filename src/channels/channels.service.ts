@@ -123,4 +123,19 @@ export class ChannelsService {
 
     return count > 0;
   }
+
+  async checkUserOwnsChannelOrServer(
+    userId: number,
+    id: number,
+  ): Promise<boolean> {
+    const count = await this.channelRepository
+      .createQueryBuilder('ch')
+      .innerJoin(Client, 'cl', 'cl.id = ch.clientId')
+      .innerJoin(Server, 's', 's.id = cl.serverId')
+      .where('ch.id = :id', { id })
+      .andWhere('(cl.userId = :userId OR s.ownerId = :userId)', { userId })
+      .getCount();
+
+    return count === 1;
+  }
 }
