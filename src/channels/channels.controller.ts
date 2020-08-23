@@ -43,7 +43,7 @@ export class ChannelsController {
 
   @Get('/:id')
   @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
-  @SetChannelRoles([ChannelRoles.OWNER])
+  @SetChannelRoles([ChannelRoles.OWNER], 'id')
   getChannelById(
     @Param('id', ParseIntPipe) id: number,
     @Param('server', ParseIntPipe) serverId: number,
@@ -53,7 +53,6 @@ export class ChannelsController {
 
   @Post()
   @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
-  @SetChannelRoles([ChannelRoles.OWNER])
   createChannel(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
@@ -64,7 +63,7 @@ export class ChannelsController {
 
   @Delete('/:id')
   @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
-  @SetChannelRoles([ChannelRoles.OWNER])
+  @SetChannelRoles([ChannelRoles.OWNER], 'id')
   deleteChannel(
     @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,

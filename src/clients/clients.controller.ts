@@ -14,8 +14,6 @@ import {
 import { ClientsService } from './clients.service';
 import { Client } from './client.entity';
 import { SaveClientDto } from './dto/save-client.dto';
-import { GetUser } from '../auth/decorators/get-user-decorator';
-import { User } from '../users/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { appSerializeOptions } from '../shared/constants';
 import {
@@ -52,10 +50,9 @@ export class ClientsController {
   @HttpCode(200)
   @SetServerRoles([ServerRoles.OWNER])
   saveServerClientById(
-    @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
     @Body() dto: SaveClientDto,
   ): Promise<Client> {
-    return this.clientsService.saveClient(user.id, serverId, dto);
+    return this.clientsService.saveClient(serverId, dto);
   }
 }

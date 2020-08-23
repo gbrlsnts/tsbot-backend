@@ -75,12 +75,8 @@ export class ClientsService {
     });
   }
 
-  async saveClient(
-    userId: number,
-    serverId: number,
-    dto: SaveClientDto,
-  ): Promise<Client> {
-    const { tsUniqueId, tsClientDbId } = dto;
+  async saveClient(serverId: number, dto: SaveClientDto): Promise<Client> {
+    const { userId, tsUniqueId, tsClientDbId } = dto;
 
     let client: Client = await this.clientRepository.findOne({
       where: { userId, serverId },
