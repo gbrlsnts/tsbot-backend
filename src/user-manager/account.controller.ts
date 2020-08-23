@@ -1,8 +1,6 @@
 import {
   Controller,
   Get,
-  Param,
-  ParseIntPipe,
   Body,
   Patch,
   ValidationPipe,
@@ -15,40 +13,36 @@ import { UsersService } from '../users/users.service';
 import { UpdateEmailDto } from '../users/dto/update-email.dto';
 import { UpdatePasswordDto } from '../users/dto/update-password.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { LoggedUserGuard } from '../auth/guards/self-user.guard';
 import { User } from '../users/user.entity';
 import { appSerializeOptions } from '../shared/constants';
-import { IsAdminGuard } from 'src/auth/guards/admin.guard';
+import { GetUser } from '../auth/decorators/get-user-decorator';
 
-@Controller('users')
-@UseGuards(JwtAuthGuard, IsAdminGuard)
+@Controller('account')
+@UseGuards(JwtAuthGuard, LoggedUserGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions(appSerializeOptions)
-export class UserManagerController {
+export class AccountController {
   constructor(private usersService: UsersService) {}
 
   @Get()
-  async getUsers(): Promise<User[]> {
-    return this.usersService.getUsers();
+  getUserById(@GetUser() user: User): Promise<User> {
+    return this.usersService.getUserById(user.id);
   }
 
-  @Get('/:id')
-  getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return this.usersService.getUserById(id);
-  }
-
-  @Patch('/:id/email')
+  @Patch('/email')
   updateUserEmail(
-    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: User,
     @Body(ValidationPipe) updateEmailDto: UpdateEmailDto,
   ): Promise<User> {
-    return this.usersService.updateEmail(id, updateEmailDto);
+    return this.usersService.updateEmail(user.id, updateEmailDto);
   }
 
-  @Patch('/:id/password')
+  @Patch('/password')
   updateUserPassword(
-    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: User,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ): Promise<void> {
-    return this.usersService.updatePassword(id, updatePasswordDto);
+    return this.usersService.updatePassword(user.id, updatePasswordDto);
   }
 }
