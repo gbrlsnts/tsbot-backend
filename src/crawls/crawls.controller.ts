@@ -8,16 +8,12 @@ import {
   Get,
   Param,
   Post,
-  ValidationPipe,
   Body,
 } from '@nestjs/common';
 import { CrawlsService } from './crawls.service';
 import { Crawl } from './crawl.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import {
-  appSerializeOptions,
-  appValidationPipeOptions,
-} from '../shared/constants';
+import { appSerializeOptions } from '../shared/constants';
 import { IsAdminGuard } from '../auth/guards/admin.guard';
 import { CrawlDto } from './dto/crawl.dto';
 
@@ -38,7 +34,7 @@ export class CrawlsController {
   @Post()
   storeCrawl(
     @Param('server', ParseIntPipe) serverId: number,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: CrawlDto,
+    @Body() dto: CrawlDto,
   ): Promise<Crawl> {
     return this.crawlsService.storeCrawl(serverId, dto);
   }

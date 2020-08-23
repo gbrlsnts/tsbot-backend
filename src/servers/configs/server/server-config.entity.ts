@@ -13,7 +13,6 @@ import { Expose } from 'class-transformer';
 @Entity()
 export class ServerConfig {
   @PrimaryColumn()
-  @Expose()
   id: number;
 
   @OneToOne(

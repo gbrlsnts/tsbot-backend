@@ -8,7 +8,6 @@ import {
   ParseIntPipe,
   Param,
   Body,
-  ValidationPipe,
   BadRequestException,
   UseInterceptors,
   ClassSerializerInterceptor,
@@ -25,11 +24,9 @@ import { atLeastOnePropertyDefined } from '../shared/messages/global.messages';
 import { SetServerRoles } from './decorators/set-server-roles.decorator';
 import { Server } from './server.entity';
 import { ServerConfig } from './configs/server/server-config.entity';
-import {
-  appSerializeOptions,
-  appValidationPipeOptions,
-} from '../shared/constants';
+import { appSerializeOptions } from '../shared/constants';
 import { IsAdminGuard } from '../auth/guards/admin.guard';
+import { UpdateServerDto } from './dto/update-server.dto';
 
 @Controller('servers')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
@@ -62,10 +59,7 @@ export class ServersController {
   }
 
   @Post()
-  createServer(
-    @GetUser() user: User,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: ServerDto,
-  ): Promise<Server> {
+  createServer(@GetUser() user: User, @Body() dto: ServerDto): Promise<Server> {
     return this.serverService.createServer(user, dto);
   }
 
@@ -73,13 +67,7 @@ export class ServersController {
   @SetServerRoles([ServerRoles.OWNER], 'id')
   updateServer(
     @Param('id', ParseIntPipe) id: number,
-    @Body(
-      new ValidationPipe({
-        ...appValidationPipeOptions,
-        skipMissingProperties: true,
-      }),
-    )
-    dto: ServerDto,
+    @Body() dto: UpdateServerDto,
   ): Promise<Server> {
     if (Object.keys(dto).length === 0)
       throw new BadRequestException(atLeastOnePropertyDefined);

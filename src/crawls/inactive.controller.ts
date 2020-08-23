@@ -7,16 +7,12 @@ import {
   ParseIntPipe,
   Get,
   Param,
-  ValidationPipe,
   Body,
   Put,
 } from '@nestjs/common';
 import { CrawlsService } from './crawls.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import {
-  appSerializeOptions,
-  appValidationPipeOptions,
-} from '../shared/constants';
+import { appSerializeOptions } from '../shared/constants';
 import { IsAdminGuard } from '../auth/guards/admin.guard';
 import { InactiveChannel } from './inactive-channel.entity';
 import { SetInactiveChannelsDto } from './dto/set-inactive.dto';
@@ -38,7 +34,7 @@ export class InactiveController {
   @Put()
   setInactiveChannels(
     @Param('server', ParseIntPipe) serverId: number,
-    @Body(new ValidationPipe(appValidationPipeOptions))
+    @Body()
     dto: SetInactiveChannelsDto,
   ): Promise<void> {
     return this.crawlsService.setInactiveChannelsInServer(serverId, dto);

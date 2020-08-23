@@ -7,7 +7,6 @@ import {
   Post,
   Param,
   Body,
-  ValidationPipe,
   ParseIntPipe,
   Patch,
   Get,
@@ -16,10 +15,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { ServerRolesGuard, ServerRoles } from '../../guards/server-roles.guard';
-import {
-  appSerializeOptions,
-  appValidationPipeOptions,
-} from '../../../shared/constants';
+import { appSerializeOptions } from '../../../shared/constants';
 import { GroupCategoryService } from './group-category.service';
 import { GroupCategory } from './group-category.entity';
 import { SetServerRoles } from '../../decorators/set-server-roles.decorator';
@@ -59,7 +55,7 @@ export class GroupCategoryController {
   @SetServerRoles([ServerRoles.OWNER])
   createCategory(
     @Param('server', ParseIntPipe) serverId: number,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: CreateCategoryDto,
+    @Body() dto: CreateCategoryDto,
   ): Promise<GroupCategory> {
     return this.categoryService.createCategory(serverId, dto);
   }
@@ -68,7 +64,7 @@ export class GroupCategoryController {
   @SetServerRoles([ServerRoles.OWNER])
   updateCategory(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: UpdateCategoryDto,
+    @Body() dto: UpdateCategoryDto,
   ): Promise<GroupCategory> {
     return this.categoryService.updateCategory(id, dto);
   }

@@ -11,16 +11,12 @@ import {
   ParseUUIDPipe,
   Post,
   Body,
-  ValidationPipe,
   Res,
 } from '@nestjs/common';
 import { IconsService } from './icons.service';
 import { Icon } from './icon.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import {
-  appSerializeOptions,
-  appValidationPipeOptions,
-} from '../shared/constants';
+import { appSerializeOptions } from '../shared/constants';
 import { SetServerRoles } from '../servers/decorators/set-server-roles.decorator';
 import {
   ServerRoles,
@@ -72,7 +68,7 @@ export class IconsController {
   uploadIcon(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: UploadIconDto,
+    @Body() dto: UploadIconDto,
   ): Promise<Icon> {
     return this.iconsService.uploadIcon(user.id, serverId, dto);
   }

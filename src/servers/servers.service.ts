@@ -12,6 +12,7 @@ import { ServerConfigRepository } from './configs/server/server-config.repositor
 import { serverNameExists } from '../shared/messages/server.messages';
 import { ServerConfigDto } from './dto/config.dto';
 import { IsNull } from 'typeorm';
+import { UpdateServerDto } from './dto/update-server.dto';
 
 @Injectable()
 export class ServersService {
@@ -111,7 +112,7 @@ export class ServersService {
    * @param id server id
    * @param dto dto with the update data
    */
-  async updateServer(id: number, dto: ServerDto): Promise<Server> {
+  async updateServer(id: number, dto: UpdateServerDto): Promise<Server> {
     const server = await this.getServerWithConfigById(id);
 
     if (server.name !== dto.serverName) {
@@ -127,14 +128,10 @@ export class ServersService {
     const updatedConfigDto = new ServerConfigDto(dto);
     server.config.config = server.config.config.merge(updatedConfigDto);
 
-    const updated = await this.serverRepository.saveTransactionServerAndConfig(
+    return await this.serverRepository.saveTransactionServerAndConfig(
       server,
       server.config,
     );
-
-    delete updated.config;
-
-    return updated;
   }
 
   /**

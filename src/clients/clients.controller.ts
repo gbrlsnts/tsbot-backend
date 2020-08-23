@@ -5,7 +5,6 @@ import {
   ParseIntPipe,
   Post,
   Body,
-  ValidationPipe,
   UseGuards,
   UseInterceptors,
   SerializeOptions,
@@ -18,10 +17,7 @@ import { SaveClientDto } from './dto/save-client.dto';
 import { GetUser } from '../auth/decorators/get-user-decorator';
 import { User } from '../users/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import {
-  appSerializeOptions,
-  appValidationPipeOptions,
-} from '../shared/constants';
+import { appSerializeOptions } from '../shared/constants';
 import {
   ServerRolesGuard,
   ServerRoles,
@@ -58,7 +54,7 @@ export class ClientsController {
   saveServerClientById(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: SaveClientDto,
+    @Body() dto: SaveClientDto,
   ): Promise<Client> {
     return this.clientsService.saveClient(user.id, serverId, dto);
   }

@@ -16,6 +16,7 @@ export class ServerRepository extends Repository<Server> {
     let createdServer: Server;
 
     await this.manager.transaction(async transactionalManager => {
+      server.updatedAt = new Date();
       createdServer = await transactionalManager.save(server);
 
       config.id = createdServer.id;

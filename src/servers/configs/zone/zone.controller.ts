@@ -8,7 +8,6 @@ import {
   Param,
   Get,
   Post,
-  ValidationPipe,
   Body,
   Patch,
   Delete,
@@ -21,7 +20,6 @@ import { Zone } from './zone.entity';
 import { SetServerRoles } from '../../decorators/set-server-roles.decorator';
 import { ServerRoles } from '../../guards/server-roles.guard';
 import { UpdateZoneDto } from './dto/update-zone.dto';
-import { appValidationPipeOptions } from '../../../shared/constants';
 import { CreateZoneDto } from './dto/create-zone.dto';
 
 @Controller('/servers/:server/configs/zones')
@@ -52,7 +50,7 @@ export class ZoneController {
   @SetServerRoles([ServerRoles.OWNER])
   createZone(
     @Param('server', ParseIntPipe) serverId: number,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: CreateZoneDto,
+    @Body() dto: CreateZoneDto,
   ): Promise<Zone> {
     return this.zoneService.createZone(serverId, dto);
   }
@@ -61,7 +59,7 @@ export class ZoneController {
   @SetServerRoles([ServerRoles.OWNER])
   updateZone(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: UpdateZoneDto,
+    @Body() dto: UpdateZoneDto,
   ): Promise<Zone> {
     return this.zoneService.updateZone(id, dto);
   }

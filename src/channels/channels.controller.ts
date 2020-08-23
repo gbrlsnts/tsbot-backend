@@ -7,7 +7,6 @@ import {
   SerializeOptions,
   Param,
   ParseIntPipe,
-  ValidationPipe,
   Body,
   Post,
   Delete,
@@ -19,10 +18,7 @@ import {
   ServerRolesGuard,
   ServerRoles,
 } from '../servers/guards/server-roles.guard';
-import {
-  appSerializeOptions,
-  appValidationPipeOptions,
-} from '../shared/constants';
+import { appSerializeOptions } from '../shared/constants';
 import { SetServerRoles } from '../servers/decorators/set-server-roles.decorator';
 import { ChannelDto } from './dto/channel.dto';
 import { GetUser } from '../auth/decorators/get-user-decorator';
@@ -57,7 +53,7 @@ export class ChannelsController {
   createChannel(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
-    @Body(new ValidationPipe(appValidationPipeOptions)) dto: ChannelDto,
+    @Body() dto: ChannelDto,
   ): Promise<Channel> {
     return this.channelsService.createChannel(user.id, serverId, dto);
   }
