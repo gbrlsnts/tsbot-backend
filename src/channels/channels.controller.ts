@@ -23,9 +23,11 @@ import { SetServerRoles } from '../servers/decorators/set-server-roles.decorator
 import { ChannelDto } from './dto/channel.dto';
 import { GetUser } from '../auth/decorators/get-user-decorator';
 import { User } from '../users/user.entity';
+import { SetChannelRoles } from './decorators/set-channel-roles.decorator';
+import { ChannelRoles, ChannelRolesGuard } from './guard/channel-roles.guard';
 
 @Controller('/servers/:server/channels')
-@UseGuards(JwtAuthGuard, ServerRolesGuard)
+@UseGuards(JwtAuthGuard, ServerRolesGuard, ChannelRolesGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions(appSerializeOptions)
 export class ChannelsController {
@@ -41,6 +43,7 @@ export class ChannelsController {
 
   @Get('/:id')
   @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
+  @SetChannelRoles([ChannelRoles.OWNER])
   getChannelById(
     @Param('id', ParseIntPipe) id: number,
     @Param('server', ParseIntPipe) serverId: number,
@@ -50,6 +53,7 @@ export class ChannelsController {
 
   @Post()
   @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
+  @SetChannelRoles([ChannelRoles.OWNER])
   createChannel(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
@@ -60,6 +64,7 @@ export class ChannelsController {
 
   @Delete('/:id')
   @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
+  @SetChannelRoles([ChannelRoles.OWNER])
   deleteChannel(
     @GetUser() user: User,
     @Param('id', ParseIntPipe) id: number,

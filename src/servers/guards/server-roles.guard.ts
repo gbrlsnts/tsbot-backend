@@ -2,7 +2,7 @@ import { Reflector } from '@nestjs/core';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { ServersService } from '../servers.service';
 import { AppRequest } from 'src/shared/types';
-import { serverRolesMetadataKey } from '../../auth/constants';
+import { serverRolesMetadataKey } from '../../shared/constants';
 import { ClientsService } from '../../clients/clients.service';
 
 @Injectable()

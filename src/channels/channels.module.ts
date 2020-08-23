@@ -6,6 +6,7 @@ import { ChannelRepository } from './channel.repository';
 import { ClientsModule } from '../clients/clients.module';
 import { ChannelsController } from './channels.controller';
 import { TeamspeakModule } from '../teamspeak/teamspeak.module';
+import { ChannelRolesGuard } from './guard/channel-roles.guard';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { TeamspeakModule } from '../teamspeak/teamspeak.module';
     ClientsModule,
     TeamspeakModule,
   ],
-  providers: [ChannelsService],
+  providers: [ChannelsService, ChannelRolesGuard],
   controllers: [ChannelsController],
   exports: [],
 })

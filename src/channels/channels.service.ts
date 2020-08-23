@@ -13,6 +13,7 @@ import { ClientsService } from '../clients/clients.service';
 import { TeamspeakService } from '../teamspeak/teamspeak.service';
 import { alreadyHasChannel } from '../shared/messages/channel.messages';
 import { Server } from '../servers/server.entity';
+import { FindChannelOptions } from './channel.types';
 
 @Injectable()
 export class ChannelsService {
@@ -44,9 +45,15 @@ export class ChannelsService {
     return channel;
   }
 
-  async getChannelById(id: number): Promise<Channel> {
+  async getChannelById(
+    id: number,
+    options?: FindChannelOptions,
+  ): Promise<Channel> {
+    const { relations } = options;
+
     const channel = await this.channelRepository.findOne({
       where: { id },
+      relations,
     });
 
     if (!channel) throw new NotFoundException();
