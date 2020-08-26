@@ -5,7 +5,6 @@ import {
   ParseIntPipe,
   Body,
   Patch,
-  ValidationPipe,
   UseGuards,
   UseInterceptors,
   ClassSerializerInterceptor,
@@ -39,7 +38,7 @@ export class UserManagerController {
   @Patch('/:id/email')
   updateUserEmail(
     @Param('id', ParseIntPipe) id: number,
-    @Body(ValidationPipe) updateEmailDto: UpdateEmailDto,
+    @Body() updateEmailDto: UpdateEmailDto,
   ): Promise<User> {
     return this.usersService.updateEmail(id, updateEmailDto);
   }

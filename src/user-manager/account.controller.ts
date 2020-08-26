@@ -3,7 +3,6 @@ import {
   Get,
   Body,
   Patch,
-  ValidationPipe,
   UseGuards,
   UseInterceptors,
   ClassSerializerInterceptor,
@@ -33,7 +32,7 @@ export class AccountController {
   @Patch('/email')
   updateUserEmail(
     @GetUser() user: User,
-    @Body(ValidationPipe) updateEmailDto: UpdateEmailDto,
+    @Body() updateEmailDto: UpdateEmailDto,
   ): Promise<User> {
     return this.usersService.updateEmail(user.id, updateEmailDto);
   }
