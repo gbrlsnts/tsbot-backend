@@ -24,13 +24,13 @@ import { SetServerRoles } from '../servers/decorators/set-server-roles.decorator
 
 @Controller('/servers/:server/clients')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
+@SetServerRoles([ServerRoles.OWNER])
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions(appSerializeOptions)
 export class ClientsController {
   constructor(private clientsService: ClientsService) {}
 
   @Get()
-  @SetServerRoles([ServerRoles.OWNER])
   getAllServerClients(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<Client[]> {
@@ -38,7 +38,6 @@ export class ClientsController {
   }
 
   @Get('/:id')
-  @SetServerRoles([ServerRoles.OWNER])
   getServerClientById(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) clientId: number,
@@ -48,7 +47,6 @@ export class ClientsController {
 
   @Post()
   @HttpCode(200)
-  @SetServerRoles([ServerRoles.OWNER])
   saveServerClientById(
     @Param('server', ParseIntPipe) serverId: number,
     @Body() dto: SaveClientDto,

@@ -30,6 +30,7 @@ import { UpdateServerDto } from './dto/update-server.dto';
 
 @Controller('servers')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
+@SetServerRoles([ServerRoles.OWNER], 'id')
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions(appSerializeOptions)
 export class ServersController {
@@ -45,13 +46,11 @@ export class ServersController {
   }
 
   @Get('/:id')
-  @SetServerRoles([ServerRoles.OWNER], 'id')
   getServerById(@Param('id', ParseIntPipe) id: number): Promise<Server> {
     return this.serverService.getServerById(id);
   }
 
   @Get('/:id/config')
-  @SetServerRoles([ServerRoles.OWNER], 'id')
   getServerConfigById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ServerConfig> {
@@ -64,7 +63,6 @@ export class ServersController {
   }
 
   @Patch('/:id')
-  @SetServerRoles([ServerRoles.OWNER], 'id')
   updateServer(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateServerDto,
@@ -76,7 +74,6 @@ export class ServersController {
   }
 
   @Delete('/:id')
-  @SetServerRoles([ServerRoles.OWNER], 'id')
   deleteServer(
     @Param('id', ParseIntPipe)
     id: number,

@@ -25,13 +25,13 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('/servers/:server/configs/groups')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
+@SetServerRoles([ServerRoles.OWNER])
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions(appSerializeOptions)
 export class GroupCategoryController {
   constructor(private categoryService: GroupCategoryService) {}
 
   @Get()
-  @SetServerRoles([ServerRoles.OWNER])
   getAllCategories(
     @Param('server', ParseIntPipe) serverId: number,
     @Query() filters: CategoryFiltersDto,
@@ -43,7 +43,6 @@ export class GroupCategoryController {
   }
 
   @Get('/:id')
-  @SetServerRoles([ServerRoles.OWNER])
   getCategoryById(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
@@ -52,7 +51,6 @@ export class GroupCategoryController {
   }
 
   @Post()
-  @SetServerRoles([ServerRoles.OWNER])
   createCategory(
     @Param('server', ParseIntPipe) serverId: number,
     @Body() dto: CreateCategoryDto,
@@ -61,7 +59,6 @@ export class GroupCategoryController {
   }
 
   @Patch('/:id')
-  @SetServerRoles([ServerRoles.OWNER])
   updateCategory(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
@@ -71,7 +68,6 @@ export class GroupCategoryController {
   }
 
   @Delete('/:id')
-  @SetServerRoles([ServerRoles.OWNER])
   deleteCategory(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,

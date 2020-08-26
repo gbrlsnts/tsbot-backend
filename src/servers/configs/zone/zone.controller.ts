@@ -24,13 +24,13 @@ import { CreateZoneDto } from './dto/create-zone.dto';
 
 @Controller('/servers/:server/configs/zones')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
+@SetServerRoles([ServerRoles.OWNER])
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions(appSerializeOptions)
 export class ZoneController {
   constructor(private zoneService: ZoneService) {}
 
   @Get()
-  @SetServerRoles([ServerRoles.OWNER])
   getZonesByServerId(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<Zone[]> {
@@ -38,7 +38,6 @@ export class ZoneController {
   }
 
   @Get('/:id')
-  @SetServerRoles([ServerRoles.OWNER])
   getZoneById(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
@@ -47,7 +46,6 @@ export class ZoneController {
   }
 
   @Post()
-  @SetServerRoles([ServerRoles.OWNER])
   createZone(
     @Param('server', ParseIntPipe) serverId: number,
     @Body() dto: CreateZoneDto,
@@ -56,7 +54,6 @@ export class ZoneController {
   }
 
   @Patch('/:id')
-  @SetServerRoles([ServerRoles.OWNER])
   updateZone(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateZoneDto,
@@ -65,7 +62,6 @@ export class ZoneController {
   }
 
   @Delete('/:id')
-  @SetServerRoles([ServerRoles.OWNER])
   deleteZone(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.zoneService.deleteZone(id);
   }

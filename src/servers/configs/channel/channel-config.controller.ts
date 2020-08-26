@@ -27,13 +27,13 @@ import { UpdateConfigDto } from './dto/update-config.dto';
 
 @Controller('/servers/:server/configs/channels')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
+@SetServerRoles([ServerRoles.OWNER])
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions(appSerializeOptions)
 export class ChannelConfigController {
   constructor(private configService: ChannelConfigService) {}
 
   @Get()
-  @SetServerRoles([ServerRoles.OWNER])
   getConfigsByServer(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<ChannelConfig[]> {
@@ -41,7 +41,6 @@ export class ChannelConfigController {
   }
 
   @Get('/:id')
-  @SetServerRoles([ServerRoles.OWNER])
   getConfigById(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
@@ -50,7 +49,6 @@ export class ChannelConfigController {
   }
 
   @Post()
-  @SetServerRoles([ServerRoles.OWNER])
   createConfig(
     @Param('server', ParseIntPipe) serverId: number,
     @Body() dto: CreateConfigDto,
@@ -59,7 +57,6 @@ export class ChannelConfigController {
   }
 
   @Patch('/:id')
-  @SetServerRoles([ServerRoles.OWNER])
   updateConfig(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
@@ -69,7 +66,6 @@ export class ChannelConfigController {
   }
 
   @Put('/:id/permissions')
-  @SetServerRoles([ServerRoles.OWNER])
   setConfigPermissions(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) configId: number,
@@ -79,7 +75,6 @@ export class ChannelConfigController {
   }
 
   @Delete('/:id')
-  @SetServerRoles([ServerRoles.OWNER])
   deleteConfig(
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) configId: number,

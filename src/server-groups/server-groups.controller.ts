@@ -21,13 +21,13 @@ import { SetServerRoles } from '../servers/decorators/set-server-roles.decorator
 
 @Controller('/servers/:server/groups')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
+@SetServerRoles([ServerRoles.OWNER])
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions(appSerializeOptions)
 export class ServerGroupsController {
   constructor(private groupsService: ServerGroupsService) {}
 
   @Get()
-  @SetServerRoles([ServerRoles.OWNER])
   getAllGroupsByServerId(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<ServerGroup[]> {
@@ -35,7 +35,6 @@ export class ServerGroupsController {
   }
 
   @Put('/sync')
-  @SetServerRoles([ServerRoles.OWNER])
   syncGroupsByServerId(@Param('server', ParseIntPipe) serverId: number): void {
     return this.groupsService.syncGroupsByServerId(serverId);
   }

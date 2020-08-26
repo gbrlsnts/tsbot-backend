@@ -28,6 +28,7 @@ import { ChannelRoles, ChannelRolesGuard } from './guard/channel-roles.guard';
 
 @Controller('/servers/:server/channels')
 @UseGuards(JwtAuthGuard, ServerRolesGuard, ChannelRolesGuard)
+@SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions(appSerializeOptions)
 export class ChannelsController {
@@ -42,7 +43,6 @@ export class ChannelsController {
   }
 
   @Get('/:id')
-  @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
   @SetChannelRoles([ChannelRoles.OWNER], 'id')
   getChannelById(
     @Param('id', ParseIntPipe) id: number,
@@ -52,7 +52,6 @@ export class ChannelsController {
   }
 
   @Post()
-  @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
   createChannel(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
@@ -62,7 +61,6 @@ export class ChannelsController {
   }
 
   @Delete('/:id')
-  @SetServerRoles([ServerRoles.OWNER, ServerRoles.CLIENT])
   @SetChannelRoles([ChannelRoles.OWNER], 'id')
   deleteChannel(
     @GetUser() user: User,
