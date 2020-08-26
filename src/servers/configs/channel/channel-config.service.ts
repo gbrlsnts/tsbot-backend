@@ -110,14 +110,19 @@ export class ChannelConfigService {
 
   /**
    * Update a config
+   * @param serverId server id
    * @param id config id
    * @param dto data to update
    */
-  async updateConfig(id: number, dto: UpdateConfigDto): Promise<ChannelConfig> {
+  async updateConfig(
+    serverId: number,
+    id: number,
+    dto: UpdateConfigDto,
+  ): Promise<ChannelConfig> {
     const { codecId } = dto;
     if (codecId) await this.validateCodecId(codecId);
 
-    const config = await this.getConfigById(id, false);
+    const config = await this.getServerConfigById(serverId, id);
 
     Object.assign(config, dto);
 
@@ -126,14 +131,16 @@ export class ChannelConfigService {
 
   /**
    * Set config permissions from the dto
+   * @param serverId server id
    * @param configId config id
    * @param dto permissions to set
    */
   async setConfigPermissions(
+    serverId: number,
     configId: number,
     dto: SetPermissionsDto,
   ): Promise<ChannelConfigPermission[]> {
-    await this.getConfigById(configId, false);
+    await this.getServerConfigById(serverId, configId);
 
     const permissions = dto.permissions.map(
       p =>
@@ -172,10 +179,11 @@ export class ChannelConfigService {
 
   /**
    * Delete a config
+   * @param serverId server id
    * @param id config id
    */
-  async deleteConfig(id: number): Promise<void> {
-    const config = await this.getConfigById(id);
+  async deleteConfig(serverId: number, id: number): Promise<void> {
+    const config = await this.getServerConfigById(serverId, id);
 
     if (!config.zoneId)
       throw new BadRequestException(deleteDefaultConfigNotAllowed);

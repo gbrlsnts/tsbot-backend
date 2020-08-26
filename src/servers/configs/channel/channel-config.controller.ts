@@ -61,24 +61,29 @@ export class ChannelConfigController {
   @Patch('/:id')
   @SetServerRoles([ServerRoles.OWNER])
   updateConfig(
+    @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateConfigDto,
   ): Promise<ChannelConfig> {
-    return this.configService.updateConfig(id, dto);
+    return this.configService.updateConfig(serverId, id, dto);
   }
 
   @Put('/:id/permissions')
   @SetServerRoles([ServerRoles.OWNER])
   setConfigPermissions(
+    @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) configId: number,
     @Body() dto: SetPermissionsDto,
   ): Promise<ChannelConfigPermission[]> {
-    return this.configService.setConfigPermissions(configId, dto);
+    return this.configService.setConfigPermissions(serverId, configId, dto);
   }
 
   @Delete('/:id')
   @SetServerRoles([ServerRoles.OWNER])
-  deleteConfig(@Param('id', ParseIntPipe) configId: number): Promise<void> {
-    return this.configService.deleteConfig(configId);
+  deleteConfig(
+    @Param('server', ParseIntPipe) serverId: number,
+    @Param('id', ParseIntPipe) configId: number,
+  ): Promise<void> {
+    return this.configService.deleteConfig(serverId, configId);
   }
 }
