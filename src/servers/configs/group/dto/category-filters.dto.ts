@@ -1,7 +1,8 @@
-import { IsBoolean, IsOptional } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CategoryFiltersDto {
-  @IsBoolean()
   @IsOptional()
+  @Transform(v => v == 'true' || v == '1')
   withGroups: boolean;
 }

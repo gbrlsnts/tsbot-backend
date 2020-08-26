@@ -46,14 +46,22 @@ export class GroupCategoryService {
 
   /**
    * Get a category by id
-   * @param id
+   * @param options find options
+   * @param withGroups if groups should be fetched
    * @throws NotFoundException when the category doesn't exist
    */
-  getCategoryById(
+  async getCategoryById(
     options: CategoryFindOptionsDto,
     withGroups = false,
   ): Promise<GroupCategory> {
-    return this.getCategorySelectQuery(options, withGroups).getOne();
+    const category = await this.getCategorySelectQuery(
+      options,
+      withGroups,
+    ).getOne();
+
+    if (!category) throw new NotFoundException();
+
+    return category;
   }
 
   /**
@@ -84,18 +92,20 @@ export class GroupCategoryService {
   /**
    * Update a category
    * @param id
+   * @param serverId server id
    * @param dto category data
    * @throws NotFoundException when the category doesn't exist
    * @throws ConflictException if the category name exists in the server
    */
   async updateCategory(
     id: number,
+    serverId: number,
     dto: UpdateCategoryDto,
   ): Promise<GroupCategory> {
     const { name } = dto;
     const groups = new Set(dto.groups); // remove dupes
 
-    let category = await this.getCategoryById({ id });
+    let category = await this.getCategoryById({ id, serverId });
     const { id: categoryId } = category;
 
     if (groups && groups.size > 0) {
@@ -138,20 +148,23 @@ export class GroupCategoryService {
 
   /**
    * Delete a category
-   * @param id
+   * @param options find options
    * @throws BadRequestException if there are associated categories
    * @throws NotFoundException when no records were deleted
    */
-  async deleteCategory(id: number): Promise<void> {
+  async deleteCategory(options: CategoryFindOptionsDto): Promise<void> {
+    if (Object.keys(options).length === 0)
+      throw new Error('options cannot be empty');
+
     const configCount = await this.categoryRepository
       .createQueryBuilder('c')
       .innerJoin(GroupConfig, 'conf', 'c.id = conf.categoryId')
-      .where('c.id = :id', { id })
+      .where('c.id = :id', { id: options.id })
       .getCount();
 
     if (configCount > 0) throw new BadRequestException(categoryHasConfigs);
 
-    const result = await this.categoryRepository.delete(id);
+    const result = await this.categoryRepository.delete(options);
 
     if (result.affected === 0) throw new NotFoundException();
   }
@@ -193,6 +206,9 @@ export class GroupCategoryService {
     withGroups = false,
   ): SelectQueryBuilder<GroupCategory> {
     const { id, serverId } = options;
+
+    if (Object.keys(options).length === 0)
+      throw new Error('options cannot be empty');
 
     const builder = this.categoryRepository.createQueryBuilder('c');
 

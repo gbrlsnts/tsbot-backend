@@ -63,15 +63,19 @@ export class GroupCategoryController {
   @Patch('/:id')
   @SetServerRoles([ServerRoles.OWNER])
   updateCategory(
+    @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateCategoryDto,
   ): Promise<GroupCategory> {
-    return this.categoryService.updateCategory(id, dto);
+    return this.categoryService.updateCategory(id, serverId, dto);
   }
 
   @Delete('/:id')
   @SetServerRoles([ServerRoles.OWNER])
-  deleteCategory(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.categoryService.deleteCategory(id);
+  deleteCategory(
+    @Param('server', ParseIntPipe) serverId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    return this.categoryService.deleteCategory({ id, serverId });
   }
 }
