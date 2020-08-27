@@ -18,9 +18,9 @@ export class ServerRolesGuard implements CanActivate {
 
     if (req.user.isAdmin) return true;
 
-    const options = this.reflector.get<ServerRolesOptions>(
+    const options = this.reflector.getAllAndOverride<ServerRolesOptions>(
       serverRolesMetadataKey,
-      context.getHandler(),
+      [context.getHandler(), context.getClass()],
     );
 
     if (!options) return true;
