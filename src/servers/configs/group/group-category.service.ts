@@ -1,4 +1,4 @@
-import { getConnection, SelectQueryBuilder } from 'typeorm';
+import { SelectQueryBuilder, Connection } from 'typeorm';
 import {
   Injectable,
   ConflictException,
@@ -30,6 +30,7 @@ export class GroupCategoryService {
     @InjectRepository(GroupConfigRepository)
     private configRepository: GroupConfigRepository,
     private groupsService: ServerGroupsService,
+    private connection: Connection,
   ) {}
 
   /**
@@ -116,33 +117,26 @@ export class GroupCategoryService {
       if (!groupsValid) throw new BadRequestException(containsInvalidGroups);
     }
 
-    const queryRunner = getConnection().createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
     try {
-      if (name) {
-        category.name = name;
+      await this.connection.transaction(async manager => {
+        if (name) {
+          category.name = name;
+          category = await manager.save(category);
+        }
 
-        category = await this.categoryRepository.save(category, {
-          transaction: false,
-        });
-      }
-
-      await this.setCategoryGroups(categoryId, groups);
-
-      await queryRunner.commitTransaction();
+        await this.configRepository.setCategoryGroups(
+          categoryId,
+          groups,
+          manager,
+        );
+      });
 
       return this.getCategoryById({ id }, true);
     } catch (e) {
-      await queryRunner.rollbackTransaction();
-
       if (e.code == DbErrorCodes.DuplicateKey)
         throw new ConflictException(categoryAlreadyExists);
 
       throw e;
-    } finally {
-      await queryRunner.release();
     }
   }
 
@@ -167,33 +161,6 @@ export class GroupCategoryService {
     const result = await this.categoryRepository.delete(options);
 
     if (result.affected === 0) throw new NotFoundException();
-  }
-
-  /**
-   * Set groups for a category. Doesn't run in a transaction.
-   * @param categoryId
-   * @param groups
-   */
-  private async setCategoryGroups(
-    categoryId: number,
-    groups: Set<number>,
-  ): Promise<void> {
-    if (groups) {
-      await this.configRepository.delete({ categoryId });
-    }
-
-    if (groups && groups.size > 0) {
-      const configs = this.configRepository.create(
-        Array.from(groups).map(groupId => ({
-          groupId,
-          categoryId,
-        })),
-      );
-
-      await this.configRepository.save(configs, {
-        transaction: false,
-      });
-    }
   }
 
   /**
