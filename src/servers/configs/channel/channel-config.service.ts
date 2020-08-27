@@ -1,4 +1,4 @@
-import { getConnection } from 'typeorm';
+import { Connection } from 'typeorm';
 import {
   NotFoundException,
   BadRequestException,
@@ -30,6 +30,7 @@ export class ChannelConfigService {
     private permRepository: ChannelConfigPermissionRepository,
     private zoneService: ZoneService,
     private refDataService: MetadataService,
+    private connection: Connection,
   ) {}
 
   /**
@@ -150,31 +151,17 @@ export class ChannelConfigService {
         }),
     );
 
-    const queryRunner = getConnection().createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    let saved = [];
 
-    try {
-      await this.permRepository.delete({ configId });
-
-      let saved = [];
+    await this.connection.transaction(async manager => {
+      await manager.delete(ChannelConfigPermission, { configId });
 
       if (permissions.length > 0) {
-        saved = await this.permRepository.save(permissions, {
-          transaction: false,
-        });
+        saved = await manager.save(permissions);
       }
+    });
 
-      await queryRunner.commitTransaction();
-
-      return saved;
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-
-      throw e;
-    } finally {
-      await queryRunner.release();
-    }
+    return saved;
   }
 
   /**
