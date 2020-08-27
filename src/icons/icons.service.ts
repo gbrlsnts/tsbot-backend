@@ -1,5 +1,5 @@
 import * as jimp from 'jimp';
-import { Brackets, getConnection } from 'typeorm';
+import { Brackets, Connection } from 'typeorm';
 import {
   Injectable,
   NotFoundException,
@@ -27,6 +27,7 @@ export class IconsService {
     private iconRepository: IconRepository,
     @InjectRepository(IconContentRepository)
     private contentRepository: IconContentRepository,
+    private connection: Connection,
   ) {}
 
   /**
@@ -95,35 +96,26 @@ export class IconsService {
       uploadedById: userId,
     });
 
-    const queryRunner = getConnection().createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
     try {
-      const saved = await this.iconRepository.save(icon, {
-        transaction: false,
-      });
+      let saved: Icon;
 
-      await this.contentRepository.save(
-        {
+      await this.connection.transaction(async manager => {
+        saved = await manager.save(icon);
+
+        const iconContent = this.contentRepository.create({
           id: saved.id,
           content,
-        },
-        { transaction: false },
-      );
+        });
 
-      await queryRunner.commitTransaction();
+        await manager.save(iconContent);
+      });
 
       return saved;
     } catch (e) {
-      await queryRunner.rollbackTransaction();
-
       if (e.code == DbErrorCodes.DuplicateKey)
         throw new ConflictException(iconAlreadyExists);
 
       throw e;
-    } finally {
-      await queryRunner.release();
     }
   }
 
