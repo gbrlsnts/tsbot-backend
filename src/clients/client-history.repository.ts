@@ -1,4 +1,4 @@
-import { Repository, EntityRepository, QueryRunner } from 'typeorm';
+import { Repository, EntityRepository, EntityManager } from 'typeorm';
 import { ClientHistory } from './client-history.entity';
 import { Client } from './client.entity';
 
@@ -7,16 +7,16 @@ export class ClientHistoryRepository extends Repository<ClientHistory> {
   /**
    *
    * @param client client to push to history
-   * @param queryRunner optional - provide if should be ran within a query runner transaction
+   * @param manager optional - provide if should be run within a transaction
    */
   pushClientToHistory(
     client: Client,
-    queryRunner?: QueryRunner,
+    manager?: EntityManager,
   ): Promise<ClientHistory> {
+    if (!manager) manager = this.manager;
+
     const history = ClientHistory.fromClient(client);
 
-    if (queryRunner) return queryRunner.manager.save(history);
-
-    return this.save(history);
+    return manager.save(history);
   }
 }

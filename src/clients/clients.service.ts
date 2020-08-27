@@ -90,39 +90,34 @@ export class ClientsService {
     )
       return client;
 
-    const queryRunner = this.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
     try {
-      if (!client) {
-        client = this.clientRepository.create({
-          userId,
-          serverId,
-          tsUniqueId,
-          tsClientDbId,
-        });
-      } else {
-        // push existing data to history
-        await this.historyRepository.pushClientToHistory(client, queryRunner);
+      let savedClient: Client;
 
-        client.tsUniqueId = tsUniqueId;
-        client.tsClientDbId = tsClientDbId;
-      }
+      await this.connection.transaction(async manager => {
+        if (!client) {
+          client = this.clientRepository.create({
+            userId,
+            serverId,
+            tsUniqueId,
+            tsClientDbId,
+          });
+        } else {
+          // push existing data to history
+          await this.historyRepository.pushClientToHistory(client, manager);
 
-      const savedClient = await queryRunner.manager.save(client);
-      await queryRunner.commitTransaction();
+          client.tsUniqueId = tsUniqueId;
+          client.tsClientDbId = tsClientDbId;
+        }
+
+        savedClient = await manager.save(client);
+      });
 
       return savedClient;
     } catch (e) {
-      await queryRunner.rollbackTransaction();
-
       if (e.code == DbErrorCodes.DuplicateKey)
         throw new ConflictException(clientAlreadyExists);
 
       throw new InternalServerErrorException();
-    } finally {
-      await queryRunner.release();
     }
   }
 }
