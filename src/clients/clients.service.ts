@@ -9,7 +9,7 @@ import { ClientRepository } from './client.repository';
 import { Client } from './client.entity';
 import { SaveClientDto } from './dto/save-client.dto';
 import { ClientHistoryRepository } from './client-history.repository';
-import { getConnection } from 'typeorm';
+import { Connection } from 'typeorm';
 import { DbErrorCodes } from '../shared/database/codes';
 import { clientAlreadyExists } from '../shared/messages/client.messages';
 
@@ -20,6 +20,7 @@ export class ClientsService {
     private clientRepository: ClientRepository,
     @InjectRepository(ClientHistoryRepository)
     private historyRepository: ClientHistoryRepository,
+    private connection: Connection,
   ) {}
 
   async getClientById(id: number): Promise<Client> {
@@ -89,7 +90,7 @@ export class ClientsService {
     )
       return client;
 
-    const queryRunner = getConnection().createQueryRunner();
+    const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -103,15 +104,13 @@ export class ClientsService {
         });
       } else {
         // push existing data to history
-        await this.historyRepository.pushClientToHistory(client, false);
+        await this.historyRepository.pushClientToHistory(client, queryRunner);
 
         client.tsUniqueId = tsUniqueId;
         client.tsClientDbId = tsClientDbId;
       }
 
-      const savedClient = await this.clientRepository.save(client, {
-        transaction: false,
-      });
+      const savedClient = await queryRunner.manager.save(client);
       await queryRunner.commitTransaction();
 
       return savedClient;
