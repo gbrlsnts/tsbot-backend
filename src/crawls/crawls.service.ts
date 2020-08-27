@@ -1,4 +1,4 @@
-import { In, getConnection } from 'typeorm';
+import { Connection } from 'typeorm';
 import {
   Injectable,
   BadRequestException,
@@ -27,6 +27,7 @@ export class CrawlsService {
     @InjectRepository(CrawlZone)
     private crawlZoneRepository: CrawlZoneRepository,
     private zoneService: ZoneService,
+    private connection: Connection,
   ) {}
 
   /**
@@ -126,36 +127,12 @@ export class CrawlsService {
   ): Promise<void> {
     const channels = this.inactiveRepository.create(dto.channels);
 
-    channels.forEach(c => {
-      c.serverId = serverId;
+    await this.connection.transaction(async manager => {
+      await this.inactiveRepository.setChannelsForServer(
+        serverId,
+        channels,
+        manager,
+      );
     });
-
-    const toDelete = (await this.getInactiveChannelsByServer(serverId))
-      .map(c => c.tsChannelId)
-      .filter(cid => {
-        return channels.findIndex(c => c.tsChannelId === cid) === -1;
-      });
-
-    const queryRunner = getConnection().createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      if (toDelete.length > 0) {
-        await this.inactiveRepository.delete({
-          serverId,
-          tsChannelId: In(toDelete),
-        });
-      }
-
-      await this.inactiveRepository.save(channels, { transaction: false });
-
-      await queryRunner.commitTransaction();
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      throw e;
-    } finally {
-      await queryRunner.release();
-    }
   }
 }
