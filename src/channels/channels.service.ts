@@ -1,4 +1,4 @@
-import { getConnection } from 'typeorm';
+import { Connection } from 'typeorm';
 import {
   Injectable,
   NotFoundException,
@@ -22,6 +22,7 @@ export class ChannelsService {
     private channelRepository: ChannelRepository,
     private clientsService: ClientsService,
     private tsChannelService: TeamspeakService,
+    private connection: Connection,
   ) {}
 
   getChannelsByServerId(serverId: number): Promise<Channel[]> {
@@ -100,20 +101,10 @@ export class ChannelsService {
 
     if (!channel) throw new NotFoundException();
 
-    const queryRunner = getConnection().createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
+    await this.connection.transaction(async manager => {
       await this.tsChannelService.deleteUserChannel(channel.id);
-      await this.channelRepository.delete(channel.id);
-      await queryRunner.commitTransaction();
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      throw e;
-    } finally {
-      await queryRunner.release();
-    }
+      await manager.delete(Channel, channel.id);
+    });
   }
 
   async checkClientHasChannel(clientId: number): Promise<boolean> {
