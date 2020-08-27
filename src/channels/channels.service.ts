@@ -21,7 +21,7 @@ export class ChannelsService {
     @InjectRepository(ChannelRepository)
     private channelRepository: ChannelRepository,
     private clientsService: ClientsService,
-    private teamspeakService: TeamspeakService,
+    private tsChannelService: TeamspeakService,
   ) {}
 
   getChannelsByServerId(serverId: number): Promise<Channel[]> {
@@ -74,7 +74,7 @@ export class ChannelsService {
 
     if (hasChannel) throw new ConflictException(alreadyHasChannel);
 
-    const tsChannelId = await this.teamspeakService.createUserChannel(dto);
+    const tsChannelId = await this.tsChannelService.createUserChannel(dto);
 
     const channel = this.channelRepository.create({
       clientId,
@@ -84,7 +84,7 @@ export class ChannelsService {
     try {
       return this.channelRepository.save(channel);
     } catch (e) {
-      await this.teamspeakService.deleteUserChannel(tsChannelId);
+      await this.tsChannelService.deleteUserChannel(tsChannelId);
       throw e;
     }
   }
@@ -105,7 +105,7 @@ export class ChannelsService {
     await queryRunner.startTransaction();
 
     try {
-      await this.teamspeakService.deleteUserChannel(channel.id);
+      await this.tsChannelService.deleteUserChannel(channel.id);
       await this.channelRepository.delete(channel.id);
       await queryRunner.commitTransaction();
     } catch (e) {
