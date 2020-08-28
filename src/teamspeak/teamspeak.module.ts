@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { TeamspeakService } from './teamspeak.service';
+import { UserChannelService } from './user-channel.service';
 
 @Module({
-  providers: [TeamspeakService],
-  exports: [TeamspeakService],
+  providers: [UserChannelService],
+  exports: [UserChannelService],
 })
 export class TeamspeakModule {}

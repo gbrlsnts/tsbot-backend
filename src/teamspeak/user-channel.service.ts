@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ChannelDto } from '../channels/dto/channel.dto';
 
 @Injectable()
-export class TeamspeakService {
+export class UserChannelService {
   /**
    * Creates a channel in teamspeak and returns the id
    * Pending implementation

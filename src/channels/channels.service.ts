@@ -10,7 +10,7 @@ import { Channel } from './channel.entity';
 import { Client } from '../clients/client.entity';
 import { ChannelDto } from './dto/channel.dto';
 import { ClientsService } from '../clients/clients.service';
-import { TeamspeakService } from '../teamspeak/teamspeak.service';
+import { UserChannelService } from '../teamspeak/user-channel.service';
 import { alreadyHasChannel } from '../shared/messages/channel.messages';
 import { Server } from '../servers/server.entity';
 import { FindChannelOptions } from './channel.types';
@@ -21,7 +21,7 @@ export class ChannelsService {
     @InjectRepository(ChannelRepository)
     private channelRepository: ChannelRepository,
     private clientsService: ClientsService,
-    private tsChannelService: TeamspeakService,
+    private tsChannelService: UserChannelService,
     private connection: Connection,
   ) {}
 
