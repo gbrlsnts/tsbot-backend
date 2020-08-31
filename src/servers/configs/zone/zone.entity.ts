@@ -1,6 +1,7 @@
+import { Expose } from 'class-transformer';
 import { PrimaryGeneratedColumn, Column, OneToOne, Entity } from 'typeorm';
 import { ChannelConfig } from '../channel/channel-config.entity';
-import { Expose } from 'class-transformer';
+import { Zone as BotZone } from '../../../teamspeak/types/user-channel';
 
 @Entity()
 export class Zone {
@@ -57,4 +58,12 @@ export class Zone {
     config => config.zone,
   )
   channelConfig: ChannelConfig;
+
+  toBotData(): BotZone {
+    return {
+      start: this.channelIdStart,
+      end: this.channelIdEnd,
+      separators: this.separator,
+    };
+  }
 }

@@ -96,7 +96,7 @@ export class ChannelsService {
   async deleteChannel(userId: number, id: number): Promise<void> {
     const channel = await this.channelRepository
       .createQueryBuilder('ch')
-      .innerJoin(Client, 'cl', 'cl.id = ch.clientId')
+      .innerJoinAndMapOne('ch.client', Client, 'cl', 'cl.id = ch.clientId')
       .innerJoin(Server, 's', 's.id = cl.serverId')
       .where('ch.id = :id', { id })
       .andWhere('(cl.userId = :userId OR s.ownerId = :userId)', { userId })
@@ -107,7 +107,7 @@ export class ChannelsService {
     await this.connection.transaction(async manager => {
       await this.tsChannelService.deleteUserChannel(
         channel.client.serverId,
-        channel.id,
+        channel.tsChannelId,
       );
       await manager.delete(Channel, channel.id);
     });

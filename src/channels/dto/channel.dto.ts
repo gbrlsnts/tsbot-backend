@@ -1,4 +1,5 @@
 import { Length, ArrayNotEmpty } from 'class-validator';
+import { UserChannelConfiguration } from 'src/teamspeak/types/user-channel';
 
 export class ChannelDto {
   @Length(2, 28)
@@ -12,4 +13,15 @@ export class ChannelDto {
     each: true,
   })
   subchannels: string[];
+
+  toBotChannel(): UserChannelConfiguration {
+    return {
+      name: this.name,
+      channels: this.subchannels.map(name => ({
+        name: name,
+        password: this.password,
+        channels: [],
+      })),
+    };
+  }
 }

@@ -13,6 +13,11 @@ import { Zone } from '../zone/zone.entity';
 import { Server } from '../../server.entity';
 import { ChannelConfigPermission } from './channel-perm.entity';
 import { Expose } from 'class-transformer';
+import {
+  AudioQuality,
+  BotCodec,
+  ChannelPermission,
+} from 'src/teamspeak/types/channel';
 
 @Entity()
 @Index('uniq_zones_config', {
@@ -85,4 +90,18 @@ export class ChannelConfig {
   @JoinColumn()
   @Expose()
   zone: Zone;
+
+  toBotAudio(): AudioQuality {
+    return {
+      codec: BotCodec[this.codec.code],
+      quality: this.codecQuality,
+    };
+  }
+
+  toBotPermissions(): ChannelPermission[] {
+    return this.permissions.map(perm => ({
+      permission: perm.permission.permid,
+      value: perm.value,
+    }));
+  }
 }

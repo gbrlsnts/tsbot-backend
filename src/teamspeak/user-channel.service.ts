@@ -1,21 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  Injectable,
-  Inject,
-  Logger,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ChannelDto } from '../channels/dto/channel.dto';
 import { TS_BOT_SERVICE } from '../shared/constants';
 import { ChannelConfigService } from '../servers/configs/channel/channel-config.service';
-import { BotCodec } from './types/channel';
 import {
   CreateChannelData,
   CreateUserChannelResultData,
+  DeleteChannelData,
 } from './types/user-channel';
 import { ZoneService } from '../servers/configs/zone/zone.service';
 import { subchannelsExceedMax } from '../shared/messages/channel.messages';
+import { createChannelSubject, deleteChannelSubject } from './subjects';
 
 @Injectable()
 export class UserChannelService {
@@ -43,35 +38,16 @@ export class UserChannelService {
     const zone = await this.zoneService.getZone({ serverId, isDefault: true });
 
     const data: CreateChannelData = {
-      zone: {
-        start: zone.channelIdStart,
-        end: zone.channelIdEnd,
-        separators: zone.separator,
-      },
-      channels: [
-        {
-          name: dto.name,
-          channels: dto.subchannels.map(name => ({
-            name: name,
-            password: dto.password,
-            channels: [],
-          })),
-        },
-      ],
-      permissions: channelConfig.permissions.map(perm => ({
-        permission: perm.permission.permid,
-        value: perm.value,
-      })),
+      channels: [dto.toBotChannel()],
+      zone: zone.toBotData(),
+      permissions: channelConfig.toBotPermissions(),
       properties: {
-        audio: {
-          codec: BotCodec[channelConfig.codec.code],
-          quality: channelConfig.codecQuality,
-        },
+        audio: channelConfig.toBotAudio(),
       },
     };
 
     const response = this.client.send<CreateUserChannelResultData>(
-      `bot.server.${serverId}.channel.create`,
+      createChannelSubject(serverId),
       data,
     );
 
@@ -88,6 +64,18 @@ export class UserChannelService {
     serverId: number,
     tsChannelId: number,
   ): Promise<void> {
-    return;
+    const zone = await this.zoneService.getZone({ serverId, isDefault: true });
+
+    const data: DeleteChannelData = {
+      zone: zone.toBotData(),
+      channelId: tsChannelId,
+    };
+
+    const response = this.client.send<boolean>(
+      deleteChannelSubject(serverId),
+      data,
+    );
+
+    await response.toPromise();
   }
 }
