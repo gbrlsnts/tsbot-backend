@@ -1,12 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ChannelDto } from '../channels/dto/channel.dto';
 import { TS_BOT_SERVICE } from '../shared/constants';
 import { ChannelConfigService } from '../servers/configs/channel/channel-config.service';
 import { BotCodec } from './types/channel';
-import { CreateChannelData } from './types/user-channel';
+import {
+  CreateChannelData,
+  CreateUserChannelResultData,
+} from './types/user-channel';
 import { ZoneService } from '../servers/configs/zone/zone.service';
+import { subchannelsExceedMax } from '../shared/messages/channel.messages';
 
 @Injectable()
 export class UserChannelService {
@@ -28,6 +37,9 @@ export class UserChannelService {
       zoneId: null,
     });
 
+    if (dto.subchannels.length > channelConfig.allowedSubChannels)
+      throw new BadRequestException(subchannelsExceedMax);
+
     const zone = await this.zoneService.getZone({ serverId, isDefault: true });
 
     const data: CreateChannelData = {
@@ -39,7 +51,11 @@ export class UserChannelService {
       channels: [
         {
           name: dto.name,
-          channels: [{ name: dto.name, password: dto.password, channels: [] }],
+          channels: dto.subchannels.map(name => ({
+            name: name,
+            password: dto.password,
+            channels: [],
+          })),
         },
       ],
       permissions: channelConfig.permissions.map(perm => ({
@@ -54,7 +70,7 @@ export class UserChannelService {
       },
     };
 
-    const response = this.client.send<{ channel: number }>(
+    const response = this.client.send<CreateUserChannelResultData>(
       `bot.server.${serverId}.channel.create`,
       data,
     );
