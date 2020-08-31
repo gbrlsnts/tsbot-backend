@@ -12,8 +12,9 @@ export class ChannelConfigPermission {
   @PrimaryColumn()
   configId: number;
 
-  @ManyToOne(() => ServerPermission)
-  @Expose()
+  @ManyToOne(() => ServerPermission, {
+    eager: true,
+  })
   permission: ServerPermission;
 
   @ManyToOne(

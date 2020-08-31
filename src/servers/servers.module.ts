@@ -52,6 +52,11 @@ import { ServerGroupsModule } from 'src/server-groups/server-groups.module';
     ZoneController,
     GroupCategoryController,
   ],
-  exports: [ServersService, ZoneService, ServerRolesGuard],
+  exports: [
+    ServersService,
+    ZoneService,
+    ChannelConfigService,
+    ServerRolesGuard,
+  ],
 })
 export class ServersModule {}

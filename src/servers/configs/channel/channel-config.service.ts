@@ -45,34 +45,16 @@ export class ChannelConfigService {
 
   /**
    * Get a config by its Id
-   * @param id config id
+   * @param params search params
    * @param loadEagerRelations if eager relations should be loaded
    */
-  async getConfigById(
-    id: number,
+  async getConfig(
+    params: Partial<ChannelConfig>,
     loadEagerRelations = true,
   ): Promise<ChannelConfig> {
     const config = await this.configRepository.findOne({
-      where: { id },
+      where: params,
       loadEagerRelations,
-    });
-
-    if (!config) throw new NotFoundException();
-
-    return config;
-  }
-
-  /**
-   * Get a config by server
-   * @param serverId server id
-   * @param id config id
-   */
-  async getServerConfigById(
-    serverId: number,
-    id: number,
-  ): Promise<ChannelConfig> {
-    const config = await this.configRepository.findOne({
-      where: { serverId, id },
     });
 
     if (!config) throw new NotFoundException();
@@ -123,7 +105,7 @@ export class ChannelConfigService {
     const { codecId } = dto;
     if (codecId) await this.validateCodecId(codecId);
 
-    const config = await this.getServerConfigById(serverId, id);
+    const config = await this.getConfig({ id, serverId });
 
     Object.assign(config, dto);
 
@@ -141,7 +123,7 @@ export class ChannelConfigService {
     configId: number,
     dto: SetPermissionsDto,
   ): Promise<ChannelConfigPermission[]> {
-    await this.getServerConfigById(serverId, configId);
+    await this.getConfig({ id: configId, serverId });
 
     const permissions = dto.permissions.map(
       p =>
@@ -170,7 +152,7 @@ export class ChannelConfigService {
    * @param id config id
    */
   async deleteConfig(serverId: number, id: number): Promise<void> {
-    const config = await this.getServerConfigById(serverId, id);
+    const config = await this.getConfig({ id, serverId });
 
     if (!config.zoneId)
       throw new BadRequestException(deleteDefaultConfigNotAllowed);

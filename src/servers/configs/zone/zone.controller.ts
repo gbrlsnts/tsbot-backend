@@ -42,7 +42,7 @@ export class ZoneController {
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Zone> {
-    return this.zoneService.getZoneIdByServer(id, serverId);
+    return this.zoneService.getZone({ id, serverId });
   }
 
   @Post()

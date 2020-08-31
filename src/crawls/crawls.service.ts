@@ -98,7 +98,7 @@ export class CrawlsService {
         );
       }
 
-      const zone = await this.zoneService.getZoneIdByServer(zoneId, serverId);
+      const zone = await this.zoneService.getZone({ id: zoneId, serverId });
 
       return zone.id;
     } catch (e) {

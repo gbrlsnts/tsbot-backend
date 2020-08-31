@@ -69,6 +69,7 @@ export class ChannelConfig {
   @ManyToOne(
     () => Codec,
     codec => codec.channelConfigs,
+    { eager: true },
   )
   @Expose()
   codec: Codec;

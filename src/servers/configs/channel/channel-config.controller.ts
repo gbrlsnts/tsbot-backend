@@ -45,7 +45,7 @@ export class ChannelConfigController {
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ChannelConfig> {
-    return this.configService.getServerConfigById(serverId, id);
+    return this.configService.getConfig({ id, serverId });
   }
 
   @Post()

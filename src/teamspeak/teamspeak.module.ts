@@ -8,8 +8,10 @@ import { UserChannelService } from './user-channel.service';
 import { TS_BOT_SERVICE } from '../shared/constants';
 import { InboundResponseExternalDeserializer } from '../shared/nats/deserializers/in-response-ext.deserializer';
 import { OutboundMessageExternalSerializer } from '../shared/nats/serializers/out-msg-ext.serializer';
+import { ServersModule } from '../servers/servers.module';
 
 @Module({
+  imports: [ServersModule],
   providers: [
     {
       provide: TS_BOT_SERVICE,

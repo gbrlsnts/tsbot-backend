@@ -48,6 +48,10 @@ export class Zone {
   @Expose()
   minutesInactiveDelete: number;
 
+  @Column()
+  @Expose()
+  isDefault: boolean;
+
   @OneToOne(
     () => ChannelConfig,
     config => config.zone,

@@ -35,26 +35,11 @@ export class ZoneService {
 
   /**
    * Get a zone by id
-   * @param id zone id
+   * @param params zone search params
    */
-  async getZoneById(id: number): Promise<Zone> {
+  async getZone(params: Partial<Zone>): Promise<Zone> {
     const zone = await this.zoneRepository.findOne({
-      where: { id },
-    });
-
-    if (!zone) throw new NotFoundException();
-
-    return zone;
-  }
-
-  /**
-   * Get a zone by id and server
-   * @param id zone id
-   * @param serverId server id
-   */
-  async getZoneIdByServer(id: number, serverId: number): Promise<Zone> {
-    const zone = await this.zoneRepository.findOne({
-      where: { id, serverId },
+      where: params,
     });
 
     if (!zone) throw new NotFoundException();
@@ -90,7 +75,7 @@ export class ZoneService {
       minutesInactiveNotify: newMinutesNotify,
       minutesInactiveDelete: newMinutesDelete,
     } = dto;
-    const zone = await this.getZoneById(id);
+    const zone = await this.getZone({ id });
 
     if (zone.name !== newName)
       await this.validateZoneName(newName, zone.serverId);
