@@ -26,6 +26,8 @@ export interface CreateSubChannelData extends CreateChannelData {
 export interface DeleteChannelData extends ZoneChannel {
   /** Channel to delete */
   channelId: number;
+  /** When deleting a subchannel, the root channel is mandatory for validation */
+  rootChannelId?: number;
 }
 
 export interface UserChannelConfiguration {

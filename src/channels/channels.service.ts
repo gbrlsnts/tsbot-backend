@@ -93,24 +93,38 @@ export class ChannelsService {
     }
   }
 
-  async deleteChannel(userId: number, id: number): Promise<void> {
+  async deleteChannel(
+    userId: number,
+    serverId: number,
+    id: number,
+    tsSubChannelId?: number,
+  ): Promise<void> {
     const channel = await this.channelRepository
       .createQueryBuilder('ch')
       .innerJoinAndMapOne('ch.client', Client, 'cl', 'cl.id = ch.clientId')
       .innerJoin(Server, 's', 's.id = cl.serverId')
-      .where('ch.id = :id', { id })
+      .where('s.id = :serverId AND ch.id = :id', { serverId, id })
       .andWhere('(cl.userId = :userId OR s.ownerId = :userId)', { userId })
       .getOne();
 
     if (!channel) throw new NotFoundException();
 
-    await this.connection.transaction(async manager => {
+    // we want to delete the sub channel
+    if (tsSubChannelId) {
       await this.tsChannelService.deleteUserChannel(
         channel.client.serverId,
+        tsSubChannelId,
         channel.tsChannelId,
       );
-      await manager.delete(Channel, channel.id);
-    });
+    } else {
+      await this.connection.transaction(async manager => {
+        await this.tsChannelService.deleteUserChannel(
+          channel.client.serverId,
+          channel.tsChannelId,
+        );
+        await manager.delete(Channel, channel.id);
+      });
+    }
   }
 
   async checkClientHasChannel(clientId: number): Promise<boolean> {

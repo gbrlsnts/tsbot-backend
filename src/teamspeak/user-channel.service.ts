@@ -59,16 +59,20 @@ export class UserChannelService {
   /**
    * Deletes a channel in the voice server
    * @param tsChannelId channel to delete
+   * @param tsRootChannelId when the channel to delete is a sub channel id, this should be the root/top channel id.
+   *        the root channel is also the id stored in the channel entity
    */
   async deleteUserChannel(
     serverId: number,
     tsChannelId: number,
+    tsRootChannelId?: number,
   ): Promise<void> {
     const zone = await this.zoneService.getZone({ serverId, isDefault: true });
 
     const data: DeleteChannelData = {
       zone: zone.toBotData(),
       channelId: tsChannelId,
+      rootChannelId: tsRootChannelId,
     };
 
     const response = this.client.send<boolean>(

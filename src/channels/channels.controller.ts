@@ -64,8 +64,25 @@ export class ChannelsController {
   @SetChannelRoles([ChannelRoles.OWNER], 'id')
   deleteChannel(
     @GetUser() user: User,
+    @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<void> {
-    return this.channelsService.deleteChannel(user.id, id);
+    return this.channelsService.deleteChannel(user.id, serverId, id);
+  }
+
+  @Delete('/:id/sub/:sub')
+  @SetChannelRoles([ChannelRoles.OWNER], 'id')
+  deleteSubChannel(
+    @GetUser() user: User,
+    @Param('server', ParseIntPipe) serverId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('sub', ParseIntPipe) subChannelId: number,
+  ): Promise<void> {
+    return this.channelsService.deleteChannel(
+      user.id,
+      serverId,
+      id,
+      subChannelId,
+    );
   }
 }
