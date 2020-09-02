@@ -14,6 +14,7 @@ import { UserChannelService } from '../teamspeak/user-channel.service';
 import { alreadyHasChannel } from '../shared/messages/channel.messages';
 import { Server } from '../servers/server.entity';
 import { FindChannelOptions } from './channel.types';
+import { SubChannelDto } from './dto/sub-channel.dto';
 
 @Injectable()
 export class ChannelsService {
@@ -91,6 +92,18 @@ export class ChannelsService {
       await this.tsChannelService.deleteUserChannel(serverId, tsChannelId);
       throw e;
     }
+  }
+
+  async createSubChannel(channelId: number, dto: SubChannelDto): Promise<void> {
+    const channel = await this.getChannelById(channelId, {
+      relations: ['client'],
+    });
+
+    await this.tsChannelService.createUserSubChannel(
+      channel.client.serverId,
+      channel.tsChannelId,
+      dto,
+    );
   }
 
   async deleteChannel(

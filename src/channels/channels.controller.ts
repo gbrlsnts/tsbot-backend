@@ -25,6 +25,7 @@ import { GetUser } from '../auth/decorators/get-user-decorator';
 import { User } from '../users/user.entity';
 import { SetChannelRoles } from './decorators/set-channel-roles.decorator';
 import { ChannelRoles, ChannelRolesGuard } from './guard/channel-roles.guard';
+import { SubChannelDto } from './dto/sub-channel.dto';
 
 @Controller('/servers/:server/channels')
 @UseGuards(JwtAuthGuard, ServerRolesGuard, ChannelRolesGuard)
@@ -58,6 +59,15 @@ export class ChannelsController {
     @Body() dto: ChannelDto,
   ): Promise<Channel> {
     return this.channelsService.createChannel(user.id, serverId, dto);
+  }
+
+  @Post('/:id/sub')
+  @SetChannelRoles([ChannelRoles.OWNER], 'id')
+  createSubChannel(
+    @Param('id', ParseIntPipe) channelId: number,
+    @Body() dto: SubChannelDto,
+  ): Promise<void> {
+    return this.channelsService.createSubChannel(channelId, dto);
   }
 
   @Delete('/:id')

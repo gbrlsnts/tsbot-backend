@@ -3,3 +3,9 @@ export const createChannelSubject = (serverId: number): string =>
 
 export const deleteChannelSubject = (serverId: number): string =>
   `bot.server.${serverId}.channel.delete`;
+
+export const createSubChannelSubject = (serverId: number): string =>
+  `bot.server.${serverId}.channel.sub.create`;
+
+export const getSubChannelCountSubject = (serverId: number): string =>
+  `bot.server.${serverId}.channel.sub.count`;
