@@ -10,15 +10,20 @@ import {
   CreateSubChannelData,
 } from './types/user-channel';
 import { ZoneService } from '../servers/configs/zone/zone.service';
-import { subchannelsExceedMax } from '../shared/messages/channel.messages';
+import {
+  subchannelsExceedMax,
+  channelNameAlreadyExists,
+} from '../shared/messages/channel.messages';
 import {
   createChannelSubject,
   deleteChannelSubject,
   getSubChannelCountSubject,
+  getChannelIsUniqueSubject,
 } from './subjects';
 import { ChannelConfig } from 'src/servers/configs/channel/channel-config.entity';
 import { Zone } from 'src/servers/configs/zone/zone.entity';
 import { createSubChannelSubject } from './subjects';
+import { ValidateChannelUniqueRequest } from './types/channel';
 
 @Injectable()
 export class UserChannelService {
@@ -36,7 +41,8 @@ export class UserChannelService {
    * @param dto channel data
    */
   async createUserChannel(serverId: number, dto: ChannelDto): Promise<number> {
-    const [channelConfig, zone] = await Promise.all([
+    const [isUnique, channelConfig, zone] = await Promise.all([
+      this.sendIsUniqueRequest(serverId, [dto.name]),
       this.channelConfigService.getConfig({
         serverId,
         zoneId: null,
@@ -44,10 +50,12 @@ export class UserChannelService {
       this.zoneService.getZone({ serverId, isDefault: true }),
     ]);
 
+    if (!isUnique) throw new BadRequestException(channelNameAlreadyExists);
+
     if (dto.subchannels.length > channelConfig.allowedSubChannels)
       throw new BadRequestException(subchannelsExceedMax);
 
-    const data = await this.getValidCreatePayload(channelConfig, zone, dto);
+    const data = await this.buildChannelCreatePayload(channelConfig, zone, dto);
 
     const response = this.client.send<CreateUserChannelResultData>(
       createChannelSubject(serverId),
@@ -71,7 +79,8 @@ export class UserChannelService {
     tsChannelId: number,
     dto: SubChannelDto,
   ): Promise<void> {
-    const [subChannelCount, channelConfig, zone] = await Promise.all([
+    const [isUnique, subChannelCount, channelConfig, zone] = await Promise.all([
+      this.sendIsUniqueRequest(serverId, dto.subchannels, tsChannelId),
       this.client
         .send<number>(getSubChannelCountSubject(serverId), {
           channelId: tsChannelId,
@@ -84,13 +93,15 @@ export class UserChannelService {
       this.zoneService.getZone({ serverId, isDefault: true }),
     ]);
 
+    if (!isUnique) throw new BadRequestException(channelNameAlreadyExists);
+
     if (
       subChannelCount + dto.subchannels.length >
       channelConfig.allowedSubChannels
     )
       throw new BadRequestException(subchannelsExceedMax);
 
-    const data = await this.getValidCreatePayload(
+    const data = await this.buildChannelCreatePayload(
       channelConfig,
       zone,
       dto,
@@ -127,7 +138,14 @@ export class UserChannelService {
     await response.toPromise();
   }
 
-  private async getValidCreatePayload(
+  /**
+   * Build a payload for the create channel requests
+   * @param channelConfig channel config to apply
+   * @param zone zone where the channel is/will be
+   * @param dto dto with channel data
+   * @param tsRootChannelId root channel id when creating sub channels
+   */
+  private async buildChannelCreatePayload(
     channelConfig: ChannelConfig,
     zone: Zone,
     dto: ChannelDto | SubChannelDto,
@@ -143,5 +161,26 @@ export class UserChannelService {
         audio: channelConfig.toBotAudio(),
       },
     };
+  }
+
+  /**
+   *
+   * @param serverId server id
+   * @param channels channel names to check
+   * @param tsRootChannelId if checking subchannels then set the param
+   */
+  private sendIsUniqueRequest(
+    serverId: number,
+    channels: string[],
+    tsRootChannelId?: number,
+  ): Promise<boolean> {
+    const isUniqueRequestData: ValidateChannelUniqueRequest = {
+      channels,
+      rootChannelId: tsRootChannelId,
+    };
+
+    return this.client
+      .send<boolean>(getChannelIsUniqueSubject(serverId), isUniqueRequestData)
+      .toPromise();
   }
 }

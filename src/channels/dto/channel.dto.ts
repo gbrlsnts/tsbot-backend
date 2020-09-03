@@ -1,4 +1,4 @@
-import { Length, ArrayNotEmpty } from 'class-validator';
+import { Length, ArrayNotEmpty, ArrayUnique } from 'class-validator';
 import { UserChannelConfiguration } from 'src/teamspeak/types/user-channel';
 
 export class ChannelDto {
@@ -9,6 +9,7 @@ export class ChannelDto {
   password: string;
 
   @ArrayNotEmpty()
+  @ArrayUnique()
   @Length(2, 28, {
     each: true,
   })

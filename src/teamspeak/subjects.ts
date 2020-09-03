@@ -9,3 +9,6 @@ export const createSubChannelSubject = (serverId: number): string =>
 
 export const getSubChannelCountSubject = (serverId: number): string =>
   `bot.server.${serverId}.channel.sub.count`;
+
+export const getChannelIsUniqueSubject = (serverId: number): string =>
+  `bot.server.${serverId}.channel.is-unique`;
