@@ -1,8 +1,7 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { TeamspeakBusService } from './teamspeak-bus.service';
 import { ChannelDto } from '../channels/dto/channel.dto';
 import { SubChannelDto } from 'src/channels/dto/sub-channel.dto';
-import { TS_BOT_SERVICE } from '../shared/constants';
 import { ChannelConfigService } from '../servers/configs/channel/channel-config.service';
 import {
   CreateUserChannelResultData,
@@ -28,8 +27,7 @@ import { ValidateChannelUniqueRequest } from './types/channel';
 @Injectable()
 export class UserChannelService {
   constructor(
-    @Inject(TS_BOT_SERVICE)
-    private client: ClientProxy,
+    private busService: TeamspeakBusService,
     private channelConfigService: ChannelConfigService,
     private zoneService: ZoneService,
   ) {}
@@ -57,12 +55,10 @@ export class UserChannelService {
 
     const data = await this.buildChannelCreatePayload(channelConfig, zone, dto);
 
-    const response = this.client.send<CreateUserChannelResultData>(
+    const result = await this.busService.send<CreateUserChannelResultData>(
       createChannelSubject(serverId),
       data,
     );
-
-    const result = await response.toPromise();
 
     return result.channel;
   }
@@ -81,11 +77,9 @@ export class UserChannelService {
   ): Promise<void> {
     const [isUnique, subChannelCount, channelConfig, zone] = await Promise.all([
       this.sendIsUniqueRequest(serverId, dto.subchannels, tsChannelId),
-      this.client
-        .send<number>(getSubChannelCountSubject(serverId), {
-          channelId: tsChannelId,
-        })
-        .toPromise(),
+      this.busService.send<number>(getSubChannelCountSubject(serverId), {
+        channelId: tsChannelId,
+      }),
       this.channelConfigService.getConfig({
         serverId,
         zoneId: null,
@@ -108,7 +102,7 @@ export class UserChannelService {
       tsChannelId,
     );
 
-    await this.client.send(createSubChannelSubject(serverId), data).toPromise();
+    await this.busService.send(createSubChannelSubject(serverId), data);
   }
 
   /**
@@ -130,12 +124,7 @@ export class UserChannelService {
       rootChannelId: tsRootChannelId,
     };
 
-    const response = this.client.send<boolean>(
-      deleteChannelSubject(serverId),
-      data,
-    );
-
-    await response.toPromise();
+    await this.busService.send<boolean>(deleteChannelSubject(serverId), data);
   }
 
   /**
@@ -179,8 +168,9 @@ export class UserChannelService {
       rootChannelId: tsRootChannelId,
     };
 
-    return this.client
-      .send<boolean>(getChannelIsUniqueSubject(serverId), isUniqueRequestData)
-      .toPromise();
+    return this.busService.send<boolean>(
+      getChannelIsUniqueSubject(serverId),
+      isUniqueRequestData,
+    );
   }
 }

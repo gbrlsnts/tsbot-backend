@@ -85,3 +85,7 @@ NATS:
 
 - NATS_URL: string - nats server url
 - NATS_MAX_RECONNECT_ATTEMPTS: number - max reconnect attemps - default: -1
+
+TEAMSPEAK:
+
+- TS_MSG_TIMEOUT: number - millis to wait for a response from a bot

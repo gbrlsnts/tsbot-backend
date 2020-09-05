@@ -10,6 +10,7 @@ import { TS_BOT_SERVICE } from '../shared/constants';
 import { InboundResponseExternalDeserializer } from '../shared/nats/deserializers/in-response-ext.deserializer';
 import { OutboundMessageExternalSerializer } from '../shared/nats/serializers/out-msg-ext.serializer';
 import { ServersModule } from '../servers/servers.module';
+import { TeamspeakBusService } from './teamspeak-bus.service';
 
 const natsConfig = config.get('nats');
 
@@ -32,6 +33,7 @@ const natsConfig = config.get('nats');
         });
       },
     },
+    TeamspeakBusService,
     UserChannelService,
   ],
   exports: [UserChannelService],

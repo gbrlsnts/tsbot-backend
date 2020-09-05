@@ -12,3 +12,6 @@ jwt:
 
 nats:
   maxReconnectAttempts: -1
+
+teamspeak:
+  messageTimeout: 2000
