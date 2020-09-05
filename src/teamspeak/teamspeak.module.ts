@@ -1,3 +1,4 @@
+import * as config from 'config';
 import { Module } from '@nestjs/common';
 import {
   ClientProxyFactory,
@@ -10,6 +11,8 @@ import { InboundResponseExternalDeserializer } from '../shared/nats/deserializer
 import { OutboundMessageExternalSerializer } from '../shared/nats/serializers/out-msg-ext.serializer';
 import { ServersModule } from '../servers/servers.module';
 
+const natsConfig = config.get('nats');
+
 @Module({
   imports: [ServersModule],
   providers: [
@@ -19,7 +22,10 @@ import { ServersModule } from '../servers/servers.module';
         return ClientProxyFactory.create({
           transport: Transport.NATS,
           options: {
-            url: 'nats://home.local:4222',
+            url: process.env.NATS_URL || natsConfig.url,
+            maxReconnectAttempts:
+              process.env.NATS_MAX_RECONNECT_ATTEMPTS ||
+              natsConfig.maxReconnectAttempts,
             serializer: new OutboundMessageExternalSerializer(),
             deserializer: new InboundResponseExternalDeserializer(),
           },

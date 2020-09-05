@@ -6,7 +6,7 @@
 [travis-url]: https://travis-ci.org/nestjs/nest
 [linux-image]: https://img.shields.io/travis/nestjs/nest/master.svg?label=linux
 [linux-url]: https://travis-ci.org/nestjs/nest
-  
+
   <p align="center">A progressive <a href="http://nodejs.org" target="blank">Node.js</a> framework for building efficient and scalable server-side applications, heavily inspired by <a href="https://angular.io" target="blank">Angular</a>.</p>
     <p align="center">
 <a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
@@ -64,19 +64,24 @@ $ npm run test:cov
 
 App:
 
-* APP_PORT: number - the port the app should listen to
+- APP_PORT: number - the port the app should listen to
 
 Database:
 
-* DB_TYPE: string - database type
-* DB_HOST: string - database host
-* DB_PORT: string - database port
-* DB_USER: string - database username
-* DB_PASSWORD: string - database password
-* DB_DATABASE: string - database name
-* DB_SYNC: boolean - if typeorm should sync entities
+- DB_TYPE: string - database type
+- DB_HOST: string - database host
+- DB_PORT: string - database port
+- DB_USER: string - database username
+- DB_PASSWORD: string - database password
+- DB_DATABASE: string - database name
+- DB_SYNC: boolean - if typeorm should sync entities
 
 Auth:
 
-* JWT_EXPIRES: number - number of seconds a JWT token is valid
-* JWT_SECRET: string - secret to use in jwt token encoding
+- JWT_EXPIRES: number - number of seconds a JWT token is valid
+- JWT_SECRET: string - secret to use in jwt token encoding
+
+NATS:
+
+- NATS_URL: string - nats server url
+- NATS_MAX_RECONNECT_ATTEMPTS: number - max reconnect attemps - default: -1

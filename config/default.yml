@@ -1,11 +1,14 @@
 server:
-    port: 3000
+  port: 3000
 
 db:
-    type: 'postgres'
-    port: 5432
-    database: 'magicteamspeak'
-    synchronize: false
+  type: 'postgres'
+  port: 5432
+  database: 'magicteamspeak'
+  synchronize: false
 
 jwt:
-    expires: 3600
+  expires: 3600
+
+nats:
+  maxReconnectAttempts: -1

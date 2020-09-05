@@ -1,9 +1,12 @@
 db:
-    host: 'home.local'
-    username: 'postgres'
-    password: 'development'
-    synchronize: true
-    logging: true
+  host: 'home.local'
+  username: 'postgres'
+  password: 'development'
+  synchronize: true
+  logging: true
 
 jwt:
-    secret: topSecret51
+  secret: topSecret51
+
+nats:
+  url: nats://home.local:4222
