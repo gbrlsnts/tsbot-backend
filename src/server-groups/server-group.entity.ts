@@ -9,6 +9,7 @@ import {
 import { Expose } from 'class-transformer';
 import { Server } from '../servers/server.entity';
 import { GroupConfig } from '../servers/configs/group/group-config.entity';
+import { Icon } from '../icons/icon.entity';
 
 @Entity()
 @Unique('uniq_server_group', ['tsId', 'serverId'])
@@ -29,6 +30,12 @@ export class ServerGroup {
   @Expose()
   serverId: number;
 
+  @Column({
+    nullable: true,
+  })
+  @Expose()
+  iconId: string;
+
   @Column()
   @Expose()
   name: string;
@@ -38,6 +45,9 @@ export class ServerGroup {
     server => server.serverGroups,
   )
   server: Server;
+
+  @OneToOne(() => Icon)
+  icon: Icon;
 
   @OneToOne(
     () => GroupConfig,

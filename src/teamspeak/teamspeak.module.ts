@@ -1,5 +1,5 @@
 import * as config from 'config';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import {
   ClientProxyFactory,
   Transport,
@@ -11,11 +11,13 @@ import { InboundResponseExternalDeserializer } from '../shared/nats/deserializer
 import { OutboundMessageExternalSerializer } from '../shared/nats/serializers/out-msg-ext.serializer';
 import { ServersModule } from '../servers/servers.module';
 import { TeamspeakBusService } from './teamspeak-bus.service';
+import { ServerGroupService } from './server-groups.service';
+import { TsIconService } from './icons.service';
 
 const natsConfig = config.get('nats');
 
 @Module({
-  imports: [ServersModule],
+  imports: [forwardRef(() => ServersModule)],
   providers: [
     {
       provide: TS_BOT_SERVICE,
@@ -35,7 +37,9 @@ const natsConfig = config.get('nats');
     },
     TeamspeakBusService,
     UserChannelService,
+    ServerGroupService,
+    TsIconService,
   ],
-  exports: [UserChannelService],
+  exports: [UserChannelService, ServerGroupService, TsIconService],
 })
 export class TeamspeakModule {}

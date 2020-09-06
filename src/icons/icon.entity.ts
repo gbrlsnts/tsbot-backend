@@ -29,15 +29,18 @@ export class Icon {
   @Expose()
   mime: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   uploadedById: number;
 
   @OneToOne(
     () => IconContent,
     content => content.icon,
+    { cascade: ['insert'] },
   )
   data: IconContent;
 
   @ManyToOne(() => User)
-  uploadedBy: User;
+  uploadedBy?: User;
 }

@@ -35,7 +35,9 @@ export class ServerGroupsController {
   }
 
   @Put('/sync')
-  syncGroupsByServerId(@Param('server', ParseIntPipe) serverId: number): void {
+  syncGroupsByServerId(
+    @Param('server', ParseIntPipe) serverId: number,
+  ): Promise<void> {
     return this.groupsService.syncGroupsByServerId(serverId);
   }
 }

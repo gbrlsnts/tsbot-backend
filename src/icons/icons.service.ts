@@ -19,6 +19,7 @@ import {
   invalidMime,
   invalidFileImage,
 } from '../shared/messages/icon.messages';
+import { TsIconService } from '../teamspeak/icons.service';
 
 @Injectable()
 export class IconsService {
@@ -27,6 +28,7 @@ export class IconsService {
     private iconRepository: IconRepository,
     @InjectRepository(IconContentRepository)
     private contentRepository: IconContentRepository,
+    private tsIconService: TsIconService,
     private connection: Connection,
   ) {}
 
@@ -147,6 +149,45 @@ export class IconsService {
       .execute();
 
     if (result.affected > 0) throw new NotFoundException();
+  }
+
+  /**
+   * Sync icons from server to database
+   * @param serverId server id
+   * @param icons icon ids to sync
+   */
+  async syncServerIcons(serverId: number, icons: number[]): Promise<void> {
+    const [dbIcons, tsIcons] = await Promise.all([
+      this.getAllIconsByServer(serverId),
+      this.tsIconService.getIcons(serverId, icons),
+    ]);
+
+    const toInsert = await Promise.all(
+      tsIcons
+        .filter(tsI => !dbIcons.find(i => i.tsId === tsI.iconId))
+        .map(async i => {
+          const content = Buffer.from(i.content, 'base64');
+          const mime = await this.getIconMime(content);
+
+          return {
+            tsId: i.iconId,
+            serverId,
+            mime,
+            data: { content },
+          };
+        }),
+    );
+
+    const toDelete = dbIcons.filter(
+      i => !tsIcons.find(tsI => tsI.iconId === i.tsId),
+    );
+
+    await this.connection.transaction(async manager => {
+      await Promise.all([
+        manager.delete(Icon, toDelete),
+        manager.insert(Icon, toInsert),
+      ]);
+    });
   }
 
   /**
