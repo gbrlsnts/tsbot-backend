@@ -153,7 +153,7 @@ export class ServerGroupSyncService {
       if (!tsGroup) continue;
 
       group.name = tsGroup.name;
-      if (Icon.isLocal(tsGroup.iconId)) group.localIconId = tsGroup.iconId;
+      group.localIconId = Icon.isLocal(tsGroup.iconId) ? tsGroup.iconId : null;
 
       toSave.push(group);
     }
