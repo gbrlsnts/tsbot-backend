@@ -38,6 +38,12 @@ export class ServerGroup {
   @Expose()
   iconId: string;
 
+  @Column({
+    nullable: true,
+  })
+  @Expose()
+  localIconId: number;
+
   @Column()
   @Expose()
   name: string;

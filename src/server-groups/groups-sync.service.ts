@@ -59,7 +59,7 @@ export class ServerGroupSyncService {
     const iconsToSync = await this.iconsService.getMissingIconsByServer(
       serverId,
       tsGroups
-        .filter(g => !isNil(g.iconId) && !Icon.localIcons.includes(g.iconId))
+        .filter(g => !isNil(g.iconId) && !Icon.isLocal(g.iconId))
         .map(g => g.iconId),
     );
 
@@ -88,7 +88,7 @@ export class ServerGroupSyncService {
       const tsGroup = tsGroups.find(tGroup => tGroup.tsId === g.tsId);
       if (!tsGroup || g?.icon?.tsId === tsGroup?.tsId) return;
 
-      if (!tsGroup.iconId || Icon.localIcons.includes(tsGroup.iconId)) {
+      if (!tsGroup.iconId || Icon.isLocal(tsGroup.iconId)) {
         g.iconId = null;
       } else {
         const dbIcon = dbIcons.find(i => i.tsId === tsGroup.iconId);
@@ -120,10 +120,11 @@ export class ServerGroupSyncService {
   } {
     const toInsert = tsGroups
       .filter(tsG => !dbGroups.find(g => g.tsId === tsG.tsId))
-      .map(({ name, tsId }) => ({
+      .map(({ name, tsId, iconId }) => ({
         name,
         tsId,
         serverId,
+        localIconId: iconId,
       }));
 
     const toSave = this.getServerGroupsToSave(dbGroups, tsGroups);
@@ -152,6 +153,8 @@ export class ServerGroupSyncService {
       if (!tsGroup) continue;
 
       group.name = tsGroup.name;
+      if (Icon.isLocal(tsGroup.iconId)) group.localIconId = tsGroup.iconId;
+
       toSave.push(group);
     }
 

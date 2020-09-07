@@ -59,4 +59,12 @@ export class Icon {
     // tsId will never be more than an unsigned 32bit
     this.tsId = Number(this.tsId);
   }
+
+  /**
+   * Check if an icon ID is a local icon
+   * @param id icon id to check
+   */
+  static isLocal(id: number): boolean {
+    return Icon.localIcons.includes(id);
+  }
 }
