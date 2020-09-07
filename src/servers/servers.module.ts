@@ -56,6 +56,7 @@ import { ServerGroupsModule } from 'src/server-groups/server-groups.module';
     ServersService,
     ZoneService,
     ChannelConfigService,
+    GroupCategoryService,
     ServerRolesGuard,
   ],
 })

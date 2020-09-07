@@ -12,3 +12,6 @@ export const categoryHasConfigs =
 export const containsInvalidGroups = 'Request contains invalid goups';
 export const iconAlreadyExists =
   'Icon already exists for the given teamspeak id';
+
+export const serverConfigurationPending =
+  'The administrator must configure the server before using this functionality.';

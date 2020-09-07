@@ -18,3 +18,6 @@ export const getServerGroupsSubject = (serverId: number): string =>
 
 export const getIconsSubject = (serverId: number): string =>
   `bot.server.${serverId}.icons.get`;
+
+export const setUserBadgesSubject = (serverId: number): string =>
+  `bot.server.${serverId}.badges.set`;

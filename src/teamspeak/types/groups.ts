@@ -3,3 +3,9 @@ export interface TsServerGroup {
   iconId?: number;
   name: string;
 }
+
+export interface SetUserBadgesData {
+  clientDatabaseId: number;
+  groups: number[];
+  allowed?: number[];
+}

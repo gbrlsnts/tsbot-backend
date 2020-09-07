@@ -14,6 +14,7 @@ import { IconsModule } from './icons/icons.module';
 import { ChannelsModule } from './channels/channels.module';
 import { TeamspeakModule } from './teamspeak/teamspeak.module';
 import { CrawlsModule } from './crawls/crawls.module';
+import { BadgesModule } from './badges/badges.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CrawlsModule } from './crawls/crawls.module';
     ChannelsModule,
     TeamspeakModule,
     CrawlsModule,
+    BadgesModule,
   ],
   controllers: [],
   providers: [

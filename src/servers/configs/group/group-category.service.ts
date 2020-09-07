@@ -46,6 +46,23 @@ export class GroupCategoryService {
   }
 
   /**
+   * Get all categories by server id
+   * @param serverId
+   * @param withGroups if the result should include related groups
+   */
+  async getConfiguredGroupIdsByServer(
+    serverId: number,
+  ): Promise<{ sgId: number; tsId: number }[]> {
+    return this.configRepository
+      .createQueryBuilder('c')
+      .select('g.id', 'sgId')
+      .addSelect('g.tsId', 'tsId')
+      .innerJoin(ServerGroup, 'g', 'c.groupId = g.id')
+      .where('g.serverId = :serverId', { serverId })
+      .getRawMany<{ sgId: number; tsId: number }>();
+  }
+
+  /**
    * Get a category by id
    * @param options find options
    * @param withGroups if groups should be fetched
