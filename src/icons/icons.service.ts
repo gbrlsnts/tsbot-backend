@@ -1,5 +1,5 @@
 import * as jimp from 'jimp';
-import { Brackets, Connection } from 'typeorm';
+import { Brackets, Connection, In } from 'typeorm';
 import {
   Injectable,
   NotFoundException,
@@ -20,6 +20,7 @@ import {
   invalidFileImage,
 } from '../shared/messages/icon.messages';
 import { TsIconService } from '../teamspeak/icons.service';
+import { TsIcon } from '../teamspeak/types/icons';
 
 @Injectable()
 export class IconsService {
@@ -39,6 +40,16 @@ export class IconsService {
   getAllIconsByServer(serverId: number): Promise<Icon[]> {
     return this.iconRepository.find({
       where: { serverId },
+    });
+  }
+
+  /**
+   * Get all icons of a server and teamspeak ids
+   * @param serverId
+   */
+  getAllIconsByTsId(serverId: number, tsIconId: number[]): Promise<Icon[]> {
+    return this.iconRepository.find({
+      where: { serverId, tsId: In(tsIconId) },
     });
   }
 
@@ -152,11 +163,11 @@ export class IconsService {
   }
 
   /**
-   * Sync icons from server to database
+   * Sync new icons from server to database. Doesnt cleanup unused
    * @param serverId server id
    * @param icons icon ids to sync
    */
-  async syncServerIcons(serverId: number, icons: number[]): Promise<void> {
+  async syncNewServerIcons(serverId: number, icons: number[]): Promise<Icon[]> {
     const [dbIcons, tsIcons] = await Promise.all([
       this.getAllIconsByServer(serverId),
       this.tsIconService.getIcons(serverId, icons),
@@ -165,17 +176,29 @@ export class IconsService {
     const toInsert = await Promise.all(
       tsIcons
         .filter(tsI => !dbIcons.find(i => i.tsId === tsI.iconId))
-        .map(async i => {
-          const content = Buffer.from(i.content, 'base64');
-          const mime = await this.getIconMime(content);
+        .map(i => this.mapTeamspeakToIcon(serverId, i)),
+    );
 
-          return {
-            tsId: i.iconId,
-            serverId,
-            mime,
-            data: { content },
-          };
-        }),
+    if (toInsert.length === 0) return [];
+
+    return await this.iconRepository.save(toInsert);
+  }
+
+  /**
+   * Sync all icons from server to database. Removes unused icons older than 1 month.
+   * @param serverId server id
+   * @param icons icon ids to sync
+   */
+  async syncAllServerIcons(serverId: number): Promise<void> {
+    const [dbIcons, tsIcons] = await Promise.all([
+      this.getAllIconsByServer(serverId),
+      this.tsIconService.getIcons(serverId),
+    ]);
+
+    const toInsert = await Promise.all(
+      tsIcons
+        .filter(tsI => !dbIcons.find(i => i.tsId === tsI.iconId))
+        .map(i => this.mapTeamspeakToIcon(serverId, i)),
     );
 
     const toDelete = dbIcons.filter(
@@ -183,10 +206,16 @@ export class IconsService {
     );
 
     await this.connection.transaction(async manager => {
-      await Promise.all([
-        manager.delete(Icon, toDelete),
-        manager.insert(Icon, toInsert),
-      ]);
+      if (toDelete.length > 0) {
+        await manager
+          .createQueryBuilder(Icon, 'i')
+          .delete()
+          .where("i.uploadedAt < now() - interval '1 month'")
+          .execute();
+      }
+
+      if (toInsert.length > 0)
+        await manager.save(toInsert, { transaction: false });
     });
   }
 
@@ -210,5 +239,49 @@ export class IconsService {
       throw new BadRequestException(invalidMime(valid));
 
     return mime;
+  }
+
+  /**
+   * Map a teamspeak icon to icon entity
+   * @param serverId server id
+   * @param tsIcon icon to map
+   */
+  private async mapTeamspeakToIcon(
+    serverId: number,
+    tsIcon: TsIcon,
+  ): Promise<Icon> {
+    const content = Buffer.from(tsIcon.content, 'base64');
+    const mime = await this.getIconMime(content);
+
+    return this.iconRepository.create({
+      tsId: tsIcon.iconId,
+      serverId,
+      mime,
+      data: { content },
+    });
+  }
+
+  /**
+   * Get the icons list that aren't saved in the database
+   * @param serverId server id
+   * @param tsIconIds ts icons to check
+   */
+  async getMissingIconsByServer(
+    serverId: number,
+    tsIconIds: number[],
+  ): Promise<number[]> {
+    const dbIcons = (
+      await this.iconRepository
+        .createQueryBuilder('i')
+        .select('i.tsId', 'tsId')
+        .where('i.serverId = :serverId', {
+          serverId,
+        })
+        .getRawMany<{ tsId: number }>()
+    ).map(i => Number(i.tsId)); // bigint returns string
+
+    return tsIconIds.filter(
+      tsIcon => !dbIcons.find(dbIcon => dbIcon === tsIcon),
+    );
   }
 }

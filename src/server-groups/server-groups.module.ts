@@ -7,6 +7,7 @@ import { ServersModule } from '../servers/servers.module';
 import { ClientsModule } from '../clients/clients.module';
 import { TeamspeakModule } from '../teamspeak/teamspeak.module';
 import { IconsModule } from '../icons/icons.module';
+import { ServerGroupSyncService } from './groups-sync.service';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { IconsModule } from '../icons/icons.module';
     TeamspeakModule,
     IconsModule,
   ],
-  providers: [ServerGroupsService],
+  providers: [ServerGroupsService, ServerGroupSyncService],
   controllers: [ServerGroupsController],
   exports: [ServerGroupsService],
 })

@@ -18,6 +18,7 @@ import { appSerializeOptions } from '../shared/constants';
 import { ServerGroupsService } from './server-groups.service';
 import { ServerGroup } from './server-group.entity';
 import { SetServerRoles } from '../servers/decorators/set-server-roles.decorator';
+import { ServerGroupSyncService } from './groups-sync.service';
 
 @Controller('/servers/:server/groups')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
@@ -25,7 +26,10 @@ import { SetServerRoles } from '../servers/decorators/set-server-roles.decorator
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions(appSerializeOptions)
 export class ServerGroupsController {
-  constructor(private groupsService: ServerGroupsService) {}
+  constructor(
+    private groupsService: ServerGroupsService,
+    private syncService: ServerGroupSyncService,
+  ) {}
 
   @Get()
   getAllGroupsByServerId(
@@ -38,6 +42,6 @@ export class ServerGroupsController {
   syncGroupsByServerId(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<void> {
-    return this.groupsService.syncGroupsByServerId(serverId);
+    return this.syncService.syncGroupsByServerId(serverId);
   }
 }

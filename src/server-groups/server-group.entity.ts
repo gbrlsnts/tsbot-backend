@@ -5,6 +5,7 @@ import {
   ManyToOne,
   Unique,
   OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Expose } from 'class-transformer';
 import { Server } from '../servers/server.entity';
@@ -32,6 +33,7 @@ export class ServerGroup {
 
   @Column({
     nullable: true,
+    type: 'uuid',
   })
   @Expose()
   iconId: string;
@@ -46,7 +48,8 @@ export class ServerGroup {
   )
   server: Server;
 
-  @OneToOne(() => Icon)
+  @ManyToOne(() => Icon, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'iconId' })
   icon: Icon;
 
   @OneToOne(
