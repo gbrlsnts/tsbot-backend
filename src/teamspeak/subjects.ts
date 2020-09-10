@@ -17,7 +17,13 @@ export const getServerGroupsSubject = (serverId: number): string =>
   `bot.server.${serverId}.server-groups.get`;
 
 export const getIconsSubject = (serverId: number): string =>
-  `bot.server.${serverId}.icons.get`;
+  `bot.server.${serverId}.icon.list`;
+
+export const uploadIconSubject = (serverId: number): string =>
+  `bot.server.${serverId}.icon.upload`;
+
+export const deleteIconSubject = (serverId: number): string =>
+  `bot.server.${serverId}.icon.delete`;
 
 export const setUserBadgesSubject = (serverId: number): string =>
   `bot.server.${serverId}.badges.set`;

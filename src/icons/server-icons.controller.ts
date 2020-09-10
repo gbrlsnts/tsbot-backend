@@ -9,6 +9,8 @@ import {
   Param,
   Post,
   Body,
+  ParseUUIDPipe,
+  Delete,
 } from '@nestjs/common';
 import { IconsService } from './icons.service';
 import { Icon } from './icon.entity';
@@ -45,5 +47,15 @@ export class ServerIconsController {
     @Body() dto: UploadIconDto,
   ): Promise<Icon> {
     return this.iconsService.uploadIcon(user.id, serverId, dto);
+  }
+
+  @Delete('/:id')
+  @SetServerRoles([ServerRoles.OWNER])
+  deleteIcon(
+    @GetUser() user: User,
+    @Param('server', ParseIntPipe) serverId: number,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
+    return this.iconsService.deleteIcon(user.id, serverId, id);
   }
 }

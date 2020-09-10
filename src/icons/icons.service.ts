@@ -1,5 +1,5 @@
 import * as jimp from 'jimp';
-import { Brackets, Connection, In } from 'typeorm';
+import { Brackets, Connection, In, DeleteResult } from 'typeorm';
 import {
   Injectable,
   NotFoundException,
@@ -97,10 +97,12 @@ export class IconsService {
     serverId: number,
     dto: UploadIconDto,
   ): Promise<Icon> {
-    const { tsId, content: encodedContent } = dto;
+    const { content: encodedContent } = dto;
 
     const content = Buffer.from(encodedContent, 'base64');
     const mime = await this.getIconMime(content);
+
+    const tsId = await this.tsIconService.uploadIcon(serverId, encodedContent);
 
     const icon = this.iconRepository.create({
       serverId,
@@ -135,15 +137,22 @@ export class IconsService {
   /**
    * Delete an icon
    * @param userId user id deleting the icon
+   * @param serverId
    * @param id
    * @throws NotFoundException
    */
-  async deleteIcon(userId: number, id: number): Promise<void> {
+  async deleteIcon(
+    userId: number,
+    serverId: number,
+    id: string,
+  ): Promise<void> {
+    const icon = await this.getIconById(id);
+
     const permQb = this.iconRepository
       .createQueryBuilder('i')
       .select('i.id')
-      .innerJoin(Server, 's')
-      .where('i.id = :id', { id })
+      .innerJoin(Server, 's', 'i.serverId = s.id')
+      .where('i.id = :id AND i.serverId = :serverId', { id, serverId })
       .andWhere(
         new Brackets(qb => {
           qb.where('s.ownerId = :userId', {
@@ -152,14 +161,20 @@ export class IconsService {
         }),
       );
 
-    const result = await this.iconRepository
-      .createQueryBuilder('icon')
-      .delete()
-      .where(`icon.id IN (${permQb.getQuery()})`)
-      .setParameters(permQb.getParameters())
-      .execute();
+    let result: DeleteResult;
 
-    if (result.affected > 0) throw new NotFoundException();
+    await this.connection.transaction(async manager => {
+      result = await manager
+        .createQueryBuilder(Icon, 'icon')
+        .delete()
+        .where(`icon.id IN (${permQb.getQuery()})`)
+        .setParameters(permQb.getParameters())
+        .execute();
+
+      await this.tsIconService.deleteIcons(serverId, [icon.tsId]);
+    });
+
+    if (result.affected === 0) throw new NotFoundException();
   }
 
   /**
