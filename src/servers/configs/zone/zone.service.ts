@@ -80,11 +80,7 @@ export class ZoneService {
     if (zone.name !== newName)
       await this.validateZoneName(newName, zone.serverId);
 
-    if (
-      zone.minutesInactiveNotify != newMinutesNotify ||
-      zone.minutesInactiveDelete != newMinutesDelete
-    )
-      this.validateInactiveMinutes(zone, newMinutesNotify, newMinutesDelete);
+    this.validateInactiveMinutes(zone, newMinutesNotify, newMinutesDelete);
 
     Object.assign(zone, dto);
 
@@ -182,9 +178,17 @@ export class ZoneService {
    */
   private validateInactiveMinutes(
     zone: Zone,
-    newMinutesNotify: number,
-    newMinutesDelete: number,
+    newMinutesNotify?: number,
+    newMinutesDelete?: number,
   ): void {
+    if (!newMinutesNotify && !newMinutesNotify) return;
+
+    if (
+      zone.minutesInactiveNotify === newMinutesNotify &&
+      zone.minutesInactiveDelete === newMinutesDelete
+    )
+      return;
+
     if (
       newMinutesNotify &&
       newMinutesDelete &&

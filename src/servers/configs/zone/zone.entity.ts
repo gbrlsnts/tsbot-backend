@@ -53,6 +53,10 @@ export class Zone {
   @Expose()
   isDefault: boolean;
 
+  @Column({ default: false })
+  @Expose()
+  crawl: boolean;
+
   @OneToOne(
     () => ChannelConfig,
     config => config.zone,

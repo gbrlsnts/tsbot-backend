@@ -36,4 +36,7 @@ export class UpdateZoneDto {
   @Max(1052000)
   @IsOptional()
   minutesInactiveDelete: number;
+
+  @IsBoolean()
+  crawl: boolean;
 }

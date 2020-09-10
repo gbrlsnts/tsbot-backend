@@ -29,4 +29,7 @@ export class CreateZoneDto {
   @Min(5)
   @Max(1052000)
   minutesInactiveDelete: number;
+
+  @IsBoolean()
+  crawl: boolean;
 }
