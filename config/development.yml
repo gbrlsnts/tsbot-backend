@@ -10,3 +10,6 @@ jwt:
 
 nats:
   url: nats://home.local:4222
+
+verification:
+  address: '192.168.1.33'

@@ -13,6 +13,7 @@ import { ServersModule } from '../servers/servers.module';
 import { TeamspeakBusService } from './teamspeak-bus.service';
 import { ServerGroupService } from './server-groups.service';
 import { TsIconService } from './icons.service';
+import { TsClientService } from './client.service';
 
 const natsConfig = config.get('nats');
 
@@ -39,7 +40,13 @@ const natsConfig = config.get('nats');
     UserChannelService,
     ServerGroupService,
     TsIconService,
+    TsClientService,
   ],
-  exports: [UserChannelService, ServerGroupService, TsIconService],
+  exports: [
+    UserChannelService,
+    ServerGroupService,
+    TsIconService,
+    TsClientService,
+  ],
 })
 export class TeamspeakModule {}

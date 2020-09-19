@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  InternalServerErrorException,
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -39,6 +38,19 @@ export class ClientsService {
   ): Promise<Client> {
     const client = await this.clientRepository.findOne({
       where: { serverId, id: clientId },
+    });
+
+    if (!client) throw new NotFoundException();
+
+    return client;
+  }
+
+  async getServerClientByTsUid(
+    serverId: number,
+    tsUniqueId: string,
+  ): Promise<Client> {
+    const client = await this.clientRepository.findOne({
+      where: { serverId, tsUniqueId },
     });
 
     if (!client) throw new NotFoundException();
@@ -117,7 +129,7 @@ export class ClientsService {
       if (e.code == DbErrorCodes.DuplicateKey)
         throw new ConflictException(clientAlreadyExists);
 
-      throw new InternalServerErrorException();
+      throw e;
     }
   }
 }
