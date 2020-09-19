@@ -43,6 +43,7 @@ export class VerificationController {
   }
 
   @Post('/:token')
+  @HttpCode(200)
   verifyToken(
     @GetUser() user: User,
     @Param('server', ParseIntPipe) serverId: number,
