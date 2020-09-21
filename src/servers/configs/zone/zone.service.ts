@@ -9,11 +9,14 @@ import {
 import { UpdateZoneDto } from './dto/update-zone.dto';
 import { propLessThanAnother } from '../../../shared/messages/global.messages';
 import { CreateZoneDto } from './dto/create-zone.dto';
+import { Connection } from 'typeorm';
+import { zoneCantUnsetDefault } from '../../../shared/messages/server.messages';
 
 export class ZoneService {
   constructor(
     @InjectRepository(ZoneRepository)
     private zoneRepository: ZoneRepository,
+    private connection: Connection,
   ) {}
 
   /**
@@ -53,15 +56,29 @@ export class ZoneService {
    * @param dto zone data
    */
   async createZone(serverId: number, dto: CreateZoneDto): Promise<Zone> {
-    const { name } = dto;
+    const { name, isDefault } = dto;
     await this.validateZoneName(name, serverId);
+
+    if (!isDefault) {
+      const defaultZonesExist = await this.checkZoneExists({
+        serverId,
+        isDefault: true,
+      });
+
+      if (!defaultZonesExist) dto.isDefault = true;
+    }
 
     const zone = this.zoneRepository.create({
       serverId,
       ...dto,
     });
 
-    return this.zoneRepository.save(zone);
+    let savedZone: Zone;
+    await this.connection.transaction(async manager => {
+      savedZone = await this.zoneRepository.saveAndSetDefaults(zone, manager);
+    });
+
+    return savedZone;
   }
 
   /**
@@ -80,11 +97,28 @@ export class ZoneService {
     if (zone.name !== newName)
       await this.validateZoneName(newName, zone.serverId);
 
-    this.validateInactiveMinutes(zone, newMinutesNotify, newMinutesDelete);
+    if (
+      dto.isDefault !== undefined &&
+      dto.isDefault === false &&
+      zone.isDefault
+    )
+      throw new BadRequestException(zoneCantUnsetDefault);
+
+    this.validateInactiveMinutes(
+      zone,
+      dto.crawl,
+      newMinutesNotify,
+      newMinutesDelete,
+    );
 
     Object.assign(zone, dto);
 
-    return this.zoneRepository.save(zone);
+    let savedZone: Zone;
+    await this.connection.transaction(async manager => {
+      savedZone = await this.zoneRepository.saveAndSetDefaults(zone, manager);
+    });
+
+    return savedZone;
   }
 
   /**
@@ -114,43 +148,11 @@ export class ZoneService {
 
   /**
    * Check if a zone name exists for a server
-   * @param name zone name to check
-   * @param serverId server id
+   * @param checkBy criteria to check for
    */
-  async checkZoneNameExistsByServer(
-    name: string,
-    serverId: number,
-  ): Promise<boolean> {
+  async checkZoneExists(checkBy: Partial<Zone>): Promise<boolean> {
     const zoneCount = await this.zoneRepository.count({
-      where: { name, serverId },
-    });
-
-    return zoneCount > 0;
-  }
-
-  /**
-   * Check if a zone id exists
-   * @param id
-   */
-  async checkZoneExists(id: number): Promise<boolean> {
-    const zoneCount = await this.zoneRepository.count({
-      where: { id },
-    });
-
-    return zoneCount > 0;
-  }
-
-  /**
-   * Check if a given zone id belongs to a server
-   * @param id
-   * @param serverId
-   */
-  async checkZoneBelongsToServer(
-    id: number,
-    serverId: number,
-  ): Promise<boolean> {
-    const zoneCount = await this.zoneRepository.count({
-      where: { id, serverId },
+      where: checkBy,
     });
 
     return zoneCount > 0;
@@ -165,7 +167,7 @@ export class ZoneService {
     name: string,
     serverId: number,
   ): Promise<void> {
-    const nameExists = await this.checkZoneNameExistsByServer(name, serverId);
+    const nameExists = await this.checkZoneExists({ name, serverId });
 
     if (nameExists) throw new ConflictException();
   }
@@ -178,18 +180,23 @@ export class ZoneService {
    */
   private validateInactiveMinutes(
     zone: Zone,
+    newIsCrawl: boolean,
     newMinutesNotify?: number,
     newMinutesDelete?: number,
   ): void {
-    if (!newMinutesNotify && !newMinutesNotify) return;
+    if (!newIsCrawl) return;
+
+    if (zone.crawl && !newMinutesNotify && !newMinutesNotify) return;
 
     if (
+      zone.crawl &&
       zone.minutesInactiveNotify === newMinutesNotify &&
       zone.minutesInactiveDelete === newMinutesDelete
     )
       return;
 
     if (
+      zone.crawl &&
       newMinutesNotify &&
       newMinutesDelete &&
       newMinutesNotify <= newMinutesDelete

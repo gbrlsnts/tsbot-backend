@@ -38,5 +38,10 @@ export class UpdateZoneDto {
   minutesInactiveDelete: number;
 
   @IsBoolean()
+  @IsOptional()
   crawl: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  isDefault: boolean;
 }

@@ -178,10 +178,10 @@ export class ChannelConfigService {
    * @throws BadRequestException when the zone doesn't exist
    */
   private async validateZoneId(id: number, serverId: number): Promise<void> {
-    const zoneExists = await this.zoneService.checkZoneBelongsToServer(
+    const zoneExists = await this.zoneService.checkZoneExists({
       id,
       serverId,
-    );
+    });
 
     if (!zoneExists) throw new BadRequestException(zoneDoesNotExists);
   }

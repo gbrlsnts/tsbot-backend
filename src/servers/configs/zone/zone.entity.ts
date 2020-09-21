@@ -39,17 +39,19 @@ export class Zone {
 
   @Column({
     unsigned: true,
+    nullable: true,
   })
   @Expose()
   minutesInactiveNotify: number;
 
   @Column({
     unsigned: true,
+    nullable: true,
   })
   @Expose()
   minutesInactiveDelete: number;
 
-  @Column()
+  @Column({ default: false })
   @Expose()
   isDefault: boolean;
 
