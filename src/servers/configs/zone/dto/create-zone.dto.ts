@@ -8,8 +8,13 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { LessThanField } from '../../../../shared/validation/less-than-field.validation';
+import { IsOptional } from 'class-validator';
 
 export class CreateZoneDto {
+  @IsPositive()
+  @IsOptional()
+  groupId: number;
+
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -35,7 +40,4 @@ export class CreateZoneDto {
 
   @IsBoolean()
   crawl: boolean;
-
-  @IsBoolean()
-  isDefault: boolean;
 }

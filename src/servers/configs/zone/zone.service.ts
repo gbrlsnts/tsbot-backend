@@ -10,7 +10,14 @@ import { UpdateZoneDto } from './dto/update-zone.dto';
 import { propLessThanAnother } from '../../../shared/messages/global.messages';
 import { CreateZoneDto } from './dto/create-zone.dto';
 import { Connection } from 'typeorm';
-import { zoneCantUnsetDefault } from '../../../shared/messages/server.messages';
+import {
+  zoneAlreadyExists,
+  zoneFirstCantBindGroup,
+} from '../../../shared/messages/server.messages';
+import { isNil } from '@nestjs/common/utils/shared.utils';
+import { deleteDefaultZoneNotAllowed } from '../../../shared/messages/server.messages';
+import { DbErrorCodes } from '../../../shared/database/codes';
+import { FindZoneOptions } from './types';
 
 export class ZoneService {
   constructor(
@@ -30,9 +37,13 @@ export class ZoneService {
    * Get all zones by server id
    * @param serverId
    */
-  getAllZonesByServer(serverId: number): Promise<Zone[]> {
+  getAllZonesByServer(
+    serverId: number,
+    options?: Partial<FindZoneOptions>,
+  ): Promise<Zone[]> {
     return this.zoneRepository.find({
-      where: { serverId },
+      where: { serverId, active: options?.withInactive ? undefined : true },
+      relations: options?.relations,
     });
   }
 
@@ -56,16 +67,15 @@ export class ZoneService {
    * @param dto zone data
    */
   async createZone(serverId: number, dto: CreateZoneDto): Promise<Zone> {
-    const { name, isDefault } = dto;
-    await this.validateZoneName(name, serverId);
+    await this.validateZoneName(dto.name, serverId);
 
-    if (!isDefault) {
-      const defaultZonesExist = await this.checkZoneExists({
-        serverId,
-        isDefault: true,
-      });
+    const defaultZoneExists = await this.checkZoneExists({
+      serverId,
+      groupId: null,
+    });
 
-      if (!defaultZonesExist) dto.isDefault = true;
+    if (!isNil(dto.groupId) && !defaultZoneExists) {
+      throw new BadRequestException(zoneFirstCantBindGroup);
     }
 
     const zone = this.zoneRepository.create({
@@ -73,12 +83,14 @@ export class ZoneService {
       ...dto,
     });
 
-    let savedZone: Zone;
-    await this.connection.transaction(async manager => {
-      savedZone = await this.zoneRepository.saveAndSetDefaults(zone, manager);
-    });
+    try {
+      return await this.zoneRepository.save(zone);
+    } catch (e) {
+      if (e.code == DbErrorCodes.DuplicateKey)
+        throw new ConflictException(zoneAlreadyExists);
 
-    return savedZone;
+      throw e;
+    }
   }
 
   /**
@@ -97,12 +109,8 @@ export class ZoneService {
     if (zone.name !== newName)
       await this.validateZoneName(newName, zone.serverId);
 
-    if (
-      dto.isDefault !== undefined &&
-      dto.isDefault === false &&
-      zone.isDefault
-    )
-      throw new BadRequestException(zoneCantUnsetDefault);
+    if (!zone.groupId && dto.groupId)
+      throw new BadRequestException(zoneFirstCantBindGroup);
 
     this.validateInactiveMinutes(
       zone,
@@ -113,12 +121,14 @@ export class ZoneService {
 
     Object.assign(zone, dto);
 
-    let savedZone: Zone;
-    await this.connection.transaction(async manager => {
-      savedZone = await this.zoneRepository.saveAndSetDefaults(zone, manager);
-    });
+    try {
+      return await this.zoneRepository.save(zone);
+    } catch (e) {
+      if (e.code == DbErrorCodes.DuplicateKey)
+        throw new ConflictException(zoneAlreadyExists);
 
-    return savedZone;
+      throw e;
+    }
   }
 
   /**
@@ -126,9 +136,12 @@ export class ZoneService {
    * @param id zone id
    */
   async deleteZone(id: number): Promise<void> {
-    const result = await this.zoneRepository.delete(id);
+    const zone = await this.getZone({ id });
 
-    if (result.affected == 0) throw new NotFoundException();
+    if (!zone.groupId)
+      throw new BadRequestException(deleteDefaultZoneNotAllowed);
+
+    await this.zoneRepository.delete(id);
   }
 
   /**
@@ -169,7 +182,7 @@ export class ZoneService {
   ): Promise<void> {
     const nameExists = await this.checkZoneExists({ name, serverId });
 
-    if (nameExists) throw new ConflictException();
+    if (nameExists) throw new ConflictException(zoneAlreadyExists);
   }
 
   /**

@@ -68,16 +68,17 @@ export class ChannelsService {
     serverId: number,
     dto: ChannelDto,
   ): Promise<Channel> {
-    const { id: clientId } = await this.clientsService.getServerClientByUserId(
-      serverId,
-      userId,
-    );
+    const {
+      id: clientId,
+      tsClientDbId,
+    } = await this.clientsService.getServerClientByUserId(serverId, userId);
     const hasChannel = await this.checkClientHasChannel(clientId);
 
     if (hasChannel) throw new ConflictException(alreadyHasChannel);
 
     const tsChannelId = await this.tsChannelService.createUserChannel(
       serverId,
+      tsClientDbId,
       dto,
     );
 
@@ -89,7 +90,11 @@ export class ChannelsService {
     try {
       return this.channelRepository.save(channel);
     } catch (e) {
-      await this.tsChannelService.deleteUserChannel(serverId, tsChannelId);
+      await this.tsChannelService.deleteUserChannel(
+        serverId,
+        tsClientDbId,
+        tsChannelId,
+      );
       throw e;
     }
   }
@@ -102,6 +107,7 @@ export class ChannelsService {
     await this.tsChannelService.createUserSubChannel(
       channel.client.serverId,
       channel.tsChannelId,
+      channel.client.tsClientDbId,
       dto,
     );
   }
@@ -126,6 +132,7 @@ export class ChannelsService {
     if (tsSubChannelId) {
       await this.tsChannelService.deleteUserChannel(
         channel.client.serverId,
+        channel.client.tsClientDbId,
         tsSubChannelId,
         channel.tsChannelId,
       );
@@ -133,6 +140,7 @@ export class ChannelsService {
       await this.connection.transaction(async manager => {
         await this.tsChannelService.deleteUserChannel(
           channel.client.serverId,
+          channel.client.tsClientDbId,
           channel.tsChannelId,
         );
         await manager.delete(Channel, channel.id);

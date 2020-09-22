@@ -18,6 +18,7 @@ import {
   deleteChannelSubject,
   getSubChannelCountSubject,
   getChannelIsUniqueSubject,
+  getUserServerGroupsSubject,
 } from './subjects';
 import { ChannelConfig } from 'src/servers/configs/channel/channel-config.entity';
 import { Zone } from 'src/servers/configs/zone/zone.entity';
@@ -36,16 +37,21 @@ export class UserChannelService {
    * Creates a channel in teamspeak and returns the id
    * Pending implementation
    * @param serverId server id to create the channel
+   * @param tsClientDbId teamspeak db id of the user creating the channel
    * @param dto channel data
    */
-  async createUserChannel(serverId: number, dto: ChannelDto): Promise<number> {
+  async createUserChannel(
+    serverId: number,
+    tsClientDbId: number,
+    dto: ChannelDto,
+  ): Promise<number> {
     const [isUnique, channelConfig, zone] = await Promise.all([
       this.sendIsUniqueRequest(serverId, [dto.name]),
       this.channelConfigService.getConfig({
         serverId,
         zoneId: null,
       }),
-      this.zoneService.getZone({ serverId, isDefault: true }),
+      this.getZoneByUserGroup(serverId, tsClientDbId),
     ]);
 
     if (!isUnique) throw new BadRequestException(channelNameAlreadyExists);
@@ -67,12 +73,14 @@ export class UserChannelService {
    * Creates a sub channel in teamspeak and returns the id
    * Pending implementation
    * @param serverId server id to create the sub channel
-   * @param tsChannelId teamspeak id of the parent channel
+   * @param tsChannelId teamspeak owner db id of the parent channel
+   * @param tsClientDbId teamspeak db id of the parent channel owner
    * @param dto channel data
    */
   async createUserSubChannel(
     serverId: number,
     tsChannelId: number,
+    tsClientDbId: number,
     dto: SubChannelDto,
   ): Promise<void> {
     const [isUnique, subChannelCount, channelConfig, zone] = await Promise.all([
@@ -84,7 +92,7 @@ export class UserChannelService {
         serverId,
         zoneId: null,
       }),
-      this.zoneService.getZone({ serverId, isDefault: true }),
+      this.getZoneByUserGroup(serverId, tsClientDbId),
     ]);
 
     if (!isUnique) throw new BadRequestException(channelNameAlreadyExists);
@@ -107,16 +115,19 @@ export class UserChannelService {
 
   /**
    * Deletes a channel in the voice server
+   * @param serverId
+   * @param tsChannelId teamspeak owner db id of the root channel
    * @param tsChannelId channel to delete
    * @param tsRootChannelId when the channel to delete is a sub channel id, this should be the root/top channel id.
    *        the root channel is also the id stored in the channel entity
    */
   async deleteUserChannel(
     serverId: number,
+    tsClientDbId: number,
     tsChannelId: number,
     tsRootChannelId?: number,
   ): Promise<void> {
-    const zone = await this.zoneService.getZone({ serverId, isDefault: true });
+    const zone = await this.getZoneByUserGroup(serverId, tsClientDbId);
 
     const data: DeleteChannelData = {
       zone: zone.toBotData(),
@@ -172,5 +183,28 @@ export class UserChannelService {
       getChannelIsUniqueSubject(serverId),
       isUniqueRequestData,
     );
+  }
+
+  /**
+   * Get the best fitting zone according to a user's groups and zone config
+   * @param serverId
+   * @param tsClientDbId
+   */
+  private async getZoneByUserGroup(
+    serverId: number,
+    tsClientDbId: number,
+  ): Promise<Zone> {
+    const [groups, zones] = await Promise.all([
+      this.busService.send<number[]>(
+        getUserServerGroupsSubject(serverId),
+        tsClientDbId,
+      ),
+      this.zoneService.getAllZonesByServer(serverId, { relations: ['group'] }),
+    ]);
+
+    const defaultZone = zones.find(z => !z.groupId);
+    const bestFitZone = zones.find(z => groups.includes(z?.group?.tsId));
+
+    return bestFitZone ?? defaultZone;
   }
 }

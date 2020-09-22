@@ -10,6 +10,10 @@ import {
 import { LessThanField } from '../../../../shared/validation/less-than-field.validation';
 
 export class UpdateZoneDto {
+  @IsPositive()
+  @IsOptional()
+  groupId: number;
+
   @IsString()
   @IsNotEmpty()
   @IsOptional()
@@ -40,8 +44,4 @@ export class UpdateZoneDto {
   @IsBoolean()
   @IsOptional()
   crawl: boolean;
-
-  @IsBoolean()
-  @IsOptional()
-  isDefault: boolean;
 }

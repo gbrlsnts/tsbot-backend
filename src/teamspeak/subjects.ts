@@ -28,6 +28,9 @@ export const deleteIconSubject = (serverId: number): string =>
 export const setUserBadgesSubject = (serverId: number): string =>
   `bot.server.${serverId}.badges.set`;
 
+export const getUserServerGroupsSubject = (serverId: number): string =>
+  `bot.server.${serverId}.user.sgroups`;
+
 export const getUsersByAddressSubject = (serverId: number): string =>
   `bot.server.${serverId}.user.get-by-addr`;
 
