@@ -9,7 +9,6 @@ import {
 import { UpdateZoneDto } from './dto/update-zone.dto';
 import { propLessThanAnother } from '../../../shared/messages/global.messages';
 import { CreateZoneDto } from './dto/create-zone.dto';
-import { Connection } from 'typeorm';
 import {
   zoneAlreadyExists,
   zoneFirstCantBindGroup,
@@ -23,7 +22,6 @@ export class ZoneService {
   constructor(
     @InjectRepository(ZoneRepository)
     private zoneRepository: ZoneRepository,
-    private connection: Connection,
   ) {}
 
   /**

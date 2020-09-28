@@ -17,7 +17,6 @@ import {
 import { ZoneService } from '../zone/zone.service';
 import { SetPermissionsDto } from './dto/set-permissions.dto';
 import { ChannelConfigPermission } from './channel-perm.entity';
-import { ChannelConfigPermissionRepository } from './channel-perm.repository';
 import { DbErrorCodes } from '../../../shared/database/codes';
 import { CreateConfigDto } from './dto/create-config.dto';
 import { UpdateConfigDto } from './dto/update-config.dto';
@@ -26,8 +25,6 @@ export class ChannelConfigService {
   constructor(
     @InjectRepository(ChannelConfigRepository)
     private configRepository: ChannelConfigRepository,
-    @InjectRepository(ChannelConfigPermissionRepository)
-    private permRepository: ChannelConfigPermissionRepository,
     private zoneService: ZoneService,
     private refDataService: MetadataService,
     private connection: Connection,
