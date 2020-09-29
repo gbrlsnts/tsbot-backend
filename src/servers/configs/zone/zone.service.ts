@@ -14,22 +14,21 @@ import {
   zoneFirstCantBindGroup,
 } from '../../../shared/messages/server.messages';
 import { isNil } from '@nestjs/common/utils/shared.utils';
-import { deleteDefaultZoneNotAllowed } from '../../../shared/messages/server.messages';
+import {
+  deleteDefaultZoneNotAllowed,
+  cannotSetZoneInactive,
+} from '../../../shared/messages/server.messages';
 import { DbErrorCodes } from '../../../shared/database/codes';
 import { FindZoneOptions } from './types';
+import { ServerGroupsService } from '../../../server-groups/server-groups.service';
+import { invalidGroup } from '../../../shared/messages/group.messages';
 
 export class ZoneService {
   constructor(
     @InjectRepository(ZoneRepository)
     private zoneRepository: ZoneRepository,
+    private groupService: ServerGroupsService,
   ) {}
-
-  /**
-   * Get all zones
-   */
-  getAllZones(): Promise<Zone[]> {
-    return this.zoneRepository.find();
-  }
 
   /**
    * Get all zones by server id
@@ -37,11 +36,14 @@ export class ZoneService {
    */
   getAllZonesByServer(
     serverId: number,
-    options?: Partial<FindZoneOptions>,
+    options?: FindZoneOptions,
   ): Promise<Zone[]> {
+    const { relations, withDeleted } = options || {};
+
     return this.zoneRepository.find({
-      where: { serverId, active: options?.withInactive ? undefined : true },
-      relations: options?.relations,
+      where: { serverId },
+      relations,
+      withDeleted,
     });
   }
 
@@ -52,6 +54,7 @@ export class ZoneService {
   async getZone(params: Partial<Zone>): Promise<Zone> {
     const zone = await this.zoneRepository.findOne({
       where: params,
+      withDeleted: true,
     });
 
     if (!zone) throw new NotFoundException();
@@ -76,6 +79,8 @@ export class ZoneService {
       throw new BadRequestException(zoneFirstCantBindGroup);
     }
 
+    if (!isNil(dto.groupId)) await this.validateGroup(dto.groupId, serverId);
+
     const zone = this.zoneRepository.create({
       serverId,
       ...dto,
@@ -97,25 +102,11 @@ export class ZoneService {
    * @param dto zone data
    */
   async updateZone(id: number, dto: UpdateZoneDto): Promise<Zone> {
-    const {
-      name: newName,
-      minutesInactiveNotify: newMinutesNotify,
-      minutesInactiveDelete: newMinutesDelete,
-    } = dto;
     const zone = await this.getZone({ id });
 
-    if (zone.name !== newName)
-      await this.validateZoneName(newName, zone.serverId);
+    await this.validateZoneForUpdate(zone, dto);
 
-    if (!zone.groupId && dto.groupId)
-      throw new BadRequestException(zoneFirstCantBindGroup);
-
-    this.validateInactiveMinutes(
-      zone,
-      dto.crawl,
-      newMinutesNotify,
-      newMinutesDelete,
-    );
+    if (!zone.active() && dto.active) zone.deletedAt = null;
 
     Object.assign(zone, dto);
 
@@ -158,15 +149,54 @@ export class ZoneService {
   }
 
   /**
-   * Check if a zone name exists for a server
+   * Check if a zone exists for a server
    * @param checkBy criteria to check for
    */
-  async checkZoneExists(checkBy: Partial<Zone>): Promise<boolean> {
+  async checkZoneExists(
+    checkBy: Partial<Zone>,
+    withDeleted = false,
+  ): Promise<boolean> {
     const zoneCount = await this.zoneRepository.count({
       where: checkBy,
+      withDeleted,
     });
 
     return zoneCount > 0;
+  }
+
+  /**
+   * Validate incoming zone data for update
+   * @param zone zone from database, to be updated
+   * @param dto new data to save
+   */
+  private async validateZoneForUpdate(
+    zone: Zone,
+    dto: UpdateZoneDto,
+  ): Promise<void> {
+    const {
+      name: newName,
+      minutesInactiveNotify: newMinutesNotify,
+      minutesInactiveDelete: newMinutesDelete,
+    } = dto;
+
+    if (zone.name !== newName)
+      await this.validateZoneName(newName, zone.serverId);
+
+    if (!zone.groupId && dto.groupId)
+      throw new BadRequestException(zoneFirstCantBindGroup);
+
+    if (zone.groupId && dto.groupId && zone.groupId !== dto.groupId)
+      await this.validateGroup(dto.groupId, zone.serverId);
+
+    if (zone.active && dto.active === false)
+      throw new BadRequestException(cannotSetZoneInactive);
+
+    this.validateInactiveMinutes(
+      zone,
+      dto.crawl,
+      newMinutesNotify,
+      newMinutesDelete,
+    );
   }
 
   /**
@@ -178,9 +208,24 @@ export class ZoneService {
     name: string,
     serverId: number,
   ): Promise<void> {
-    const nameExists = await this.checkZoneExists({ name, serverId });
+    const nameExists = await this.checkZoneExists({ name, serverId }, true);
 
     if (nameExists) throw new ConflictException(zoneAlreadyExists);
+  }
+
+  /**
+   * Check if a group is valid and active
+   * @param name zone name to check
+   * @param serverId server id
+   */
+  private async validateGroup(id: number, serverId: number): Promise<void> {
+    try {
+      const group = await this.groupService.getGroup({ id, serverId });
+
+      if (!group.active()) throw new Error();
+    } catch (e) {
+      throw new BadRequestException(invalidGroup);
+    }
   }
 
   /**

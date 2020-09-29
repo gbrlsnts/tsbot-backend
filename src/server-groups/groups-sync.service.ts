@@ -1,4 +1,4 @@
-import { Connection } from 'typeorm';
+import { Connection, EntityManager, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNil } from '@nestjs/common/utils/shared.utils';
 import { ServerGroupRepository } from './server-group.repository';
@@ -8,6 +8,7 @@ import { ServerGroupsService } from './server-groups.service';
 import { Icon } from '../icons/icon.entity';
 import { TsServerGroup } from '../teamspeak/types/groups';
 import { ServerGroup } from './server-group.entity';
+import { Zone } from '../servers/configs/zone/zone.entity';
 
 export class ServerGroupSyncService {
   constructor(
@@ -25,7 +26,7 @@ export class ServerGroupSyncService {
    */
   async syncGroupsByServerId(serverId: number): Promise<void> {
     const [dbGroups, tsGroups] = await Promise.all([
-      this.groupService.getAllGroupsByServerId(serverId),
+      this.groupService.getAllGroupsByServerId(serverId, { withDeleted: true }),
       this.tsGroupService.getServerGroups(serverId),
     ]);
 
@@ -37,6 +38,7 @@ export class ServerGroupSyncService {
 
     await this.connection.transaction(async manager => {
       await Promise.all([
+        this.cascadeGroupsDeletion(manager, serverId, toDelete),
         this.groupRepository.deleteGroupsById(toDelete, manager),
         this.groupRepository.saveGroups(toSave, manager),
         this.groupRepository.insertGroups(toInsert, manager),
@@ -77,7 +79,9 @@ export class ServerGroupSyncService {
     tsGroups: TsServerGroup[],
   ): Promise<void> {
     const [allGroups, dbIcons] = await Promise.all([
-      this.groupService.getAllGroupsByServerId(serverId, ['icon']),
+      this.groupService.getAllGroupsByServerId(serverId, {
+        relations: ['icon'],
+      }),
       this.iconsService.getAllIconsByTsId(
         serverId,
         tsGroups.map(g => g.iconId),
@@ -154,10 +158,34 @@ export class ServerGroupSyncService {
 
       group.name = tsGroup.name;
       group.localIconId = Icon.isLocal(tsGroup.iconId) ? tsGroup.iconId : null;
+      group.deletedAt = null; // in practice a group will never be restored, since TS3 doesnt reuse id's
 
       toSave.push(group);
     }
 
     return toSave;
+  }
+
+  /**
+   * Cascade soft removed groups to dependent entities
+   * @param manager entity manager to wrap in transaction
+   * @param serverId server id
+   * @param groups groups deleted
+   */
+  private cascadeGroupsDeletion(
+    manager: EntityManager,
+    serverId: number,
+    groups: number[],
+  ): Promise<UpdateResult> {
+    if (groups.length === 0) return;
+
+    return manager
+      .createQueryBuilder(Zone, 'z')
+      .softDelete()
+      .where('serverId = :serverId AND groupId IN (:...groups)', {
+        serverId,
+        groups,
+      })
+      .execute();
   }
 }

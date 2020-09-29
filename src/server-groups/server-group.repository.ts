@@ -41,7 +41,7 @@ export class ServerGroupRepository extends Repository<ServerGroup> {
 
     if (groups.length === 0) return;
 
-    return manager.delete(ServerGroup, {
+    return manager.softDelete(ServerGroup, {
       id: In(groups),
     });
   }

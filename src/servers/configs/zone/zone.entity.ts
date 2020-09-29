@@ -6,6 +6,7 @@ import {
   Entity,
   ManyToOne,
   Index,
+  DeleteDateColumn,
 } from 'typeorm';
 import { ChannelConfig } from '../channel/channel-config.entity';
 import { Zone as BotZone } from '../../../teamspeak/types/user-channel';
@@ -74,9 +75,8 @@ export class Zone {
   @Expose()
   crawl: boolean;
 
-  @Column({ default: true })
-  @Expose()
-  active: boolean;
+  @DeleteDateColumn()
+  deletedAt?: Date;
 
   @OneToOne(
     () => ChannelConfig,
@@ -86,6 +86,11 @@ export class Zone {
 
   @ManyToOne(() => ServerGroup)
   group: ServerGroup;
+
+  @Expose()
+  active(): boolean {
+    return !(this.deletedAt !== undefined && this.deletedAt !== null);
+  }
 
   toBotData(): BotZone {
     return {

@@ -12,6 +12,8 @@ export const zoneFirstCantBindGroup =
 export const deleteDefaultZoneNotAllowed =
   'Deleting the default zone is not allowed';
 
+export const cannotSetZoneInactive = "Can't set zone as inactive. Only active";
+
 export const configAlreadyExists = 'Config already exists';
 export const deleteDefaultConfigNotAllowed =
   'Deleting the default config is not allowed';

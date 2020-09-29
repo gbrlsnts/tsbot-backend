@@ -11,6 +11,7 @@ import {
   Body,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { ServerRolesGuard } from 'src/servers/guards/server-roles.guard';
@@ -21,6 +22,7 @@ import { SetServerRoles } from '../../decorators/set-server-roles.decorator';
 import { ServerRoles } from '../../guards/server-roles.guard';
 import { UpdateZoneDto } from './dto/update-zone.dto';
 import { CreateZoneDto } from './dto/create-zone.dto';
+import { ZoneFilters } from './types';
 
 @Controller('/servers/:server/configs/zones')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
@@ -33,8 +35,9 @@ export class ZoneController {
   @Get()
   getZonesByServerId(
     @Param('server', ParseIntPipe) serverId: number,
+    @Query() options: ZoneFilters,
   ): Promise<Zone[]> {
-    return this.zoneService.getAllZonesByServer(serverId);
+    return this.zoneService.getAllZonesByServer(serverId, options);
   }
 
   @Get('/:id')

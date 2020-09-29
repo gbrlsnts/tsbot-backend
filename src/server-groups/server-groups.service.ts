@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ServerGroupRepository } from './server-group.repository';
 import { ServerGroup } from './server-group.entity';
+import { FindGroupOptions } from './groups.types';
 
 @Injectable()
 export class ServerGroupsService {
@@ -10,17 +11,34 @@ export class ServerGroupsService {
     private groupRepository: ServerGroupRepository,
   ) {}
 
+  async getGroup(
+    params: Partial<ServerGroup>,
+    withDeleted = false,
+  ): Promise<ServerGroup> {
+    const group = await this.groupRepository.findOne({
+      where: params,
+      withDeleted,
+    });
+
+    if (!group) throw new NotFoundException();
+
+    return group;
+  }
+
   /**
    * Get all groups by server id
    * @param serverId
    */
   getAllGroupsByServerId(
     serverId: number,
-    relations?: string[],
+    options?: FindGroupOptions,
   ): Promise<ServerGroup[]> {
+    const { relations, withDeleted } = options || {};
+
     return this.groupRepository.find({
       where: { serverId },
       relations,
+      withDeleted,
     });
   }
 

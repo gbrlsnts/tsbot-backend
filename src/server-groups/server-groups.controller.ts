@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Param,
   Put,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
@@ -19,6 +20,7 @@ import { ServerGroupsService } from './server-groups.service';
 import { ServerGroup } from './server-group.entity';
 import { SetServerRoles } from '../servers/decorators/set-server-roles.decorator';
 import { ServerGroupSyncService } from './groups-sync.service';
+import { GroupFilters } from './groups.types';
 
 @Controller('/servers/:server/groups')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
@@ -34,8 +36,9 @@ export class ServerGroupsController {
   @Get()
   getAllGroupsByServerId(
     @Param('server', ParseIntPipe) serverId: number,
+    @Query() options: GroupFilters,
   ): Promise<ServerGroup[]> {
-    return this.groupsService.getAllGroupsByServerId(serverId);
+    return this.groupsService.getAllGroupsByServerId(serverId, options);
   }
 
   @Put('/sync')

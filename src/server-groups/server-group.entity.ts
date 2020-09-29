@@ -6,6 +6,7 @@ import {
   Unique,
   OneToOne,
   JoinColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Expose } from 'class-transformer';
 import { Server } from '../servers/server.entity';
@@ -48,6 +49,9 @@ export class ServerGroup {
   @Expose()
   name: string;
 
+  @DeleteDateColumn()
+  deletedAt?: Date;
+
   @ManyToOne(
     () => Server,
     server => server.serverGroups,
@@ -63,4 +67,9 @@ export class ServerGroup {
     config => config.group,
   )
   config: GroupConfig;
+
+  @Expose()
+  active(): boolean {
+    return !(this.deletedAt !== undefined && this.deletedAt !== null);
+  }
 }

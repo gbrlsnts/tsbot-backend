@@ -1,6 +1,10 @@
 import { ZoneRelations } from './zone.entity';
 
 export interface FindZoneOptions {
-  relations: ZoneRelations[];
-  withInactive: boolean;
+  relations?: ZoneRelations[];
+  withDeleted?: boolean;
+}
+
+export interface ZoneFilters {
+  withDeleted?: boolean;
 }
