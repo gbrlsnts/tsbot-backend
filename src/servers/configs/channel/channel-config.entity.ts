@@ -6,7 +6,7 @@ import {
   OneToOne,
   JoinColumn,
   OneToMany,
-  Index,
+  Unique,
 } from 'typeorm';
 import { Codec } from '../../../metadata/codec.entity';
 import { Zone } from '../zone/zone.entity';
@@ -20,9 +20,7 @@ import {
 } from 'src/teamspeak/types/channel';
 
 @Entity()
-@Index('uniq_zones_config', {
-  synchronize: false,
-})
+@Unique('uniq_zones_config', ['serverId', 'zoneId'])
 export class ChannelConfig {
   @PrimaryGeneratedColumn()
   @Expose()
@@ -32,11 +30,9 @@ export class ChannelConfig {
   @Expose()
   serverId: number;
 
-  @Column({
-    nullable: true,
-  })
+  @Column()
   @Expose()
-  zoneId?: number;
+  zoneId: number;
 
   @Column({
     nullable: true,

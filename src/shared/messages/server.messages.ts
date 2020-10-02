@@ -1,7 +1,7 @@
 export const serverNameExists = 'Server name already exists';
-export const codecDoesNotExist = "Codec Id doesn't exist";
+export const codecDoesNotExist = "Codec doesn't exist";
 
-export const zoneDoesNotExists = "Zone Id doesn't exist";
+export const zoneDoesNotExists = "Zone doesn't exist";
 export const zoneInvalid = 'Invalid zone';
 export const zoneAlreadyExists = 'Zone already exists';
 export const zoneCantUnsetDefault =
@@ -13,6 +13,8 @@ export const deleteDefaultZoneNotAllowed =
   'Deleting the default zone is not allowed';
 
 export const cannotSetZoneInactive = "Can't set zone as inactive. Only active";
+
+export const zoneWithoutConfig = 'Zone has no associated config';
 
 export const configAlreadyExists = 'Config already exists';
 export const deleteDefaultConfigNotAllowed =

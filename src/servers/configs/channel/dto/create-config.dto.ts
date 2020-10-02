@@ -10,13 +10,9 @@ import { PermissionDto } from './permission.dto';
 
 export class CreateConfigDto {
   @IsPositive()
-  @IsOptional()
-  zoneId?: number;
+  zoneId: number;
 
   @IsPositive()
-  @IsOptional({
-    groups: ['patch'],
-  })
   allowedSubChannels: number;
 
   @IsPositive()

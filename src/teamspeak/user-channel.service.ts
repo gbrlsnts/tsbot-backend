@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { TeamspeakBusService } from './teamspeak-bus.service';
 import { ChannelDto } from '../channels/dto/channel.dto';
 import { SubChannelDto } from 'src/channels/dto/sub-channel.dto';
@@ -24,6 +28,8 @@ import { ChannelConfig } from 'src/servers/configs/channel/channel-config.entity
 import { Zone } from 'src/servers/configs/zone/zone.entity';
 import { createSubChannelSubject } from './subjects';
 import { ValidateChannelUniqueRequest } from './types/channel';
+import { InvalidConfigurationException } from '../shared/exceptions/InvalidConfigurationException';
+import { zoneWithoutConfig } from 'src/shared/messages/server.messages';
 
 @Injectable()
 export class UserChannelService {
@@ -45,21 +51,17 @@ export class UserChannelService {
     tsClientDbId: number,
     dto: ChannelDto,
   ): Promise<number> {
-    const [isUnique, channelConfig, zone] = await Promise.all([
+    const [isUnique, { zone, config }] = await Promise.all([
       this.sendIsUniqueRequest(serverId, [dto.name]),
-      this.channelConfigService.getConfig({
-        serverId,
-        zoneId: null,
-      }),
-      this.getZoneByUserGroup(serverId, tsClientDbId),
+      this.getZoneWithConfig(serverId, tsClientDbId),
     ]);
 
     if (!isUnique) throw new BadRequestException(channelNameAlreadyExists);
 
-    if (dto.subchannels.length > channelConfig.allowedSubChannels)
+    if (dto.subchannels.length > config.allowedSubChannels)
       throw new BadRequestException(subchannelsExceedMax);
 
-    const data = await this.buildChannelCreatePayload(channelConfig, zone, dto);
+    const data = await this.buildChannelCreatePayload(config, zone, dto);
 
     const result = await this.busService.send<CreateUserChannelResultData>(
       createChannelSubject(serverId),
@@ -83,28 +85,21 @@ export class UserChannelService {
     tsClientDbId: number,
     dto: SubChannelDto,
   ): Promise<void> {
-    const [isUnique, subChannelCount, channelConfig, zone] = await Promise.all([
+    const [isUnique, subChannelCount, { zone, config }] = await Promise.all([
       this.sendIsUniqueRequest(serverId, dto.subchannels, tsChannelId),
       this.busService.send<number>(getSubChannelCountSubject(serverId), {
         channelId: tsChannelId,
       }),
-      this.channelConfigService.getConfig({
-        serverId,
-        zoneId: null,
-      }),
-      this.getZoneByUserGroup(serverId, tsClientDbId),
+      this.getZoneWithConfig(serverId, tsClientDbId),
     ]);
 
     if (!isUnique) throw new BadRequestException(channelNameAlreadyExists);
 
-    if (
-      subChannelCount + dto.subchannels.length >
-      channelConfig.allowedSubChannels
-    )
+    if (subChannelCount + dto.subchannels.length > config.allowedSubChannels)
       throw new BadRequestException(subchannelsExceedMax);
 
     const data = await this.buildChannelCreatePayload(
-      channelConfig,
+      config,
       zone,
       dto,
       tsChannelId,
@@ -186,7 +181,7 @@ export class UserChannelService {
   }
 
   /**
-   * Get the best fitting zone according to a user's groups and zone config
+   * Get the best fitting zone according to a user's groups
    * @param serverId
    * @param tsClientDbId
    */
@@ -206,5 +201,29 @@ export class UserChannelService {
     const bestFitZone = zones.find(z => groups.includes(z?.group?.tsId));
 
     return bestFitZone ?? defaultZone;
+  }
+
+  /**
+   * Get the best fitting zone according to a user's groups and zone's channel config
+   * @param serverId
+   * @param tsClientDbId
+   */
+  private async getZoneWithConfig(
+    serverId: number,
+    tsClientDbId: number,
+  ): Promise<{ zone: Zone; config: ChannelConfig }> {
+    const zone = await this.getZoneByUserGroup(serverId, tsClientDbId);
+
+    try {
+      const config = await this.channelConfigService.getConfig({
+        serverId,
+        zoneId: zone.id,
+      });
+
+      return { zone, config };
+    } catch (e) {
+      if (e instanceof NotFoundException)
+        throw new InvalidConfigurationException(zoneWithoutConfig);
+    }
   }
 }

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { TeamspeakBusService } from './teamspeak-bus.service';
 import { TsServerGroup, SetUserBadgesData } from './types/groups';
 import { getServerGroupsSubject, setUserBadgesSubject } from './subjects';
-import { ServerGroup } from 'src/server-groups/server-group.entity';
 
 @Injectable()
 export class ServerGroupService {
