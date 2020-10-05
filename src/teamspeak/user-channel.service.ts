@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { TeamspeakBusService } from './teamspeak-bus.service';
 import { ChannelDto } from '../channels/dto/channel.dto';
@@ -26,10 +27,12 @@ import {
 } from './subjects';
 import { ChannelConfig } from 'src/servers/configs/channel/channel-config.entity';
 import { Zone } from 'src/servers/configs/zone/zone.entity';
-import { createSubChannelSubject } from './subjects';
-import { ValidateChannelUniqueRequest } from './types/channel';
+import { createSubChannelSubject, getChannelZoneSubject } from './subjects';
+import { ValidateChannelUniqueRequest, ZoneInfo } from './types/channel';
 import { InvalidConfigurationException } from '../shared/exceptions/InvalidConfigurationException';
 import { zoneWithoutConfig } from 'src/shared/messages/server.messages';
+import { channelNotInZone } from '../shared/messages/channel.messages';
+import { GetChannelZoneRequest } from './types/user-channel';
 
 @Injectable()
 export class UserChannelService {
@@ -53,7 +56,7 @@ export class UserChannelService {
   ): Promise<number> {
     const [isUnique, { zone, config }] = await Promise.all([
       this.sendIsUniqueRequest(serverId, [dto.name]),
-      this.getZoneWithConfig(serverId, tsClientDbId),
+      this.getZoneInfo(serverId, tsClientDbId),
     ]);
 
     if (!isUnique) throw new BadRequestException(channelNameAlreadyExists);
@@ -61,7 +64,12 @@ export class UserChannelService {
     if (dto.subchannels.length > config.allowedSubChannels)
       throw new BadRequestException(subchannelsExceedMax);
 
-    const data = await this.buildChannelCreatePayload(config, zone, dto);
+    const data = await this.buildChannelCreatePayload(
+      config,
+      zone,
+      dto,
+      tsClientDbId,
+    );
 
     const result = await this.busService.send<CreateUserChannelResultData>(
       createChannelSubject(serverId),
@@ -90,7 +98,7 @@ export class UserChannelService {
       this.busService.send<number>(getSubChannelCountSubject(serverId), {
         channelId: tsChannelId,
       }),
-      this.getZoneWithConfig(serverId, tsClientDbId),
+      this.getZoneInfoOfExistingChannel(serverId, tsChannelId),
     ]);
 
     if (!isUnique) throw new BadRequestException(channelNameAlreadyExists);
@@ -102,6 +110,7 @@ export class UserChannelService {
       config,
       zone,
       dto,
+      tsClientDbId,
       tsChannelId,
     );
 
@@ -111,21 +120,19 @@ export class UserChannelService {
   /**
    * Deletes a channel in the voice server
    * @param serverId
-   * @param tsChannelId teamspeak owner db id of the root channel
    * @param tsChannelId channel to delete
    * @param tsRootChannelId when the channel to delete is a sub channel id, this should be the root/top channel id.
    *        the root channel is also the id stored in the channel entity
    */
   async deleteUserChannel(
     serverId: number,
-    tsClientDbId: number,
     tsChannelId: number,
     tsRootChannelId?: number,
   ): Promise<void> {
-    const zone = await this.getZoneByUserGroup(serverId, tsClientDbId);
+    const info = await this.getZoneInfoOfExistingChannel(serverId, tsChannelId);
 
     const data: DeleteChannelData = {
-      zone: zone.toBotData(),
+      zone: info.zone.toBotData(),
       channelId: tsChannelId,
       rootChannelId: tsRootChannelId,
     };
@@ -138,15 +145,18 @@ export class UserChannelService {
    * @param channelConfig channel config to apply
    * @param zone zone where the channel is/will be
    * @param dto dto with channel data
+   * @param tsClientDbId channel owner ts3 database id
    * @param tsRootChannelId root channel id when creating sub channels
    */
   private async buildChannelCreatePayload(
     channelConfig: ChannelConfig,
     zone: Zone,
     dto: ChannelDto | SubChannelDto,
+    tsClientDbId: number,
     tsRootChannelId?: number,
   ): Promise<CreateSubChannelData> {
     return {
+      owner: tsClientDbId,
       rootChannelId: tsRootChannelId,
       channels:
         dto instanceof ChannelDto ? [dto.toBotChannel()] : dto.toBotChannel(),
@@ -181,6 +191,38 @@ export class UserChannelService {
   }
 
   /**
+   * Get the zone a channel is currently sitting at. Allows to get the real time zone even if the channel was moved.
+   * @param serverId
+   * @param tsRootChannelId root channel id when creating sub channels
+   */
+  async getZoneInfoOfExistingChannel(
+    serverId: number,
+    tsRootChannelId: number,
+  ): Promise<ZoneInfo> {
+    const zones = await this.zoneService.getAllZonesByServer(serverId);
+
+    const data: GetChannelZoneRequest = {
+      channelId: tsRootChannelId,
+      zones: zones.map(z => {
+        return { id: z.id, ...z.toBotData() };
+      }),
+    };
+
+    // no id -> channel not in any zone!
+    const id = await this.busService.send<number>(
+      getChannelZoneSubject(serverId),
+      data,
+    );
+
+    if (!id) throw new UnprocessableEntityException(channelNotInZone);
+
+    const zone = zones.find(z => z.id === id);
+    const config = await this.getZoneConfigSafe(serverId, zone.id);
+
+    return { zone, config };
+  }
+
+  /**
    * Get the best fitting zone according to a user's groups
    * @param serverId
    * @param tsClientDbId
@@ -208,19 +250,33 @@ export class UserChannelService {
    * @param serverId
    * @param tsClientDbId
    */
-  private async getZoneWithConfig(
+  private async getZoneInfo(
     serverId: number,
     tsClientDbId: number,
-  ): Promise<{ zone: Zone; config: ChannelConfig }> {
+  ): Promise<ZoneInfo> {
     const zone = await this.getZoneByUserGroup(serverId, tsClientDbId);
+    const config = await this.getZoneConfigSafe(serverId, zone.id);
 
+    return { zone, config };
+  }
+
+  /**
+   * Returns a zone's channel config and fails with invalid config if none was found.
+   * @param serverId
+   * @param zoneId
+   * @throws InvalidConfigurationException when the zone has no config
+   */
+  private async getZoneConfigSafe(
+    serverId: number,
+    zoneId: number,
+  ): Promise<ChannelConfig> {
     try {
       const config = await this.channelConfigService.getConfig({
         serverId,
-        zoneId: zone.id,
+        zoneId,
       });
 
-      return { zone, config };
+      return config;
     } catch (e) {
       if (e instanceof NotFoundException)
         throw new InvalidConfigurationException(zoneWithoutConfig);

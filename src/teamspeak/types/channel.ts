@@ -1,3 +1,6 @@
+import { ChannelConfig } from '../../servers/configs/channel/channel-config.entity';
+import { Zone } from '../../servers/configs/zone/zone.entity';
+
 export interface ChannelProperties {
   /** Audio quality */
   audio?: AudioQuality;
@@ -29,4 +32,9 @@ export interface ChannelIdRequest {
 export interface ValidateChannelUniqueRequest {
   channels: string[];
   rootChannelId?: number;
+}
+
+export interface ZoneInfo {
+  zone: Zone;
+  config: ChannelConfig;
 }

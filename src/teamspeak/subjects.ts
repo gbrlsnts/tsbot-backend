@@ -13,6 +13,9 @@ export const getSubChannelCountSubject = (serverId: number): string =>
 export const getChannelIsUniqueSubject = (serverId: number): string =>
   `bot.server.${serverId}.channel.is-unique`;
 
+export const getChannelZoneSubject = (serverId: number): string =>
+  `bot.server.${serverId}.channel.get-zone`;
+
 export const getServerGroupsSubject = (serverId: number): string =>
   `bot.server.${serverId}.server-groups.get`;
 

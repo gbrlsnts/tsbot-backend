@@ -90,11 +90,7 @@ export class ChannelsService {
     try {
       return this.channelRepository.save(channel);
     } catch (e) {
-      await this.tsChannelService.deleteUserChannel(
-        serverId,
-        tsClientDbId,
-        tsChannelId,
-      );
+      await this.tsChannelService.deleteUserChannel(serverId, tsChannelId);
       throw e;
     }
   }
@@ -132,7 +128,6 @@ export class ChannelsService {
     if (tsSubChannelId) {
       await this.tsChannelService.deleteUserChannel(
         channel.client.serverId,
-        channel.client.tsClientDbId,
         tsSubChannelId,
         channel.tsChannelId,
       );
@@ -140,7 +135,7 @@ export class ChannelsService {
       await this.connection.transaction(async manager => {
         await this.tsChannelService.deleteUserChannel(
           channel.client.serverId,
-          channel.client.tsClientDbId,
+
           channel.tsChannelId,
         );
         await manager.delete(Channel, channel.id);
