@@ -31,8 +31,10 @@ import { createSubChannelSubject, getChannelZoneSubject } from './subjects';
 import { ValidateChannelUniqueRequest, ZoneInfo } from './types/channel';
 import { InvalidConfigurationException } from '../shared/exceptions/InvalidConfigurationException';
 import { zoneWithoutConfig } from 'src/shared/messages/server.messages';
-import { channelNotInZone } from '../shared/messages/channel.messages';
-import { GetChannelZoneRequest } from './types/user-channel';
+import { channelOutsideOfZone } from '../shared/messages/channel.messages';
+import { GetChannelZoneRequest } from './types/channel';
+import { GetChannelZoneResponse } from './types/channel';
+import { InvalidTeamspeakChannelException } from './exceptions';
 
 @Injectable()
 export class UserChannelService {
@@ -129,7 +131,14 @@ export class UserChannelService {
     tsChannelId: number,
     tsRootChannelId?: number,
   ): Promise<void> {
-    const info = await this.getZoneInfoOfExistingChannel(serverId, tsChannelId);
+    let info: ZoneInfo;
+
+    try {
+      info = await this.getZoneInfoOfExistingChannel(serverId, tsChannelId);
+    } catch (error) {
+      if (error instanceof InvalidTeamspeakChannelException) return;
+      throw error;
+    }
 
     const data: DeleteChannelData = {
       zone: info.zone.toBotData(),
@@ -209,14 +218,17 @@ export class UserChannelService {
     };
 
     // no id -> channel not in any zone!
-    const id = await this.busService.send<number>(
+    const res = await this.busService.send<GetChannelZoneResponse>(
       getChannelZoneSubject(serverId),
       data,
     );
 
-    if (!id) throw new UnprocessableEntityException(channelNotInZone);
+    if (!res.zoneId && res.existsOutOfZone)
+      throw new UnprocessableEntityException(channelOutsideOfZone);
+    else if (!res.zoneId && !res.existsOutOfZone)
+      throw new InvalidTeamspeakChannelException();
 
-    const zone = zones.find(z => z.id === id);
+    const zone = zones.find(z => z.id === res.zoneId);
     const config = await this.getZoneConfigSafe(serverId, zone.id);
 
     return { zone, config };

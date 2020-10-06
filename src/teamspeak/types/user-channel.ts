@@ -63,8 +63,3 @@ export interface CreateUserSubChannelResultData {
   /** The created channels id */
   channels: number[];
 }
-
-export interface GetChannelZoneRequest {
-  channelId: number;
-  zones: Zone[];
-}

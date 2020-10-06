@@ -1,5 +1,6 @@
 import { ChannelConfig } from '../../servers/configs/channel/channel-config.entity';
 import { Zone } from '../../servers/configs/zone/zone.entity';
+import { Zone as TsZone } from './user-channel';
 
 export interface ChannelProperties {
   /** Audio quality */
@@ -37,4 +38,14 @@ export interface ValidateChannelUniqueRequest {
 export interface ZoneInfo {
   zone: Zone;
   config: ChannelConfig;
+}
+
+export interface GetChannelZoneRequest {
+  channelId: number;
+  zones: TsZone[];
+}
+
+export interface GetChannelZoneResponse {
+  zoneId?: number;
+  existsOutOfZone?: boolean;
 }
