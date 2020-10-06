@@ -43,6 +43,14 @@ export class ChannelsController {
     return this.channelsService.getChannelsByServerId(serverId);
   }
 
+  @Get('/me')
+  getLoggedUserChannel(
+    @GetUser() user: User,
+    @Param('server', ParseIntPipe) serverId: number,
+  ): Promise<Channel> {
+    return this.channelsService.getUserChannel(user.id, serverId);
+  }
+
   @Get('/:id')
   @SetChannelRoles([ChannelRoles.OWNER], 'id')
   getChannelById(

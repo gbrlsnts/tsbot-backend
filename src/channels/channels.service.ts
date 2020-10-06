@@ -26,6 +26,10 @@ export class ChannelsService {
     private connection: Connection,
   ) {}
 
+  /**
+   * Get all channels by server id
+   * @param serverId
+   */
   getChannelsByServerId(serverId: number): Promise<Channel[]> {
     return this.channelRepository
       .createQueryBuilder('ch')
@@ -34,6 +38,11 @@ export class ChannelsService {
       .getMany();
   }
 
+  /**
+   * Get a channel in a server
+   * @param id
+   * @param serverId
+   */
   async getChannelByServerId(id: number, serverId: number): Promise<Channel> {
     const channel = await this.channelRepository
       .createQueryBuilder('ch')
@@ -47,6 +56,29 @@ export class ChannelsService {
     return channel;
   }
 
+  /**
+   * Get the logged user channel in a server
+   * @param userId
+   * @param serverId
+   */
+  async getUserChannel(userId: number, serverId: number): Promise<Channel> {
+    const channel = await this.channelRepository
+      .createQueryBuilder('ch')
+      .innerJoin(Client, 'cl', 'cl.id = ch.clientId')
+      .where('cl.userId = :userId', { userId })
+      .andWhere('cl.serverId = :serverId', { serverId })
+      .getOne();
+
+    if (!channel) throw new NotFoundException();
+
+    return channel;
+  }
+
+  /**
+   * Get a channel by id
+   * @param id
+   * @param options
+   */
   async getChannelById(
     id: number,
     options?: FindChannelOptions,
@@ -63,6 +95,12 @@ export class ChannelsService {
     return channel;
   }
 
+  /**
+   * Create a channel
+   * @param userId user that will be linked to the channel
+   * @param serverId
+   * @param dto data
+   */
   async createChannel(
     userId: number,
     serverId: number,
@@ -95,6 +133,11 @@ export class ChannelsService {
     }
   }
 
+  /**
+   * Create a sub channel in teamspeak
+   * @param channelId db channel to create a sub channel for
+   * @param dto data
+   */
   async createSubChannel(channelId: number, dto: SubChannelDto): Promise<void> {
     const channel = await this.getChannelById(channelId, {
       relations: ['client'],
@@ -108,6 +151,13 @@ export class ChannelsService {
     );
   }
 
+  /**
+   * Delete a channel or sub channel
+   * @param userId
+   * @param serverId
+   * @param id db channel id
+   * @param tsSubChannelId if deleting a subchannel, provide the ID here (ts3 id)
+   */
   async deleteChannel(
     userId: number,
     serverId: number,
@@ -143,6 +193,10 @@ export class ChannelsService {
     }
   }
 
+  /**
+   * Check if a client has a channel
+   * @param clientId
+   */
   async checkClientHasChannel(clientId: number): Promise<boolean> {
     const count = await this.channelRepository.count({
       where: { clientId },
@@ -151,6 +205,11 @@ export class ChannelsService {
     return count > 0;
   }
 
+  /**
+   * Check if the client either owns the channel or server
+   * @param userId
+   * @param id
+   */
   async checkUserOwnsChannelOrServer(
     userId: number,
     id: number,
