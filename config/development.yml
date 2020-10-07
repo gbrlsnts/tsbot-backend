@@ -13,3 +13,6 @@ nats:
 
 verification:
   address: '192.168.1.33'
+
+teamspeak:
+  crawlInterval: 15

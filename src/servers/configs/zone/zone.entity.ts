@@ -1,3 +1,4 @@
+import slugify from 'slugify';
 import { Expose } from 'class-transformer';
 import {
   PrimaryGeneratedColumn,
@@ -90,6 +91,10 @@ export class Zone {
   @Expose()
   active(): boolean {
     return !(this.deletedAt !== undefined && this.deletedAt !== null);
+  }
+
+  slug(): string {
+    return slugify(this.name);
   }
 
   toBotData(): BotZone {

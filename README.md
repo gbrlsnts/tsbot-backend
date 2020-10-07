@@ -89,3 +89,4 @@ NATS:
 TEAMSPEAK:
 
 - TS_MSG_TIMEOUT: number - millis to wait for a response from a bot
+- CRAWL_INTERVAL: number - interval in seconds that the bot should crawl the server

@@ -1,3 +1,10 @@
+/** EVENTS */
+
+export const crawlConfigUpdatedEventSubject = (serverId: number): string =>
+  `bot.server.${serverId}.evt.crawl.updated`;
+
+/** REQUESTS */
+
 export const createChannelSubject = (serverId: number): string =>
   `bot.server.${serverId}.channel.create`;
 

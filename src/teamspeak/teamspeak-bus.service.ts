@@ -24,7 +24,7 @@ export class TeamspeakBusService {
    * @param data data to send
    */
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  send<T>(pattern: any, data: any): Promise<T> {
+  send<T>(pattern: string, data: any): Promise<T> {
     this.logger.verbose(`Sending message to bot: ${pattern}`);
 
     return this.client
@@ -39,5 +39,12 @@ export class TeamspeakBusService {
         }),
       )
       .toPromise();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  emit(pattern: string, data: any): void {
+    this.logger.verbose(`Sending event to bot: ${pattern}`);
+
+    this.client.emit(pattern, data);
   }
 }

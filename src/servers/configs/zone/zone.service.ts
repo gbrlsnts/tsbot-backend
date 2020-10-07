@@ -1,11 +1,12 @@
-import { ZoneRepository } from './zone.repository';
+import { InjectEventEmitter } from 'nest-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Zone } from './zone.entity';
 import {
   NotFoundException,
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
+import { ZoneRepository } from './zone.repository';
+import { Zone } from './zone.entity';
 import { UpdateZoneDto } from './dto/update-zone.dto';
 import { propLessThanAnother } from '../../../shared/messages/global.messages';
 import { CreateZoneDto } from './dto/create-zone.dto';
@@ -22,9 +23,12 @@ import { DbErrorCodes } from '../../../shared/database/codes';
 import { FindZoneOptions } from './types';
 import { ServerGroupsService } from '../../../server-groups/server-groups.service';
 import { invalidGroup } from '../../../shared/messages/group.messages';
+import { AppEventEmitter } from '../../../events/types/app.event';
 
 export class ZoneService {
   constructor(
+    @InjectEventEmitter()
+    private readonly eventEmitter: AppEventEmitter,
     @InjectRepository(ZoneRepository)
     private zoneRepository: ZoneRepository,
     private groupService: ServerGroupsService,
@@ -87,7 +91,10 @@ export class ZoneService {
     });
 
     try {
-      return await this.zoneRepository.save(zone);
+      const savedZone = await this.zoneRepository.save(zone);
+      this.eventEmitter.emit('zoneUpdated', savedZone);
+
+      return savedZone;
     } catch (e) {
       if (e.code == DbErrorCodes.DuplicateKey)
         throw new ConflictException(zoneAlreadyExists);
@@ -111,7 +118,10 @@ export class ZoneService {
     Object.assign(zone, dto);
 
     try {
-      return await this.zoneRepository.save(zone);
+      const savedZone = await this.zoneRepository.save(zone);
+      this.eventEmitter.emit('zoneUpdated', savedZone);
+
+      return savedZone;
     } catch (e) {
       if (e.code == DbErrorCodes.DuplicateKey)
         throw new ConflictException(zoneAlreadyExists);

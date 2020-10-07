@@ -14,6 +14,7 @@ import { TeamspeakBusService } from './teamspeak-bus.service';
 import { ServerGroupService } from './server-groups.service';
 import { TsIconService } from './icons.service';
 import { TsClientService } from './client.service';
+import { TsServerEventsService } from './server-events.service';
 
 const natsConfig = config.get('nats');
 
@@ -41,12 +42,14 @@ const natsConfig = config.get('nats');
     ServerGroupService,
     TsIconService,
     TsClientService,
+    TsServerEventsService,
   ],
   exports: [
     UserChannelService,
     ServerGroupService,
     TsIconService,
     TsClientService,
+    TsServerEventsService,
   ],
 })
 export class TeamspeakModule {}
