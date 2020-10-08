@@ -1,53 +1,58 @@
-import { Connection, EntityManager, UpdateResult } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { isNil } from '@nestjs/common/utils/shared.utils';
-import { ServerGroupRepository } from './server-group.repository';
-import { ServerGroupService as TeamspeakSGroupService } from '../teamspeak/server-groups.service';
-import { IconsService } from '../icons/icons.service';
-import { ServerGroupsService } from './server-groups.service';
-import { Icon } from '../icons/icon.entity';
-import { TsServerGroup } from '../teamspeak/types/groups';
-import { ServerGroup } from './server-group.entity';
-import { Zone } from '../servers/configs/zone/zone.entity';
+import { ServerGroupService as TeamspeakSGroupService } from '../../teamspeak/server-groups.service';
+import { IconsService } from '../../icons/icons.service';
+import { Icon } from '../../icons/icon.entity';
+import { TsGroup, TsGroupType } from '../../teamspeak/types/groups';
+import { TsGroup as TsGroupEntity } from '../ts-group.entity';
+import { SyncChanges } from '../groups.types';
+import { TsGroupRepository } from '../repository/ts-group.repository';
+import { TsGroupsService } from '../service/ts-groups.service';
 
-export class ServerGroupSyncService {
+export abstract class GroupSyncService {
   constructor(
-    @InjectRepository(ServerGroupRepository)
-    private groupRepository: ServerGroupRepository,
-    private groupService: ServerGroupsService,
-    private tsGroupService: TeamspeakSGroupService,
-    private iconsService: IconsService,
-    private connection: Connection,
+    protected readonly groupRepository: TsGroupRepository<TsGroupEntity>,
+    protected readonly groupService: TsGroupsService<TsGroupEntity>,
+    protected readonly tsGroupService: TeamspeakSGroupService,
+    protected readonly iconsService: IconsService,
   ) {}
 
   /**
    * Trigger a group sync from the bot.
    * @param serverId
    */
-  async syncGroupsByServerId(serverId: number): Promise<void> {
+  abstract async syncGroupsByServerId(serverId: number): Promise<void>;
+
+  /**
+   * Sync groups with server
+   * @param serverId
+   */
+  protected async syncGroups(
+    serverId: number,
+    type: TsGroupType,
+  ): Promise<void> {
     const [dbGroups, tsGroups] = await Promise.all([
       this.groupService.getAllGroupsByServerId(serverId, { withDeleted: true }),
-      this.tsGroupService.getServerGroups(serverId),
+      this.tsGroupService.getServerGroups(serverId, type),
     ]);
 
-    const { toInsert, toSave, toDelete } = this.getChangesForSync(
+    await this.persistChanges(
       serverId,
-      dbGroups,
-      tsGroups,
+      this.getChangesForSync(serverId, dbGroups, tsGroups),
     );
-
-    await this.connection.transaction(async manager => {
-      await Promise.all([
-        this.cascadeGroupsDeletion(manager, serverId, toDelete),
-        this.groupRepository.deleteGroupsById(toDelete, manager),
-        this.groupRepository.saveGroups(toSave, manager),
-        this.groupRepository.insertGroups(toInsert, manager),
-      ]);
-    });
 
     await this.triggerGroupIconSync(serverId, tsGroups);
     await this.updateGroupIcons(serverId, tsGroups);
   }
+
+  /**
+   * Persist all groups changes in the db
+   * @param serverId server id
+   * @param changes changes to persit
+   */
+  protected abstract async persistChanges(
+    serverId: number,
+    changes: SyncChanges,
+  ): Promise<void>;
 
   /**
    * Trigger a icon sync for the sync'ed groups
@@ -56,7 +61,7 @@ export class ServerGroupSyncService {
    */
   private async triggerGroupIconSync(
     serverId: number,
-    tsGroups: TsServerGroup[],
+    tsGroups: TsGroup[],
   ): Promise<void> {
     const iconsToSync = await this.iconsService.getMissingIconsByServer(
       serverId,
@@ -76,7 +81,7 @@ export class ServerGroupSyncService {
    */
   private async updateGroupIcons(
     serverId: number,
-    tsGroups: TsServerGroup[],
+    tsGroups: TsGroup[],
   ): Promise<void> {
     const [allGroups, dbIcons] = await Promise.all([
       this.groupService.getAllGroupsByServerId(serverId, {
@@ -115,13 +120,9 @@ export class ServerGroupSyncService {
    */
   private getChangesForSync(
     serverId: number,
-    dbGroups: ServerGroup[],
-    tsGroups: TsServerGroup[],
-  ): {
-    toInsert: Partial<ServerGroup>[];
-    toSave: ServerGroup[];
-    toDelete: number[];
-  } {
+    dbGroups: TsGroupEntity[],
+    tsGroups: TsGroup[],
+  ): SyncChanges {
     const toInsert = tsGroups
       .filter(tsG => !dbGroups.find(g => g.tsId === tsG.tsId))
       .map(({ name, tsId, iconId }) => ({
@@ -146,10 +147,10 @@ export class ServerGroupSyncService {
    * @param tsGroups groups retrieved from teamspeak
    */
   private getServerGroupsToSave(
-    dbGroups: ServerGroup[],
-    tsGroups: TsServerGroup[],
-  ): ServerGroup[] {
-    const toSave: ServerGroup[] = [];
+    dbGroups: TsGroupEntity[],
+    tsGroups: TsGroup[],
+  ): TsGroupEntity[] {
+    const toSave: TsGroupEntity[] = [];
 
     for (const group of dbGroups) {
       const tsGroup = tsGroups.find(g => g.tsId === group.tsId);
@@ -164,28 +165,5 @@ export class ServerGroupSyncService {
     }
 
     return toSave;
-  }
-
-  /**
-   * Cascade soft removed groups to dependent entities
-   * @param manager entity manager to wrap in transaction
-   * @param serverId server id
-   * @param groups groups deleted
-   */
-  private cascadeGroupsDeletion(
-    manager: EntityManager,
-    serverId: number,
-    groups: number[],
-  ): Promise<UpdateResult> {
-    if (groups.length === 0) return;
-
-    return manager
-      .createQueryBuilder(Zone, 'z')
-      .softDelete()
-      .where('serverId = :serverId AND groupId IN (:...groups)', {
-        serverId,
-        groups,
-      })
-      .execute();
   }
 }

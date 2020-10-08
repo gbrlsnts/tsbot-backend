@@ -18,7 +18,7 @@ import {
 } from '../../../shared/messages/server.messages';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { GroupConfigRepository } from './group-config.repository';
-import { ServerGroupsService } from '../../../server-groups/server-groups.service';
+import { ServerGroupsService } from '../../../server-groups/service/server-groups.service';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryFindOptionsDto } from './dto/category-find.dto';
 

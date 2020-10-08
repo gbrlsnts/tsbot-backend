@@ -1,20 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ServerGroupRepository } from './server-group.repository';
-import { ServerGroup } from './server-group.entity';
-import { FindGroupOptions } from './groups.types';
+import { NotFoundException } from '@nestjs/common';
+import { ServerGroup } from '../server-group.entity';
+import { FindGroupOptions } from '../groups.types';
+import { TsGroupRepository } from '../repository/ts-group.repository';
 
-@Injectable()
-export class ServerGroupsService {
-  constructor(
-    @InjectRepository(ServerGroupRepository)
-    private groupRepository: ServerGroupRepository,
-  ) {}
+export abstract class TsGroupsService<T> {
+  constructor(protected groupRepository: TsGroupRepository<T>) {}
 
   async getGroup(
     params: Partial<ServerGroup>,
     withDeleted = false,
-  ): Promise<ServerGroup> {
+  ): Promise<T> {
     const group = await this.groupRepository.findOne({
       where: params,
       withDeleted,
@@ -32,7 +27,7 @@ export class ServerGroupsService {
   getAllGroupsByServerId(
     serverId: number,
     options?: FindGroupOptions,
-  ): Promise<ServerGroup[]> {
+  ): Promise<T[]> {
     const { relations, withDeleted } = options || {};
 
     return this.groupRepository.find({

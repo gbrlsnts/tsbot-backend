@@ -16,11 +16,14 @@ import {
   ServerRoles,
 } from '../servers/guards/server-roles.guard';
 import { appSerializeOptions } from '../shared/constants';
-import { ServerGroupsService } from './server-groups.service';
+import { ServerGroupsService } from './service/server-groups.service';
 import { ServerGroup } from './server-group.entity';
 import { SetServerRoles } from '../servers/decorators/set-server-roles.decorator';
-import { ServerGroupSyncService } from './groups-sync.service';
+import { ServerGroupSyncService } from './sync/server-groups-sync.service';
+import { ChannelGroupSyncService } from './sync/channel-groups-sync.service';
 import { GroupFilters } from './groups.types';
+import { ChannelGroupsService } from './service/channel-groups.service';
+import { ChannelGroup } from './channel-group.entity';
 
 @Controller('/servers/:server/groups')
 @UseGuards(JwtAuthGuard, ServerRolesGuard)
@@ -29,22 +32,39 @@ import { GroupFilters } from './groups.types';
 @SerializeOptions(appSerializeOptions)
 export class ServerGroupsController {
   constructor(
-    private groupsService: ServerGroupsService,
-    private syncService: ServerGroupSyncService,
+    private serverGroupsService: ServerGroupsService,
+    private channelGroupsService: ChannelGroupsService,
+    private serverGroupsSyncService: ServerGroupSyncService,
+    private channelGroupsSyncService: ChannelGroupSyncService,
   ) {}
 
-  @Get()
-  getAllGroupsByServerId(
+  @Get('/server')
+  getAllServerGroupsByServerId(
     @Param('server', ParseIntPipe) serverId: number,
     @Query() options: GroupFilters,
   ): Promise<ServerGroup[]> {
-    return this.groupsService.getAllGroupsByServerId(serverId, options);
+    return this.serverGroupsService.getAllGroupsByServerId(serverId, options);
   }
 
-  @Put('/sync')
-  syncGroupsByServerId(
+  @Get('/channel')
+  getAllChannelGroupsByServerId(
+    @Param('server', ParseIntPipe) serverId: number,
+    @Query() options: GroupFilters,
+  ): Promise<ChannelGroup[]> {
+    return this.channelGroupsService.getAllGroupsByServerId(serverId, options);
+  }
+
+  @Put('/sync/server')
+  syncServerGroupsByServerId(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<void> {
-    return this.syncService.syncGroupsByServerId(serverId);
+    return this.serverGroupsSyncService.syncGroupsByServerId(serverId);
+  }
+
+  @Put('/sync/channel')
+  syncChannelGroupsByServerId(
+    @Param('server', ParseIntPipe) serverId: number,
+  ): Promise<void> {
+    return this.channelGroupsSyncService.syncGroupsByServerId(serverId);
   }
 }

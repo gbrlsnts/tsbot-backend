@@ -21,7 +21,7 @@ import {
 } from '../../../shared/messages/server.messages';
 import { DbErrorCodes } from '../../../shared/database/codes';
 import { FindZoneOptions } from './types';
-import { ServerGroupsService } from '../../../server-groups/server-groups.service';
+import { ServerGroupsService } from '../../../server-groups/service/server-groups.service';
 import { invalidGroup } from '../../../shared/messages/group.messages';
 import { AppEventEmitter } from '../../../events/types/app.event';
 
