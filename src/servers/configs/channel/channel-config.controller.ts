@@ -37,7 +37,10 @@ export class ChannelConfigController {
   getConfigsByServer(
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<ChannelConfig[]> {
-    return this.configService.getConfigsByServerId(serverId);
+    return this.configService.getConfigs(
+      { serverId },
+      { relations: ['permissions', 'codec', 'zone', 'adminGroup'] },
+    );
   }
 
   @Get('/:id')
@@ -45,7 +48,10 @@ export class ChannelConfigController {
     @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ChannelConfig> {
-    return this.configService.getConfig({ id, serverId });
+    return this.configService.getConfig(
+      { id, serverId },
+      { relations: ['permissions', 'codec', 'zone', 'adminGroup'] },
+    );
   }
 
   @Post()

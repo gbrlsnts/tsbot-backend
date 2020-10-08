@@ -1,7 +1,7 @@
 export const serverNameExists = 'Server name already exists';
-export const codecDoesNotExist = "Codec doesn't exist";
+export const codecDoesNotExist = 'Codec does not exist';
 
-export const zoneDoesNotExists = "Zone doesn't exist";
+export const zoneDoesNotExists = 'Zone does not exist';
 export const zoneInvalid = 'Invalid zone';
 export const zoneAlreadyExists = 'Zone already exists';
 export const zoneCantUnsetDefault =

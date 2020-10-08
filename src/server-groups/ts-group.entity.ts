@@ -23,7 +23,6 @@ export abstract class TsGroup {
   @Column({
     unsigned: true,
   })
-  @Expose()
   serverId: number;
 
   @Column({

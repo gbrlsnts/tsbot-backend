@@ -13,6 +13,10 @@ export class CreateConfigDto {
   zoneId: number;
 
   @IsPositive()
+  @IsOptional()
+  adminChannelGroupId: number;
+
+  @IsPositive()
   allowedSubChannels: number;
 
   @IsPositive()

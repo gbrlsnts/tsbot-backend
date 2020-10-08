@@ -3,6 +3,10 @@ import { IsPositive, IsOptional, Min, Max } from 'class-validator';
 export class UpdateConfigDto {
   @IsPositive()
   @IsOptional()
+  adminChannelGroupId: number;
+
+  @IsPositive()
+  @IsOptional()
   allowedSubChannels: number;
 
   @IsPositive()

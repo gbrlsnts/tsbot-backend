@@ -13,11 +13,19 @@ import { Zone } from '../zone/zone.entity';
 import { Server } from '../../server.entity';
 import { ChannelConfigPermission } from './channel-perm.entity';
 import { Expose } from 'class-transformer';
+import { ChannelGroup } from '../../../server-groups/channel-group.entity';
 import {
   AudioQuality,
   BotCodec,
   ChannelPermission,
 } from 'src/teamspeak/types/channel';
+
+export type ChannelConfigRelations =
+  | 'server'
+  | 'permissions'
+  | 'codec'
+  | 'zone'
+  | 'adminGroup';
 
 @Entity()
 @Unique('uniq_zones_config', ['serverId', 'zoneId'])
@@ -27,12 +35,13 @@ export class ChannelConfig {
   id: number;
 
   @Column()
-  @Expose()
   serverId: number;
 
   @Column()
-  @Expose()
   zoneId: number;
+
+  @Column({ nullable: true })
+  adminChannelGroupId: number;
 
   @Column({
     nullable: true,
@@ -62,7 +71,7 @@ export class ChannelConfig {
   @OneToMany(
     () => ChannelConfigPermission,
     perm => perm.config,
-    { eager: true },
+    { persistence: false },
   )
   @Expose()
   permissions: ChannelConfigPermission[];
@@ -70,7 +79,6 @@ export class ChannelConfig {
   @ManyToOne(
     () => Codec,
     codec => codec.channelConfigs,
-    { eager: true },
   )
   @Expose()
   codec: Codec;
@@ -86,6 +94,11 @@ export class ChannelConfig {
   @JoinColumn()
   @Expose()
   zone: Zone;
+
+  @ManyToOne(() => ChannelGroup)
+  @JoinColumn({ name: 'adminChannelGroupId' })
+  @Expose()
+  adminGroup: ChannelGroup;
 
   toBotAudio(): AudioQuality {
     return {

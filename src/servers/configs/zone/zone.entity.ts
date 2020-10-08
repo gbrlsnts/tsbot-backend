@@ -25,7 +25,6 @@ export class Zone {
   id: number;
 
   @Column()
-  @Expose()
   serverId: number;
 
   @Column({

@@ -283,10 +283,13 @@ export class UserChannelService {
     zoneId: number,
   ): Promise<ChannelConfig> {
     try {
-      const config = await this.channelConfigService.getConfig({
-        serverId,
-        zoneId,
-      });
+      const config = await this.channelConfigService.getConfig(
+        {
+          serverId,
+          zoneId,
+        },
+        { relations: ['permissions', 'codec'] },
+      );
 
       return config;
     } catch (e) {

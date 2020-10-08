@@ -20,38 +20,47 @@ import { ChannelConfigPermission } from './channel-perm.entity';
 import { DbErrorCodes } from '../../../shared/database/codes';
 import { CreateConfigDto } from './dto/create-config.dto';
 import { UpdateConfigDto } from './dto/update-config.dto';
+import { ChannelGroupsService } from '../../../server-groups/service/channel-groups.service';
+import { groupDoesNotExist } from '../../../shared/messages/group.messages';
+import { FindChannelConfigOptions } from './channel-config.types';
 
 export class ChannelConfigService {
   constructor(
     @InjectRepository(ChannelConfigRepository)
     private configRepository: ChannelConfigRepository,
     private zoneService: ZoneService,
+    private chGroupService: ChannelGroupsService,
     private refDataService: MetadataService,
     private connection: Connection,
   ) {}
 
   /**
-   * Get all configs by server id
-   * @param serverId server id
+   * Get many configs
+   * @param params search params
+   * @param options
    */
-  getConfigsByServerId(serverId: number): Promise<ChannelConfig[]> {
+  getConfigs(
+    params: Partial<ChannelConfig>,
+    options?: FindChannelConfigOptions,
+  ): Promise<ChannelConfig[]> {
     return this.configRepository.find({
-      where: { serverId },
+      where: params,
+      relations: options?.relations,
     });
   }
 
   /**
    * Get a config by its Id
    * @param params search params
-   * @param loadEagerRelations if eager relations should be loaded
+   * @param options
    */
   async getConfig(
     params: Partial<ChannelConfig>,
-    loadEagerRelations = true,
+    options?: FindChannelConfigOptions,
   ): Promise<ChannelConfig> {
     const config = await this.configRepository.findOne({
       where: params,
-      loadEagerRelations,
+      relations: options?.relations,
     });
 
     if (!config) throw new NotFoundException();
@@ -68,10 +77,13 @@ export class ChannelConfigService {
     serverId: number,
     dto: CreateConfigDto,
   ): Promise<ChannelConfig> {
-    const { codecId, zoneId } = dto;
+    const { codecId, zoneId, adminChannelGroupId } = dto;
 
     await this.validateCodecId(codecId);
     if (zoneId) await this.validateZoneId(zoneId, serverId);
+
+    if (adminChannelGroupId)
+      await this.validateChannelGroupId(adminChannelGroupId, serverId);
 
     const config = this.configRepository.create({
       serverId,
@@ -79,7 +91,15 @@ export class ChannelConfigService {
     });
 
     try {
-      return await this.configRepository.save(config);
+      let savedConfig: ChannelConfig;
+      await this.connection.transaction(async manager => {
+        savedConfig = await manager.save(config);
+
+        savedConfig.permissions.forEach(p => (p.configId = savedConfig.id));
+        savedConfig.permissions = await manager.save(config.permissions);
+      });
+
+      return savedConfig;
     } catch (e) {
       if (e.code == DbErrorCodes.DuplicateKey)
         throw new ConflictException(configAlreadyExists);
@@ -99,10 +119,16 @@ export class ChannelConfigService {
     id: number,
     dto: UpdateConfigDto,
   ): Promise<ChannelConfig> {
-    const { codecId } = dto;
+    const { codecId, adminChannelGroupId } = dto;
     if (codecId) await this.validateCodecId(codecId);
 
-    const config = await this.getConfig({ id, serverId });
+    if (adminChannelGroupId)
+      await this.validateChannelGroupId(adminChannelGroupId, serverId);
+
+    const config = await this.getConfig(
+      { id, serverId },
+      { relations: ['permissions', 'codec', 'zone', 'adminGroup'] },
+    );
 
     Object.assign(config, dto);
 
@@ -181,5 +207,23 @@ export class ChannelConfigService {
     });
 
     if (!zoneExists) throw new BadRequestException(zoneDoesNotExists);
+  }
+
+  /**
+   * Validate if channel group exists in a server
+   * @param id codec id
+   * @param serverId server id
+   * @throws BadRequestException when the zone doesn't exist
+   */
+  private async validateChannelGroupId(
+    id: number,
+    serverId: number,
+  ): Promise<void> {
+    const groupExists = await this.chGroupService.checkGroupsByServer(
+      serverId,
+      [id],
+    );
+
+    if (!groupExists) throw new BadRequestException(groupDoesNotExist);
   }
 }
