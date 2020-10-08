@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   Unique,
+  Index,
 } from 'typeorm';
 import { Server } from '../../server.entity';
 import { Expose } from 'class-transformer';
@@ -23,7 +24,7 @@ export class GroupCategory {
   name: string;
 
   @Column()
-  @Expose()
+  @Index()
   serverId: number;
 
   @ManyToOne(

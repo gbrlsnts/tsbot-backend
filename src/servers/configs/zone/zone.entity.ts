@@ -12,6 +12,7 @@ import {
 import { ChannelConfig } from '../channel/channel-config.entity';
 import { Zone as BotZone } from '../../../teamspeak/types/user-channel';
 import { ServerGroup } from '../../../server-groups/server-group.entity';
+import { Server } from '../../server.entity';
 
 export type ZoneRelations = 'channelConfig' | 'group';
 
@@ -25,6 +26,7 @@ export class Zone {
   id: number;
 
   @Column()
+  @Index()
   serverId: number;
 
   @Column({
@@ -86,6 +88,9 @@ export class Zone {
 
   @ManyToOne(() => ServerGroup)
   group: ServerGroup;
+
+  @ManyToOne(() => Server)
+  server: Server;
 
   @Expose()
   active(): boolean {

@@ -95,7 +95,11 @@ export class ChannelConfigService {
       await this.connection.transaction(async manager => {
         savedConfig = await manager.save(config);
 
-        savedConfig.permissions.forEach(p => (p.configId = savedConfig.id));
+        savedConfig.permissions.forEach(p => {
+          p.configId = savedConfig.id;
+          p.serverId = serverId;
+        });
+
         savedConfig.permissions = await manager.save(config.permissions);
       });
 
@@ -153,13 +157,14 @@ export class ChannelConfigService {
         new ChannelConfigPermission({
           ...p,
           configId,
+          serverId,
         }),
     );
 
     let saved = [];
 
     await this.connection.transaction(async manager => {
-      await manager.delete(ChannelConfigPermission, { configId });
+      await manager.delete(ChannelConfigPermission, { configId, serverId });
 
       if (permissions.length > 0) {
         saved = await manager.save(permissions);

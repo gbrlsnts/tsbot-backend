@@ -4,6 +4,7 @@ import {
   ManyToOne,
   JoinColumn,
   DeleteDateColumn,
+  Index,
 } from 'typeorm';
 import { Expose } from 'class-transformer';
 import { Server } from 'src/servers/server.entity';
@@ -23,6 +24,7 @@ export abstract class TsGroup {
   @Column({
     unsigned: true,
   })
+  @Index()
   serverId: number;
 
   @Column({
@@ -45,10 +47,7 @@ export abstract class TsGroup {
   @DeleteDateColumn()
   deletedAt?: Date;
 
-  @ManyToOne(
-    () => Server,
-    server => server.serverGroups,
-  )
+  @ManyToOne(() => Server)
   server: Server;
 
   @ManyToOne(() => Icon, { onDelete: 'SET NULL' })

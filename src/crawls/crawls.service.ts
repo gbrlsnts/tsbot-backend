@@ -37,9 +37,9 @@ export class CrawlsService {
   async getLastCrawl(serverId: number): Promise<Crawl> {
     const crawl = await this.crawlRepository
       .createQueryBuilder('c')
-      .innerJoinAndMapMany('c.zones', CrawlZone, 'cl', 'c.id = cl.crawlId')
-      .innerJoinAndMapOne('cl.zone', Zone, 'z', 'cl.zoneId = z.id')
-      .where({ serverId })
+      .innerJoinAndMapMany('c.zones', CrawlZone, 'cz', 'c.id = cz.crawlId')
+      .innerJoinAndMapOne('cz.zone', Zone, 'z', 'cz.zoneId = z.id')
+      .where('c.serverId = :serverId AND cz.serverId = :serverId', { serverId })
       .orderBy('c.runAt', 'DESC')
       .getOne();
 

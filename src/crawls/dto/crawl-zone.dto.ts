@@ -1,16 +1,16 @@
-import { IsPositive, IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, Min } from 'class-validator';
 
 export class CrawlZoneDto {
   @IsString()
   zone: string | number;
 
-  @IsPositive()
+  @Min(0)
   inactiveChannels: number;
 
-  @IsPositive()
+  @Min(0)
   @IsOptional()
   deletedChannels: number;
 
-  @IsPositive()
+  @Min(0)
   totalChannels: number;
 }

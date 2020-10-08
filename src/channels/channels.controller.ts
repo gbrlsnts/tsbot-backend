@@ -57,7 +57,7 @@ export class ChannelsController {
     @Param('id', ParseIntPipe) id: number,
     @Param('server', ParseIntPipe) serverId: number,
   ): Promise<Channel> {
-    return this.channelsService.getChannelByServerId(id, serverId);
+    return this.channelsService.getChannel({ id, serverId });
   }
 
   @Post()
@@ -72,10 +72,11 @@ export class ChannelsController {
   @Post('/:id/sub')
   @SetChannelRoles([ChannelRoles.OWNER], 'id')
   createSubChannel(
+    @Param('server', ParseIntPipe) serverId: number,
     @Param('id', ParseIntPipe) channelId: number,
     @Body() dto: SubChannelDto,
   ): Promise<void> {
-    return this.channelsService.createSubChannel(channelId, dto);
+    return this.channelsService.createSubChannel(channelId, serverId, dto);
   }
 
   @Delete('/:id')

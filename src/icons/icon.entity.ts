@@ -7,10 +7,12 @@ import {
   ManyToOne,
   CreateDateColumn,
   AfterLoad,
+  Index,
 } from 'typeorm';
 import { Expose } from 'class-transformer';
 import { IconContent } from './icon-content.entity';
 import { User } from '../users/user.entity';
+import { Server } from '../servers/server.entity';
 
 @Entity()
 @Unique('uniq_server_icon', ['serverId', 'tsId'])
@@ -28,7 +30,7 @@ export class Icon {
   tsId: number;
 
   @Column()
-  @Expose()
+  @Index()
   serverId: number;
 
   @Column()
@@ -53,6 +55,9 @@ export class Icon {
 
   @ManyToOne(() => User)
   uploadedBy?: User;
+
+  @ManyToOne(() => Server)
+  server: Server;
 
   @AfterLoad()
   initConfigDto(): void {

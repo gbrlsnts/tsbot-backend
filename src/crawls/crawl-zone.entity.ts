@@ -1,7 +1,8 @@
-import { Entity, PrimaryColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, Index } from 'typeorm';
 import { Crawl } from './crawl.entity';
 import { Zone } from '../servers/configs/zone/zone.entity';
 import { Expose, Transform } from 'class-transformer';
+import { Server } from '../servers/server.entity';
 
 @Entity()
 export class CrawlZone {
@@ -10,6 +11,10 @@ export class CrawlZone {
 
   @PrimaryColumn()
   zoneId: number;
+
+  @Column()
+  @Index()
+  serverId: number;
 
   @Column({
     unsigned: true,
@@ -46,4 +51,7 @@ export class CrawlZone {
   @Expose()
   @Transform(z => z?.name)
   zone: Zone;
+
+  @ManyToOne(() => Server)
+  server: Server;
 }

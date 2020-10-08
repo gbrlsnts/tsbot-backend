@@ -9,12 +9,17 @@ import {
 } from 'typeorm';
 import { Client } from '../clients/client.entity';
 import { Expose } from 'class-transformer';
+import { Server } from '../servers/server.entity';
 
 @Entity()
 export class Channel {
   @PrimaryGeneratedColumn()
   @Expose()
   id: number;
+
+  @Column()
+  @Index()
+  serverId: number;
 
   @Column()
   @Index({ unique: true })
@@ -38,4 +43,7 @@ export class Channel {
     client => client.channels,
   )
   client: Client;
+
+  @ManyToOne(() => Server)
+  server: Server;
 }

@@ -7,6 +7,7 @@ import {
   JoinColumn,
   OneToMany,
   Unique,
+  Index,
 } from 'typeorm';
 import { Codec } from '../../../metadata/codec.entity';
 import { Zone } from '../zone/zone.entity';
@@ -35,6 +36,7 @@ export class ChannelConfig {
   id: number;
 
   @Column()
+  @Index()
   serverId: number;
 
   @Column()

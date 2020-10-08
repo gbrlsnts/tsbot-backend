@@ -4,6 +4,7 @@ import {
   OneToMany,
   Column,
   ManyToOne,
+  Index,
 } from 'typeorm';
 import { CrawlZone } from './crawl-zone.entity';
 import { Expose } from 'class-transformer';
@@ -19,6 +20,7 @@ export class Crawl {
   runAt: Date;
 
   @Column()
+  @Index()
   serverId: number;
 
   @OneToMany(

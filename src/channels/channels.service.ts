@@ -31,11 +31,9 @@ export class ChannelsService {
    * @param serverId
    */
   getChannelsByServerId(serverId: number): Promise<Channel[]> {
-    return this.channelRepository
-      .createQueryBuilder('ch')
-      .innerJoin(Client, 'cl', 'cl.id = ch.clientId')
-      .where('cl.serverId = :serverId', { serverId })
-      .getMany();
+    return this.channelRepository.find({
+      where: { serverId },
+    });
   }
 
   /**
@@ -43,13 +41,16 @@ export class ChannelsService {
    * @param id
    * @param serverId
    */
-  async getChannelByServerId(id: number, serverId: number): Promise<Channel> {
-    const channel = await this.channelRepository
-      .createQueryBuilder('ch')
-      .innerJoin(Client, 'cl', 'cl.id = ch.clientId')
-      .where('ch.id = :id', { id })
-      .andWhere('cl.serverId = :serverId', { serverId })
-      .getOne();
+  async getChannel(
+    params: Partial<Channel>,
+    options?: FindChannelOptions,
+  ): Promise<Channel> {
+    const { relations } = options;
+
+    const channel = await this.channelRepository.findOne({
+      where: params,
+      relations,
+    });
 
     if (!channel) throw new NotFoundException();
 
@@ -66,29 +67,10 @@ export class ChannelsService {
       .createQueryBuilder('ch')
       .innerJoin(Client, 'cl', 'cl.id = ch.clientId')
       .where('cl.userId = :userId', { userId })
-      .andWhere('cl.serverId = :serverId', { serverId })
+      .andWhere('ch.serverId = :serverId and cl.serverId = :serverId', {
+        serverId,
+      })
       .getOne();
-
-    if (!channel) throw new NotFoundException();
-
-    return channel;
-  }
-
-  /**
-   * Get a channel by id
-   * @param id
-   * @param options
-   */
-  async getChannelById(
-    id: number,
-    options?: FindChannelOptions,
-  ): Promise<Channel> {
-    const { relations } = options;
-
-    const channel = await this.channelRepository.findOne({
-      where: { id },
-      relations,
-    });
 
     if (!channel) throw new NotFoundException();
 
@@ -136,12 +118,20 @@ export class ChannelsService {
   /**
    * Create a sub channel in teamspeak
    * @param channelId db channel to create a sub channel for
+   * @param serverId
    * @param dto data
    */
-  async createSubChannel(channelId: number, dto: SubChannelDto): Promise<void> {
-    const channel = await this.getChannelById(channelId, {
-      relations: ['client'],
-    });
+  async createSubChannel(
+    channelId: number,
+    serverId: number,
+    dto: SubChannelDto,
+  ): Promise<void> {
+    const channel = await this.getChannel(
+      { id: channelId, serverId },
+      {
+        relations: ['client'],
+      },
+    );
 
     await this.tsChannelService.createUserSubChannel(
       channel.client.serverId,
@@ -168,7 +158,10 @@ export class ChannelsService {
       .createQueryBuilder('ch')
       .innerJoinAndMapOne('ch.client', Client, 'cl', 'cl.id = ch.clientId')
       .innerJoin(Server, 's', 's.id = cl.serverId')
-      .where('s.id = :serverId AND ch.id = :id', { serverId, id })
+      .where('ch.serverId = :serverId AND s.id = :serverId AND ch.id = :id', {
+        serverId,
+        id,
+      })
       .andWhere('(cl.userId = :userId OR s.ownerId = :userId)', { userId })
       .getOne();
 
