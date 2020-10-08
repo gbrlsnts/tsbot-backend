@@ -166,6 +166,7 @@ export class UserChannelService {
   ): Promise<CreateSubChannelData> {
     return {
       owner: tsClientDbId,
+      group: channelConfig.adminGroup.tsId,
       rootChannelId: tsRootChannelId,
       channels:
         dto instanceof ChannelDto ? [dto.toBotChannel()] : dto.toBotChannel(),
@@ -288,7 +289,7 @@ export class UserChannelService {
           serverId,
           zoneId,
         },
-        { relations: ['permissions', 'codec'] },
+        { relations: ['permissions', 'codec', 'adminGroup'] },
       );
 
       return config;

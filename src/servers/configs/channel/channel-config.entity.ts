@@ -41,22 +41,18 @@ export class ChannelConfig {
   zoneId: number;
 
   @Column({ nullable: true })
-  adminChannelGroupId: number;
+  adminChannelGroupId?: number;
 
   @Column({
-    nullable: true,
     unsigned: true,
   })
   @Expose()
   allowedSubChannels: number;
 
-  @Column({
-    nullable: true,
-  })
+  @Column()
   codecId: number;
 
   @Column({
-    nullable: true,
     unsigned: true,
   })
   @Expose()
@@ -87,7 +83,6 @@ export class ChannelConfig {
     () => Zone,
     zone => zone.channelConfig,
     {
-      nullable: true,
       onDelete: 'CASCADE',
     },
   )
