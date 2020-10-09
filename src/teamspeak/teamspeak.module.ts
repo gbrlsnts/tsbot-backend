@@ -1,15 +1,14 @@
 import * as config from 'config';
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import {
   ClientProxyFactory,
   Transport,
   ClientProxy,
 } from '@nestjs/microservices';
-import { UserChannelService } from './user-channel.service';
+import { TsUserChannelService } from './user-channel.service';
 import { TS_BOT_SERVICE } from '../shared/constants';
 import { InboundResponseExternalDeserializer } from '../shared/nats/deserializers/in-response-ext.deserializer';
 import { OutboundMessageExternalSerializer } from '../shared/nats/serializers/out-msg-ext.serializer';
-import { ServersModule } from '../servers/servers.module';
 import { TeamspeakBusService } from './teamspeak-bus.service';
 import { ServerGroupService } from './server-groups.service';
 import { TsIconService } from './icons.service';
@@ -19,7 +18,6 @@ import { TsServerEventsService } from './server-events.service';
 const natsConfig = config.get('nats');
 
 @Module({
-  imports: [forwardRef(() => ServersModule)],
   providers: [
     {
       provide: TS_BOT_SERVICE,
@@ -38,14 +36,14 @@ const natsConfig = config.get('nats');
       },
     },
     TeamspeakBusService,
-    UserChannelService,
+    TsUserChannelService,
     ServerGroupService,
     TsIconService,
     TsClientService,
     TsServerEventsService,
   ],
   exports: [
-    UserChannelService,
+    TsUserChannelService,
     ServerGroupService,
     TsIconService,
     TsClientService,

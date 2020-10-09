@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { TeamspeakBusService } from './teamspeak-bus.service';
 import { TsGroup, SetUserBadgesData, TsGroupType } from './types/groups';
-import { getServerGroupsSubject, setUserBadgesSubject } from './subjects';
+import {
+  getServerGroupsSubject,
+  setUserBadgesSubject,
+  getUserServerGroupsSubject,
+} from './subjects';
 
 @Injectable()
 export class ServerGroupService {
@@ -41,5 +45,20 @@ export class ServerGroupService {
     };
 
     return this.busService.send<void>(setUserBadgesSubject(serverId), data);
+  }
+
+  /**
+   * Get an user server group ids
+   * @param serverId
+   * @param tsClientDbId
+   */
+  getUserServerGroupsIds(
+    serverId: number,
+    tsClientDbId: number,
+  ): Promise<number[]> {
+    return this.busService.send<number[]>(
+      getUserServerGroupsSubject(serverId),
+      tsClientDbId,
+    );
   }
 }

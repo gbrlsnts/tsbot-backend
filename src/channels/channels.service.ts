@@ -10,19 +10,22 @@ import { Channel } from './channel.entity';
 import { Client } from '../clients/client.entity';
 import { ChannelDto } from './dto/channel.dto';
 import { ClientsService } from '../clients/clients.service';
-import { UserChannelService } from '../teamspeak/user-channel.service';
 import { alreadyHasChannel } from '../shared/messages/channel.messages';
 import { Server } from '../servers/server.entity';
 import { FindChannelOptions } from './channel.types';
 import { SubChannelDto } from './dto/sub-channel.dto';
+import { UserChannelService } from './user-channel.service';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class ChannelsService {
+  logger = new Logger('ChannelsService');
+
   constructor(
     @InjectRepository(ChannelRepository)
     private channelRepository: ChannelRepository,
     private clientsService: ClientsService,
-    private tsChannelService: UserChannelService,
+    private userChannelService: UserChannelService,
     private connection: Connection,
   ) {}
 
@@ -96,21 +99,27 @@ export class ChannelsService {
 
     if (hasChannel) throw new ConflictException(alreadyHasChannel);
 
-    const tsChannelId = await this.tsChannelService.createUserChannel(
+    const tsChannelId = await this.userChannelService.createUserChannel(
       serverId,
       tsClientDbId,
       dto,
     );
 
     const channel = this.channelRepository.create({
+      serverId,
       clientId,
       tsChannelId,
     });
 
     try {
-      return this.channelRepository.save(channel);
+      return await this.channelRepository.save(channel);
     } catch (e) {
-      await this.tsChannelService.deleteUserChannel(serverId, tsChannelId);
+      this.userChannelService
+        .deleteUserChannel(serverId, tsChannelId)
+        .catch(e =>
+          this.logger.error('error deleting channel after exception', e?.stack),
+        );
+
       throw e;
     }
   }
@@ -133,7 +142,7 @@ export class ChannelsService {
       },
     );
 
-    await this.tsChannelService.createUserSubChannel(
+    await this.userChannelService.createUserSubChannel(
       channel.client.serverId,
       channel.tsChannelId,
       channel.client.tsClientDbId,
@@ -169,14 +178,14 @@ export class ChannelsService {
 
     // we want to delete the sub channel
     if (tsSubChannelId) {
-      await this.tsChannelService.deleteUserChannel(
+      await this.userChannelService.deleteUserChannel(
         channel.client.serverId,
         tsSubChannelId,
         channel.tsChannelId,
       );
     } else {
       await this.connection.transaction(async manager => {
-        await this.tsChannelService.deleteUserChannel(
+        await this.userChannelService.deleteUserChannel(
           channel.client.serverId,
 
           channel.tsChannelId,
