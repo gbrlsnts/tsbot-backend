@@ -8,7 +8,7 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { AuthModule } from './auth/auth.module';
 import { UserManagerModule } from './user-manager/user-manager.module';
 import { ServersModule } from './servers/servers.module';
-import { ResponseMapperInterceptor } from './global/interceptors/response-mapper.interceptor';
+import { ResponseMapperInterceptor } from './shared/interceptors/response-mapper.interceptor';
 import { ClientsModule } from './clients/clients.module';
 import { MetadataModule } from './metadata/metadata.module';
 import { ServerGroupsModule } from './server-groups/server-groups.module';
