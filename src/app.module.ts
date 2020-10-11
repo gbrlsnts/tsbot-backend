@@ -18,6 +18,8 @@ import { TeamspeakModule } from './teamspeak/teamspeak.module';
 import { CrawlsModule } from './crawls/crawls.module';
 import { BadgesModule } from './badges/badges.module';
 import { EventsModule } from './events/events.module';
+import { TeamspeakListenerModule } from './teamspeak-listener/teamspeak-listener.module';
+import { TeamspeakCommonModule } from './teamspeak-common/teamspeak-common.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { EventsModule } from './events/events.module';
     CrawlsModule,
     BadgesModule,
     EventsModule,
+    TeamspeakListenerModule,
+    TeamspeakCommonModule,
   ],
   controllers: [],
   providers: [

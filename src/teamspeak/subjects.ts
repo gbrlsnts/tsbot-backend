@@ -46,3 +46,7 @@ export const getUsersByAddressSubject = (serverId: number): string =>
 
 export const sendVerificationMessageSubject = (serverId: number): string =>
   `bot.server.${serverId}.user.verification`;
+
+/** BOT->BACKEND REQUESTS */
+
+export const getServerConfigSubject = 'backend.server.*.config.get';

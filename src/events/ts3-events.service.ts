@@ -1,20 +1,16 @@
-import * as config from 'config';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectEventEmitter } from 'nest-emitter';
 import { Zone } from 'src/servers/configs/zone/zone.entity';
 import { AppEventEmitter } from './types/app.event';
 import { TsServerEventsService } from '../teamspeak/server-events.service';
-import { ZoneService } from '../servers/configs/zone/zone.service';
-import { CrawlerConfiguration } from 'src/teamspeak/types/crawl';
-
-const crawlInterval = config.get<number>('teamspeak.crawlInterval');
+import { ConfigCommonService } from '../teamspeak-common/config-common.service';
 
 @Injectable()
 export class Ts3EventsService implements OnModuleInit {
   constructor(
     @InjectEventEmitter() private readonly emitter: AppEventEmitter,
     private readonly tsEvents: TsServerEventsService,
-    private zoneService: ZoneService,
+    private tsConfigCommonService: ConfigCommonService,
   ) {}
 
   onModuleInit(): void {
@@ -25,23 +21,10 @@ export class Ts3EventsService implements OnModuleInit {
   }
 
   private async onZoneUpdated(zone: Zone): Promise<void> {
-    const interval = Number(process.env.CRAWL_INTERVAL || crawlInterval);
-    const zones = (
-      await this.zoneService.getAllZonesByServer(zone.serverId)
-    ).filter(z => z.crawl);
+    const config = await this.tsConfigCommonService.getCrawlerConfiguration(
+      zone.serverId,
+    );
 
-    const data: CrawlerConfiguration = {
-      interval,
-      zones: zones.map(z => ({
-        name: z.slug() + '#' + z.id,
-        spacerAsSeparator: z.separator,
-        start: z.channelIdStart,
-        end: z.channelIdEnd,
-        timeInactiveNotify: z.minutesInactiveNotify * 60,
-        timeInactiveMax: z.minutesInactiveDelete * 60,
-      })),
-    };
-
-    this.tsEvents.emitCrawlConfigUpdatedEvent(zone.serverId, data);
+    this.tsEvents.emitCrawlConfigUpdatedEvent(zone.serverId, config);
   }
 }
