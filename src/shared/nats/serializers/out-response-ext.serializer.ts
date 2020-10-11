@@ -8,6 +8,6 @@ export class OutboundResponseExternalSerializer implements Serializer {
      * message structure, and returning it as a "plain" top-level object.
      */
 
-    return value.response;
+    return value.response?.data ?? value.response;
   }
 }

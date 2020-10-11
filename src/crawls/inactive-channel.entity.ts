@@ -16,7 +16,7 @@ export class InactiveChannel {
   @Expose()
   timeInactive: number;
 
-  @Column()
+  @Column({ default: false })
   @Expose()
   isNotified: boolean;
 

@@ -30,6 +30,16 @@ export class CrawlsService {
     private connection: Connection,
   ) {}
 
+  getCrawlsByServerId(serverId: number): Promise<Crawl[]> {
+    return this.crawlRepository
+      .createQueryBuilder('c')
+      .innerJoinAndMapMany('c.zones', CrawlZone, 'cz', 'c.id = cz.crawlId')
+      .innerJoinAndMapOne('cz.zone', Zone, 'z', 'cz.zoneId = z.id')
+      .where('c.serverId = :serverId AND cz.serverId = :serverId', { serverId })
+      .orderBy('c.runAt', 'DESC')
+      .getMany();
+  }
+
   /**
    * Get the last crawl ran on the server
    * @param serverId server id
@@ -87,15 +97,23 @@ export class CrawlsService {
     checkZoneId: string | number,
     serverId: number,
   ): Promise<number> {
-    const zoneId = Number(checkZoneId);
+    let zoneId = Number(checkZoneId);
 
     try {
-      // not a number, try to get by name
+      // not a number, parse and try to get by name
       if (!zoneId) {
-        return await this.zoneService.getZoneIdByName(
-          checkZoneId.toString(),
-          serverId,
-        );
+        const stringZone = checkZoneId.toString();
+        const hashIdx = stringZone.lastIndexOf('#');
+
+        if (hashIdx >= 0) {
+          // is in format of name#id
+          zoneId = Number(stringZone.substr(hashIdx + 1));
+        }
+
+        // did we have a successful parse?
+        if (!zoneId) {
+          return await this.zoneService.getZoneIdByName(stringZone, serverId);
+        }
       }
 
       const zone = await this.zoneService.getZone({ id: zoneId, serverId });
@@ -134,5 +152,40 @@ export class CrawlsService {
         manager,
       );
     });
+  }
+
+  /**
+   * Get an inactive channel by server and ts channel id
+   * @param serverId
+   * @param tsChannelId
+   */
+  async getInactiveChannelById(
+    serverId: number,
+    tsChannelId: number,
+  ): Promise<InactiveChannel> {
+    const channel = await this.inactiveRepository.findOne({
+      where: { serverId, tsChannelId },
+    });
+
+    if (!channel) throw new NotFoundException();
+
+    return channel;
+  }
+
+  /**
+   * Toggle the notified flag of a channel
+   * @param serverId
+   * @param tsChannelId
+   * @param isNotified
+   */
+  async setChannelNotified(
+    serverId: number,
+    tsChannelId: number,
+    isNotified: boolean,
+  ): Promise<void> {
+    await this.inactiveRepository.update(
+      { serverId, tsChannelId },
+      { isNotified },
+    );
   }
 }

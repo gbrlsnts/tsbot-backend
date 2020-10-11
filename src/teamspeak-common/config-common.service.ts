@@ -25,7 +25,7 @@ export class ConfigCommonService {
     return {
       interval,
       zones: zones.map(z => ({
-        name: z.slug() + '#' + z.id,
+        name: z.friendlyId(),
         spacerAsSeparator: z.separator,
         start: z.channelIdStart,
         end: z.channelIdEnd,

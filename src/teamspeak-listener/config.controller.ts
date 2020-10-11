@@ -1,17 +1,16 @@
 import { Controller } from '@nestjs/common';
-import { Ctx, MessagePattern, NatsContext } from '@nestjs/microservices';
+import { MessagePattern } from '@nestjs/microservices';
 import { ConfigListenerService } from './config.service';
 import { getServerConfigSubject } from '../teamspeak/subjects';
 import { Configuration } from '../teamspeak/types/server';
+import { GetServerId } from 'src/shared/decorators/get-server-id.decorator';
 
 @Controller()
 export class ConfigListenerController {
   constructor(private readonly configService: ConfigListenerService) {}
 
   @MessagePattern(getServerConfigSubject)
-  getServerConfig(@Ctx() context: NatsContext): Promise<Configuration> {
-    const serverId = Number(context.getSubject().split('.')[2]); // refactor this
-
+  getServerConfig(@GetServerId() serverId: number): Promise<Configuration> {
     return this.configService.getServerConfig(serverId);
   }
 }

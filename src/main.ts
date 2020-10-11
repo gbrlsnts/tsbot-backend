@@ -10,7 +10,9 @@ const port = process.env.APP_PORT || config.get('server.port');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.connectMicroservice<MicroserviceOptions>(natsInboundOptions);
+  app.connectMicroservice<MicroserviceOptions>(natsInboundOptions, {
+    inheritAppConfig: true,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({

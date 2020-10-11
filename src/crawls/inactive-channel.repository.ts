@@ -18,15 +18,21 @@ export class InactiveChannelRepository extends Repository<InactiveChannel> {
 
     const toKeep = channels.map(c => c.tsChannelId);
 
-    await manager.delete(InactiveChannel, {
-      serverId,
-      tsChannelId: Not(In(toKeep)),
-    });
+    if (channels.length > 0) {
+      await manager.delete(InactiveChannel, {
+        serverId,
+        tsChannelId: Not(In(toKeep)),
+      });
 
-    channels.forEach(c => {
-      c.serverId = serverId;
-    });
+      channels.forEach(c => {
+        c.serverId = serverId;
+      });
 
-    await manager.save(channels);
+      await manager.save(channels);
+    } else {
+      await manager.delete(InactiveChannel, {
+        serverId,
+      });
+    }
   }
 }

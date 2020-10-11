@@ -101,6 +101,10 @@ export class Zone {
     return slugify(this.name);
   }
 
+  friendlyId(): string {
+    return slugify(this.name) + '#' + this.id;
+  }
+
   toBotData(): BotZone {
     return {
       start: this.channelIdStart,
