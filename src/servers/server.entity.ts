@@ -81,4 +81,9 @@ export class Server {
     cat => cat.server,
   )
   groupCategories: GroupCategory[];
+
+  @Expose()
+  hasProblems(): boolean {
+    return this.config?.hasConnectionError;
+  }
 }

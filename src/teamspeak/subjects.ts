@@ -3,6 +3,8 @@
 export const crawlConfigUpdatedEventSubject = (serverId: number): string =>
   `bot.server.${serverId}.evt.crawl.updated`;
 
+export const botConnectionLostEventSubject = 'bot.server.*.connection.lost';
+
 /** REQUESTS */
 
 export const createChannelSubject = (serverId: number): string =>

@@ -23,4 +23,13 @@ export class ServersConfigService {
 
     return config;
   }
+
+  /**
+   * Set the connection error flag. If true, will also set hasProblems flag in server entity.
+   * @param id
+   * @param error
+   */
+  async setConnectionErrorFlag(id: number, error: boolean): Promise<void> {
+    await this.configRepository.update({ id }, { hasConnectionError: error });
+  }
 }

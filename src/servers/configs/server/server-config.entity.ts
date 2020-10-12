@@ -15,6 +15,14 @@ export class ServerConfig {
   @PrimaryColumn()
   id: number;
 
+  @Column({ default: false })
+  @Expose()
+  hasConnectionError: boolean;
+
+  @Column('jsonb')
+  @Expose()
+  config: ServerConfigDto;
+
   @OneToOne(
     () => Server,
     server => server.config,
@@ -24,10 +32,6 @@ export class ServerConfig {
   )
   @JoinColumn({ name: 'id' })
   server: Server;
-
-  @Column('jsonb')
-  @Expose()
-  config: ServerConfigDto;
 
   @AfterLoad()
   initConfigDto(): void {

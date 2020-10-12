@@ -2,6 +2,7 @@ import {
   Controller,
   UseGuards,
   Get,
+  Put,
   Patch,
   Delete,
   Post,
@@ -55,6 +56,13 @@ export class ServersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ServerConfig> {
     return this.configService.getServerConfigById(id);
+  }
+
+  @Put('/:id/config/clear-error')
+  async clearConnectionError(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    await this.configService.setConnectionErrorFlag(id, false);
   }
 
   @Post()

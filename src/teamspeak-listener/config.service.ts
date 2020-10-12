@@ -28,6 +28,15 @@ export class ConfigListenerService {
   }
 
   /**
+   * Set the connection error flag
+   * @param serverId
+   * @param error
+   */
+  setConnectionError(serverId: number, error: boolean): Promise<void> {
+    return this.serverConfigService.setConnectionErrorFlag(serverId, error);
+  }
+
+  /**
    * Build the configuration object
    * @param serverId
    * @param serverConfig

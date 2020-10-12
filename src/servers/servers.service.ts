@@ -127,6 +127,7 @@ export class ServersService {
 
     const updatedConfigDto = new ServerConfigDto(dto);
     server.config.config = server.config.config.merge(updatedConfigDto);
+    server.config.hasConnectionError = false;
 
     return await this.serverRepository.saveTransactionServerAndConfig(
       server,
