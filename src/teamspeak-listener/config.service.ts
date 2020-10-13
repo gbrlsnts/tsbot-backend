@@ -12,6 +12,14 @@ export class ConfigListenerService {
   ) {}
 
   /**
+   * Get a list of all servers that should be loaded by the  bot
+   * @param serverId
+   */
+  getServersToLoad(): Promise<number[]> {
+    return this.serverConfigService.getWorkingConfigIds();
+  }
+
+  /**
    * Get a server configuration for the bot
    * @param serverId
    */

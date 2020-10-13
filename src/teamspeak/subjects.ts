@@ -51,6 +51,7 @@ export const sendVerificationMessageSubject = (serverId: number): string =>
 
 /** BOT->BACKEND REQUESTS */
 
+export const getServersToLoadSubject = 'backend.servers.config.get';
 export const getServerConfigSubject = 'backend.server.*.config.get';
 
 export const getAllCrawlsSubject = 'backend.server.*.crawl.get-all';

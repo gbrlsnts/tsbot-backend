@@ -5,6 +5,7 @@ import {
   PrimaryColumn,
   JoinColumn,
   AfterLoad,
+  Index,
 } from 'typeorm';
 import { Server } from '../../server.entity';
 import { ServerConfigDto } from '../../dto/config.dto';
@@ -16,6 +17,7 @@ export class ServerConfig {
   id: number;
 
   @Column({ default: false })
+  @Index()
   @Expose()
   hasConnectionError: boolean;
 
